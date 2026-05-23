@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Registro — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-auth">
+  <div class="card-auth" style="max-width:480px">
+    <div class="auth-logo">
+      <div style="font-size:2.5rem">🐱</div>
+      <h1>Crear Cuenta</h1>
+      <p>Únete a la comunidad Sarichi 🧶</p>
+    </div>
+
+    <div id="error-msg"   class="alert alert-error"   style="display:none"></div>
+    <div id="success-msg" class="alert alert-success" style="display:none"></div>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" id="nombre" placeholder="Tu nombre" required>
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="correo" placeholder="tu@correo.com" required>
+      </div>
+      <div class="form-group">
+        <label>Teléfono (opcional)</label>
+        <input type="tel" id="telefono" placeholder="3XX XXX XXXX">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="contrasena" placeholder="Mínimo 8 caracteres" required>
+      </div>
+      <div class="form-group">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="confirmar" placeholder="Repite la contraseña" required>
+      </div>
+	  <!-- Rol fijo: CLIENTE para registro público -->
+	  <input type="hidden" id="rol" value="CLIENTE">
+	  <div class="alert alert-success" style="font-size:.85rem;margin-bottom:16px">
+	    🛍️ Tu cuenta se creará como <strong>Cliente</strong>. 
+	    Si eres parte del equipo Sarichi, contacta al administrador.
+	  </div>
+      <button type="submit" class="btn btn-primary btn-full" id="btnReg">
+        Crear cuenta
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  document.getElementById('registerForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('btnReg');
+    const err = document.getElementById('error-msg');
+    const ok  = document.getElementById('success-msg');
+    err.style.display = 'none'; ok.style.display = 'none';
+
+    const pass = document.getElementById('contrasena').value;
+    const conf = document.getElementById('confirmar').value;
+    if (pass !== conf) {
+      err.textContent = 'Las contraseñas no coinciden';
+      err.style.display = 'block'; return;
+    }
+
+    btn.innerHTML = '<span class="spinner"></span> Registrando...';
+    btn.disabled = true;
+
+    try {
+      await apiPost('/auth/register', {
+        nombre:             document.getElementById('nombre').value,
+        correo:             document.getElementById('correo').value,
+        telefono:           document.getElementById('telefono').value || null,
+        contrasena:         pass,
+        confirmarContrasena: conf,
+        rol:                document.getElementById('rol').value,
+      });
+      ok.textContent = '¡Cuenta creada! Redirigiendo al login...';
+      ok.style.display = 'block';
+      setTimeout(() => window.location.href = 'login.html', 1800);
+    } catch(ex) {
+      err.textContent = ex.message;
+      err.style.display = 'block';
+      btn.innerHTML = 'Crear cuenta';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tienda — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="tienda.html"       class="sidebar-item active">🛍️ Catálogo</a>
+      <a href="mis-pedidos.html"  class="sidebar-item">📦 Mis pedidos</a>
+      <a href="wishlist.html"     class="sidebar-item">❤️ Lista de deseos</a>
+      <a href="personalizar.html" class="sidebar-item">🎨 Personalizar</a>
+      <a href="perfil.html"       class="sidebar-item">👤 Mi perfil</a>
+    </aside>
+    <main class="main-content">
+      <h2 class="section-title">🛍️ Catálogo Sarichi</h2>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;
+                  background:var(--blanco);padding:16px;border-radius:12px;
+                  box-shadow:var(--sombra)">
+        <input type="text" id="busqueda" placeholder="🔍 Buscar productos..."
+               style="flex:1;min-width:180px" oninput="filtrar()">
+        <select id="categoria" onchange="filtrar()" style="min-width:160px">
+          <option value="">Todas las categorías</option>
+          <option value="Amigurumis">🧸 Amigurumis</option>
+          <option value="Accesorios">👜 Accesorios</option>
+          <option value="Ropa">👗 Ropa</option>
+          <option value="Hogar">🏠 Hogar</option>
+        </select>
+        <input type="number" id="precioMin" placeholder="Precio mín"
+               style="width:110px" onchange="filtrar()">
+        <input type="number" id="precioMax" placeholder="Precio máx"
+               style="width:110px" onchange="filtrar()">
+        <button onclick="filtrar()" class="btn btn-primary btn-sm">
+          Buscar
+        </button>
+        <button onclick="limpiarFiltros()" class="btn btn-outline btn-sm">
+          Limpiar
+        </button>
+      </div>
+
+      <!-- Grilla de productos -->
+      <div id="catalogo"
+           style="display:grid;
+                  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+                  gap:20px">
+        <div style="grid-column:1/-1;text-align:center;padding:40px">
+          <span class="spinner"></span> Cargando catálogo...
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      <div style="display:flex;justify-content:center;gap:10px;margin-top:24px">
+        <button id="btn-anterior" onclick="cambiarPagina(-1)"
+                class="btn btn-outline btn-sm" disabled>← Anterior</button>
+        <span id="pagina-info"
+              style="display:flex;align-items:center;font-size:.9rem;
+                     color:var(--gris)">Página 1</span>
+        <button id="btn-siguiente" onclick="cambiarPagina(1)"
+                class="btn btn-outline btn-sm">Siguiente →</button>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  requireAuth();
+  renderNav(Auth.getRol());
+
+  let paginaActual = 0;
+  const TAMANO = 12;
+
+  async function cargarCatalogo() {
+    const catalogo = document.getElementById('catalogo');
+    catalogo.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px">
+      <span class="spinner"></span></div>`;
+
+    const busqueda  = document.getElementById('busqueda').value;
+    const categoria = document.getElementById('categoria').value;
+    const precioMin = document.getElementById('precioMin').value;
+    const precioMax = document.getElementById('precioMax').value;
+
+    let url = `/productos?pagina=${paginaActual}&tamano=${TAMANO}`;
+    if (busqueda)  url += `&busqueda=${encodeURIComponent(busqueda)}`;
+    if (categoria) url += `&categoria=${encodeURIComponent(categoria)}`;
+    if (precioMin) url += `&precioMin=${precioMin}`;
+    if (precioMax) url += `&precioMax=${precioMax}`;
+
+    try {
+      const productos = await apiGet(url);
+
+      if (!productos.length) {
+        catalogo.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+          <div class="cat">🐱</div>
+          <h3>Sin productos encontrados</h3>
+          <p>Prueba con otros filtros o busca algo diferente</p>
+        </div>`;
+        document.getElementById('btn-siguiente').disabled = true;
+        return;
+      }
+
+      catalogo.innerHTML = productos.map(p => `
+        <div class="card" style="text-align:center;padding:20px;
+             transition:.2s;cursor:pointer"
+             onmouseover="this.style.transform='translateY(-4px)'"
+             onmouseout="this.style.transform=''"
+             onclick="verDetalle('${p.id}')">
+          <div style="font-size:3rem;margin-bottom:8px">
+            ${p.categoria === 'Amigurumis' ? '🧸'
+              : p.categoria === 'Accesorios' ? '👜'
+              : p.categoria === 'Ropa' ? '👗' : '🏠'}
+          </div>
+          <h3 style="font-size:.95rem;margin-bottom:4px;color:var(--negro)">
+            ${p.nombre}
+          </h3>
+          <p style="color:var(--gris);font-size:.8rem;margin-bottom:8px">
+            ${p.categoria}
+            ${p.tiempoElaboracionDias
+              ? ' · ' + p.tiempoElaboracionDias + ' días' : ''}
+          </p>
+          <p style="color:var(--rosa);font-weight:700;font-size:1.1rem;
+                    margin-bottom:12px">
+            $${Number(p.precioBase).toLocaleString('es-CO')}
+          </p>
+          <div style="display:flex;gap:6px;justify-content:center">
+            <span class="badge ${p.stock > 0 ? 'badge-activo' : 'badge-critico'}">
+              ${p.stock > 0 ? 'Disponible' : 'Agotado'}
+            </span>
+          </div>
+          ${p.stock > 0 ? `
+          <button onclick="event.stopPropagation();agregarCarrito('${p.id}','${p.nombre}')"
+                  class="btn btn-primary btn-sm btn-full"
+                  style="margin-top:12px">
+            🛒 Agregar
+          </button>` : `
+          <button class="btn btn-sm btn-full" disabled
+                  style="margin-top:12px;opacity:.5;background:var(--gris-l)">
+            Sin stock
+          </button>`}
+        </div>`).join('');
+
+      document.getElementById('btn-siguiente').disabled =
+        productos.length < TAMANO;
+      document.getElementById('btn-anterior').disabled  =
+        paginaActual === 0;
+      document.getElementById('pagina-info').textContent =
+        `Página ${paginaActual + 1}`;
+
+    } catch(e) {
+      catalogo.innerHTML = `<div class="alert alert-error"
+        style="grid-column:1/-1">${e.message}</div>`;
+    }
+  }
+
+  function filtrar() {
+    paginaActual = 0;
+    cargarCatalogo();
+  }
+
+  function limpiarFiltros() {
+    document.getElementById('busqueda').value  = '';
+    document.getElementById('categoria').value = '';
+    document.getElementById('precioMin').value = '';
+    document.getElementById('precioMax').value = '';
+    filtrar();
+  }
+
+  function cambiarPagina(delta) {
+    paginaActual = Math.max(0, paginaActual + delta);
+    cargarCatalogo();
+    window.scrollTo(0, 0);
+  }
+
+  function verDetalle(id) {
+    showToast('Detalle de producto disponible en Sprint 3 🧸', 'info');
+  }
+
+  function agregarCarrito(id, nombre) {
+    showToast(`🛒 "${nombre}" agregado al carrito (Sprint 3)`, 'success');
+  }
+
+  cargarCatalogo();
+</script>
+</body>
+</html>

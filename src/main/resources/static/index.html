@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-auth" style="flex-direction:column;gap:32px;text-align:center">
+  <div>
+    <div style="font-size:5rem;margin-bottom:16px">🐱</div>
+    <h1 style="color:var(--rosa);font-size:2.5rem">Crocheting Sarichi</h1>
+    <p style="color:var(--gris);font-size:1.1rem;margin-top:8px">
+      Amigurumis · Accesorios · Detalles Personalizados 🎀🧸
+    </p>
+    <p style="color:var(--gris);font-size:.9rem;margin-top:4px">
+      Creaciones tejidas a mano con mucho amor 🧵🩷
+    </p>
+  </div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+    <a href="login.html"    class="btn btn-primary"   style="min-width:160px">🔐 Iniciar Sesión</a>
+    <a href="register.html" class="btn btn-secondary" style="min-width:160px">✨ Crear Cuenta</a>
+  </div>
+  <p style="color:var(--gris);font-size:.8rem">
+    UTS — Desarrollo de Aplicaciones Empresariales · 2026
+  </p>
+</div>
+<script src="sarichi.js"></script>
+<script>
+  if (Auth.isLoggedIn()) Auth.redirectByRol(Auth.getRol());
+</script>
+</body>
+</html>

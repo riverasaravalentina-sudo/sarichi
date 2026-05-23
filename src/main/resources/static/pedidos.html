@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pedidos — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="pedidos.html"   class="sidebar-item active">📦 Mis Pedidos</a>
+      <a href="pedido-nuevo.html" class="sidebar-item">➕ Nuevo pedido</a>
+      <a href="galeria.html"   class="sidebar-item">📸 Galería proceso</a>
+      <a href="chat.html"      class="sidebar-item">💬 Chats activos</a>
+    </aside>
+    <main class="main-content">
+      <h2 class="section-title">🧶 Panel Artesana — Pedidos Activos</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-icon">📬</div>
+          <div class="kpi-label">Solicitados</div><div class="kpi-value">3</div></div>
+        <div class="kpi-card celeste"><div class="kpi-icon">🪡</div>
+          <div class="kpi-label">En producción</div><div class="kpi-value">2</div></div>
+        <div class="kpi-card verde"><div class="kpi-icon">✅</div>
+          <div class="kpi-label">Listos hoy</div><div class="kpi-value">1</div></div>
+        <div class="kpi-card naranja"><div class="kpi-icon">💬</div>
+          <div class="kpi-label">Mensajes nuevos</div><div class="kpi-value">4</div></div>
+      </div>
+      <div class="card">
+        <h3 class="section-title">📋 Pedidos personalizados</h3>
+        <div class="empty-state">
+          <div class="cat">🐱</div>
+          <h3>¡Conectando con MongoDB!</h3>
+          <p>Los pedidos aparecerán aquí en el Sprint 4 🧵</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  requireAuth(); renderNav(Auth.getRol());
+</script>
+</body>
+</html>

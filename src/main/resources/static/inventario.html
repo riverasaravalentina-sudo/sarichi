@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Inventario — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="inventario.html" class="sidebar-item active">🧵 Inventario Hilos</a>
+      <a href="movimientos.html" class="sidebar-item">📊 Movimientos</a>
+      <a href="alertas.html"    class="sidebar-item">⚠️ Alertas</a>
+    </aside>
+    <main class="main-content">
+      <h2 class="section-title">🧵 Panel Bodega — Inventario de Hilos</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-icon">🎨</div>
+          <div class="kpi-label">Colores en stock</div><div class="kpi-value">24</div></div>
+        <div class="kpi-card naranja"><div class="kpi-icon">⚠️</div>
+          <div class="kpi-label">Stock crítico</div><div class="kpi-value">2</div></div>
+        <div class="kpi-card celeste"><div class="kpi-icon">📥</div>
+          <div class="kpi-label">Entradas este mes</div><div class="kpi-value">8</div></div>
+        <div class="kpi-card verde"><div class="kpi-icon">📤</div>
+          <div class="kpi-label">Salidas este mes</div><div class="kpi-value">15</div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 class="section-title" style="margin-bottom:0">🎨 Colores de hilo</h3>
+          <button class="btn btn-primary btn-sm">➕ Registrar entrada</button>
+        </div>
+        <div class="empty-state">
+          <div class="cat">🐱</div>
+          <h3>Inventario en construcción</h3>
+          <p>El módulo de bodega completo estará listo en el Sprint 3 🧵</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>requireAuth(); renderNav(Auth.getRol());</script>
+</body>
+</html>

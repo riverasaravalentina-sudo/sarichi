@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Productos — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="dashboard.html"       class="sidebar-item">📊 Dashboard</a>
+      <a href="productos-admin.html" class="sidebar-item active">🧸 Productos</a>
+      <a href="usuarios-admin.html"  class="sidebar-item">👥 Usuarios</a>
+      <a href="inventario.html"      class="sidebar-item">🧵 Inventario</a>
+    </aside>
+    <main class="main-content">
+      <h2 class="section-title">🧸 Gestión de Productos</h2>
+
+      <div class="dash-grid">
+        <!-- Formulario crear/editar -->
+        <div class="card">
+          <h3 class="section-title" id="form-titulo">➕ Nuevo Producto</h3>
+          <div id="form-error"   class="alert alert-error"   style="display:none"></div>
+          <div id="form-success" class="alert alert-success" style="display:none"></div>
+
+          <form id="productoForm">
+            <input type="hidden" id="prod-id">
+            <div class="form-group">
+              <label>Nombre</label>
+              <input type="text" id="prod-nombre"
+                     placeholder="Ej: Amigurumi Conejo Rosa" required>
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <textarea id="prod-descripcion" rows="3"
+                        placeholder="Describe el producto..."
+                        style="resize:vertical"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Precio base (COP)</label>
+              <input type="number" id="prod-precio"
+                     placeholder="45000" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Categoría</label>
+              <select id="prod-categoria" required>
+                <option value="">— Selecciona —</option>
+                <option value="Amigurumis">🧸 Amigurumis</option>
+                <option value="Accesorios">👜 Accesorios</option>
+                <option value="Ropa">👗 Ropa</option>
+                <option value="Hogar">🏠 Hogar</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Stock inicial</label>
+              <input type="number" id="prod-stock"
+                     placeholder="0" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label>Tiempo elaboración (días)</label>
+              <input type="number" id="prod-tiempo"
+                     placeholder="3" min="1">
+            </div>
+            <div style="display:flex;gap:10px">
+              <button type="submit" class="btn btn-primary" id="btnGuardar">
+                💾 Guardar producto
+              </button>
+              <button type="button" onclick="limpiarForm()"
+                      class="btn btn-outline btn-sm">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lista de productos -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;
+                      align-items:center;margin-bottom:16px">
+            <h3 class="section-title" style="margin-bottom:0">
+              📋 Productos registrados
+            </h3>
+            <button onclick="cargarProductos()"
+                    class="btn btn-outline btn-sm">🔄</button>
+          </div>
+          <div id="lista-productos">
+            <div style="text-align:center;padding:20px">
+              <span class="spinner"></span> Cargando...
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  requireAuth();
+  const rol = Auth.getRol();
+  if (rol !== 'ADMIN') Auth.redirectByRol(rol);
+  renderNav(rol);
+
+  async function cargarProductos() {
+    const lista = document.getElementById('lista-productos');
+    lista.innerHTML = '<div style="text-align:center"><span class="spinner"></span></div>';
+    try {
+      const prods = await apiGet('/productos/admin/todos');
+      if (!prods.length) {
+        lista.innerHTML = `<div class="empty-state" style="padding:30px">
+          <div class="cat">🐱</div><h3>Sin productos aún</h3>
+          <p>Crea el primer producto con el formulario</p></div>`;
+        return;
+      }
+      lista.innerHTML = prods.map(p => `
+        <div style="padding:12px;border-bottom:1px solid #f0e8e8;
+                    display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong style="font-size:.9rem">${p.nombre}</strong>
+            <div style="font-size:.78rem;color:var(--gris)">
+              ${p.categoria} · $${Number(p.precioBase).toLocaleString('es-CO')}
+              · Stock: <span class="${p.stock<=2?'badge badge-critico':''}">
+                ${p.stock}</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button onclick="editarProducto('${p.id}')"
+                    class="btn btn-outline btn-sm">✏️</button>
+            <button onclick="eliminarProducto('${p.id}','${p.nombre}')"
+                    class="btn btn-sm"
+                    style="background:#fee2e2;color:#991b1b;border:none">
+              🗑️
+            </button>
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      lista.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    }
+  }
+
+  // Guardar (crear o editar)
+  document.getElementById('productoForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('btnGuardar');
+    const err = document.getElementById('form-error');
+    const ok  = document.getElementById('form-success');
+    err.style.display = 'none'; ok.style.display = 'none';
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+
+    const id = document.getElementById('prod-id').value;
+    const dto = {
+      nombre:               document.getElementById('prod-nombre').value,
+      descripcion:          document.getElementById('prod-descripcion').value,
+      precioBase:    Number(document.getElementById('prod-precio').value),
+      categoria:            document.getElementById('prod-categoria').value,
+      stock:         Number(document.getElementById('prod-stock').value),
+      tiempoElaboracionDias:Number(document.getElementById('prod-tiempo').value)||null,
+    };
+
+    try {
+      if (id) {
+        await apiFetch(`/productos/${id}`, 'PUT', dto);
+        ok.textContent = '✅ Producto actualizado correctamente';
+      } else {
+        await apiFetch('/productos', 'POST', dto);
+        ok.textContent = '✅ Producto creado correctamente';
+      }
+      ok.style.display = 'block';
+      limpiarForm();
+      cargarProductos();
+      showToast('Producto guardado', 'success');
+    } catch(ex) {
+      err.textContent = ex.message;
+      err.style.display = 'block';
+    }
+    btn.innerHTML = '💾 Guardar producto';
+    btn.disabled = false;
+  });
+
+  async function editarProducto(id) {
+    try {
+      const p = await apiGet(`/productos/${id}`);
+      document.getElementById('prod-id').value          = p.id;
+      document.getElementById('prod-nombre').value      = p.nombre;
+      document.getElementById('prod-descripcion').value = p.descripcion || '';
+      document.getElementById('prod-precio').value      = p.precioBase;
+      document.getElementById('prod-categoria').value   = p.categoria;
+      document.getElementById('prod-stock').value       = p.stock;
+      document.getElementById('prod-tiempo').value      = p.tiempoElaboracionDias || '';
+      document.getElementById('form-titulo').textContent = '✏️ Editar Producto';
+      window.scrollTo(0, 0);
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function eliminarProducto(id, nombre) {
+    if (!confirm(`¿Eliminar "${nombre}"? El producto quedará inactivo.`)) return;
+    try {
+      await apiFetch(`/productos/${id}`, 'DELETE');
+      showToast('Producto eliminado', 'success');
+      cargarProductos();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  function limpiarForm() {
+    document.getElementById('productoForm').reset();
+    document.getElementById('prod-id').value = '';
+    document.getElementById('form-titulo').textContent = '➕ Nuevo Producto';
+    document.getElementById('form-error').style.display   = 'none';
+    document.getElementById('form-success').style.display = 'none';
+  }
+
+  cargarProductos();
+</script>
+</body>
+</html>

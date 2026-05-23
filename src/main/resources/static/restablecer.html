@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Restablecer Contraseña — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-auth">
+  <div class="card-auth">
+    <div class="auth-logo">
+      <div style="font-size:2.5rem">🔐</div>
+      <h1 style="font-size:1.4rem">Nueva Contraseña</h1>
+      <p>Ingresa tu nueva contraseña 🧵</p>
+    </div>
+
+    <div id="error-msg"   class="alert alert-error"   style="display:none"></div>
+    <div id="success-msg" class="alert alert-success" style="display:none"></div>
+    <div id="token-error" class="alert alert-error"   style="display:none">
+      ❌ El enlace es inválido o ya expiró. 
+      <a href="recuperar.html">Solicita uno nuevo aquí.</a>
+    </div>
+
+    <form id="restablecerForm">
+      <div class="form-group">
+        <label>Nueva contraseña</label>
+        <input type="password" id="nuevaContrasena"
+               placeholder="Mínimo 8 caracteres" required>
+      </div>
+      <div class="form-group">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="confirmarContrasena"
+               placeholder="Repite la contraseña" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="btnRest">
+        Cambiar contraseña
+      </button>
+    </form>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  // Leer el token de la URL: ?token=xxxx
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+
+  if (!token) {
+    document.getElementById('restablecerForm').style.display = 'none';
+    document.getElementById('token-error').style.display = 'block';
+  }
+
+  document.getElementById('restablecerForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn  = document.getElementById('btnRest');
+    const err  = document.getElementById('error-msg');
+    const ok   = document.getElementById('success-msg');
+    err.style.display = 'none'; ok.style.display = 'none';
+
+    const nueva    = document.getElementById('nuevaContrasena').value;
+    const confirmar = document.getElementById('confirmarContrasena').value;
+
+    if (nueva !== confirmar) {
+      err.textContent = 'Las contraseñas no coinciden.';
+      err.style.display = 'block'; return;
+    }
+    if (nueva.length < 8) {
+      err.textContent = 'La contraseña debe tener mínimo 8 caracteres.';
+      err.style.display = 'block'; return;
+    }
+
+    btn.innerHTML = '<span class="spinner"></span> Cambiando...';
+    btn.disabled = true;
+
+    try {
+      await apiPost('/auth/restablecer', {
+        token,
+        nuevaContrasena:    nueva,
+        confirmarContrasena: confirmar,
+      });
+      ok.textContent = '✅ ¡Contraseña cambiada exitosamente! Redirigiendo al login...';
+      ok.style.display = 'block';
+      document.getElementById('restablecerForm').style.display = 'none';
+      setTimeout(() => window.location.href = 'login.html', 2500);
+    } catch(ex) {
+      err.textContent = ex.message;
+      err.style.display = 'block';
+      btn.innerHTML = 'Cambiar contraseña';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

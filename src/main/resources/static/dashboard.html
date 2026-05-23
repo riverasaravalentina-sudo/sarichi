@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="dashboard.html"       class="sidebar-item active">📊 Dashboard</a>
+      <a href="productos-admin.html" class="sidebar-item">🧸 Productos</a>
+      <a href="usuarios-admin.html"  class="sidebar-item">👥 Usuarios</a>
+      <a href="inventario.html"      class="sidebar-item">🧵 Inventario</a>
+      <a href="despachos.html"       class="sidebar-item">🚚 Despachos</a>
+      <a href="analiticas.html"      class="sidebar-item">📈 Analíticas</a>
+    </aside>
+    <main class="main-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <h2 class="section-title" style="margin-bottom:0">📊 Dashboard Administrador</h2>
+        <button onclick="cargarKpis()" class="btn btn-outline btn-sm">🔄 Actualizar</button>
+      </div>
+
+      <!-- KPIs reales desde /api/dashboard/kpis -->
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">👥</div>
+          <div class="kpi-label">Total clientes</div>
+          <div class="kpi-value" id="kpi-clientes">
+            <span class="spinner"></span>
+          </div>
+          <div class="kpi-sub">Usuarios registrados</div>
+        </div>
+        <div class="kpi-card celeste">
+          <div class="kpi-icon">🧸</div>
+          <div class="kpi-label">Productos activos</div>
+          <div class="kpi-value" id="kpi-productos">
+            <span class="spinner"></span>
+          </div>
+          <div class="kpi-sub">En catálogo</div>
+        </div>
+        <div class="kpi-card verde">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-label">Ventas del día</div>
+          <div class="kpi-value" id="kpi-ventas">$0</div>
+          <div class="kpi-sub">Disponible en Sprint 3</div>
+        </div>
+        <div class="kpi-card naranja">
+          <div class="kpi-icon">⚠️</div>
+          <div class="kpi-label">Stock crítico</div>
+          <div class="kpi-value" id="kpi-stock">
+            <span class="spinner"></span>
+          </div>
+          <div class="kpi-sub">Productos ≤ 2 unidades</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Perfil -->
+        <div class="card">
+          <h3 class="section-title">👤 Mi perfil</h3>
+          <div style="line-height:2.2">
+            <div><span style="color:var(--gris);font-size:.85rem">Nombre:</span>
+              <strong id="u-nombre"></strong></div>
+            <div><span style="color:var(--gris);font-size:.85rem">Correo:</span>
+              <strong id="u-correo"></strong></div>
+            <div><span style="color:var(--gris);font-size:.85rem">Rol:</span>
+              <span class="badge" style="background:#fce7f3;color:#9d174d"
+                    id="u-rol"></span></div>
+          </div>
+        </div>
+
+        <!-- Accesos rápidos -->
+        <div class="card">
+          <h3 class="section-title">⚡ Accesos rápidos</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+            <a href="productos-admin.html" class="btn btn-primary btn-sm">
+              ➕ Gestionar productos
+            </a>
+            <a href="usuarios-admin.html"  class="btn btn-secondary btn-sm">
+              👥 Gestionar usuarios
+            </a>
+            <a href="tienda.html"          class="btn btn-outline btn-sm">
+              🛍️ Ver tienda como cliente
+            </a>
+          </div>
+        </div>
+
+        <!-- Tabla productos recientes -->
+        <div class="card full">
+          <div style="display:flex;justify-content:space-between;align-items:center;
+                      margin-bottom:16px">
+            <h3 class="section-title" style="margin-bottom:0">
+              🧸 Productos del catálogo
+            </h3>
+            <a href="productos-admin.html" class="btn btn-primary btn-sm">
+              Ver todos
+            </a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th><th>Categoría</th>
+                  <th>Precio</th><th>Stock</th><th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-productos">
+                <tr><td colspan="5" style="text-align:center;padding:30px">
+                  <span class="spinner"></span> Cargando...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  requireAuth();
+  const rol = Auth.getRol();
+  if (rol !== 'ADMIN') Auth.redirectByRol(rol);
+  renderNav(rol);
+
+  const user = Auth.getUser();
+  document.getElementById('u-nombre').textContent = user?.nombre || '';
+  document.getElementById('u-correo').textContent = user?.correo || '';
+  document.getElementById('u-rol').textContent    = user?.rol    || '';
+
+  async function cargarKpis() {
+    try {
+      const kpis = await apiGet('/dashboard/kpis');
+      document.getElementById('kpi-clientes').textContent =
+        kpis.totalClientes ?? 0;
+      document.getElementById('kpi-productos').textContent =
+        kpis.totalProductos ?? 0;
+      document.getElementById('kpi-stock').textContent =
+        kpis.stockCritico ?? 0;
+      if ((kpis.stockCritico ?? 0) > 0)
+        showToast(`⚠️ ${kpis.stockCritico} productos con stock crítico`, 'info');
+    } catch(e) {
+      showToast('Error cargando KPIs: ' + e.message, 'error');
+    }
+  }
+
+  async function cargarProductos() {
+    try {
+      const productos = await apiGet('/productos/admin/todos');
+      const tbody = document.getElementById('tbl-productos');
+      if (!productos.length) {
+        tbody.innerHTML = `<tr><td colspan="5">
+          <div class="empty-state" style="padding:30px">
+            <div class="cat">🐱</div>
+            <h3>Sin productos aún</h3>
+            <p>Agrega el primer producto desde Gestionar productos</p>
+          </div></td></tr>`;
+        return;
+      }
+      tbody.innerHTML = productos.slice(0,8).map(p => `
+        <tr>
+          <td><strong>${p.nombre}</strong></td>
+          <td>${p.categoria}</td>
+          <td style="color:var(--rosa);font-weight:600">
+            $${Number(p.precioBase).toLocaleString('es-CO')}
+          </td>
+          <td>
+            <span class="badge ${p.stock <= 2 ? 'badge-critico' : 'badge-activo'}">
+              ${p.stock}
+            </span>
+          </td>
+          <td>
+            <span class="badge ${p.estado==='ACTIVO'?'badge-activo':'badge-pendiente'}">
+              ${p.estado}
+            </span>
+          </td>
+        </tr>`).join('');
+    } catch(e) {
+      document.getElementById('tbl-productos').innerHTML =
+        `<tr><td colspan="5" style="text-align:center;color:var(--gris)">
+          Sin productos registrados aún
+        </td></tr>`;
+    }
+  }
+
+  // Cargar datos al iniciar
+  cargarKpis();
+  cargarProductos();
+
+  // Auto-refresh cada 30 segundos
+  setInterval(cargarKpis, 30000);
+</script>
+</body>
+</html>

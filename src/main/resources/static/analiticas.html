@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Analíticas — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="analiticas.html" class="sidebar-item active">📈 Analíticas</a>
+      <a href="blog.html"       class="sidebar-item">✍️ Blog</a>
+      <a href="galeria.html"    class="sidebar-item">🖼️ Galería</a>
+      <a href="retos.html"      class="sidebar-item">🏆 Retos</a>
+    </aside>
+    <main class="main-content">
+      <h2 class="section-title">📈 Panel Mercadeo — Analíticas</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-icon">👁️</div>
+          <div class="kpi-label">Visitas esta semana</div><div class="kpi-value">1.240</div></div>
+        <div class="kpi-card celeste"><div class="kpi-icon">📸</div>
+          <div class="kpi-label">Desde Instagram</div><div class="kpi-value">68%</div></div>
+        <div class="kpi-card verde"><div class="kpi-icon">🛒</div>
+          <div class="kpi-label">Tasa conversión</div><div class="kpi-value">4.2%</div></div>
+        <div class="kpi-card naranja"><div class="kpi-icon">📝</div>
+          <div class="kpi-label">Artículos publicados</div><div class="kpi-value">7</div></div>
+      </div>
+      <div class="card">
+        <h3 class="section-title">📊 Métricas de tráfico</h3>
+        <div class="empty-state">
+          <div class="cat">🐱</div>
+          <h3>Conectando con analíticas</h3>
+          <p>Las gráficas de tráfico real estarán en el Sprint 2 📈</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>requireAuth(); renderNav(Auth.getRol());</script>
+</body>
+</html>
