@@ -130,3 +130,72 @@ async function refrescarTokenAutomatico() {
 
 // Refrescar cada 12 minutos automáticamente
 setInterval(refrescarTokenAutomatico, 12 * 60 * 1000);
+
+// ── Carrito Functions ───────────────────────────────────────────────────────
+const Carrito = {
+  KEY: 'sarichi_carrito',
+  
+  obtener() {
+    return JSON.parse(sessionStorage.getItem(this.KEY) || '[]');
+  },
+  
+  guardar(items) {
+    sessionStorage.setItem(this.KEY, JSON.stringify(items));
+  },
+  
+  agregar(producto, cantidad, color = '') {
+    if (cantidad <= 0) {
+      showToast('Cantidad debe ser mayor a 0', 'error');
+      return;
+    }
+    
+    const items = this.obtener();
+    const existe = items.find(i => i.id === producto.id && i.color === color);
+    
+    if (existe) {
+      existe.cantidad += cantidad;
+    } else {
+      items.push({
+        id: producto.id,
+        nombre: producto.nombre,
+        precio: producto.precioBase,
+        cantidad: cantidad,
+        color: color,
+        imagen: producto.fotosUrls?.[0] || ''
+      });
+    }
+    
+    this.guardar(items);
+    showToast(`${producto.nombre} agregado al carrito`);
+    this.actualizarBadge();
+  },
+  
+  eliminar(productoId, color = '') {
+    let items = this.obtener();
+    items = items.filter(i => !(i.id === productoId && i.color === color));
+    this.guardar(items);
+    this.actualizarBadge();
+  },
+  
+  vaciar() {
+    sessionStorage.removeItem(this.KEY);
+    this.actualizarBadge();
+  },
+  
+  obtenerTotal() {
+    return this.obtener().reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+  },
+  
+  obtenerCantidad() {
+    return this.obtener().reduce((sum, item) => sum + item.cantidad, 0);
+  },
+  
+  actualizarBadge() {
+    const badge = document.getElementById('cartBadge');
+    if (badge) {
+      const cantidad = this.obtenerCantidad();
+      badge.textContent = cantidad;
+      badge.style.display = cantidad > 0 ? 'inline' : 'none';
+    }
+  }
+};

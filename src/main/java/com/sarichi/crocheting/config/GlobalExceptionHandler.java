@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.sarichi.crocheting.exception.CredencialesInvalidasException;
+import com.sarichi.crocheting.exception.StockInsuficienteException;
 import com.sarichi.crocheting.exception.TokenInvalidoException;
+import com.sarichi.crocheting.exception.UnauthorizedException;
 import com.sarichi.crocheting.exception.UsuarioYaExisteException;
 
 @RestControllerAdvice
@@ -34,6 +36,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> manejarToken(
             TokenInvalidoException ex) {
         return error(HttpStatus.UNAUTHORIZED, "Token inválido o expirado", ex.getMessage());
+    }
+
+    @ExceptionHandler(StockInsuficienteException.class)
+    public ResponseEntity<Map<String, Object>> manejarStockInsuficiente(
+            StockInsuficienteException ex) {
+        return error(HttpStatus.CONFLICT, "Stock insuficiente", ex.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Map<String, Object>> manejarUnauthorized(
+            UnauthorizedException ex) {
+        return error(HttpStatus.FORBIDDEN, "No autorizado", ex.getMessage());
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)

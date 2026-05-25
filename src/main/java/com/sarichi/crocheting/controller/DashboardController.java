@@ -1,5 +1,8 @@
 package com.sarichi.crocheting.controller;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.sarichi.crocheting.dto.DashboardKpisDTO;
 import com.sarichi.crocheting.dto.ProductoDTO;
+import com.sarichi.crocheting.dto.VentasPorCategoriaDTO;
+import com.sarichi.crocheting.dto.VentasPorPeriodoDTO;
 import com.sarichi.crocheting.service.DashboardService;
 import com.sarichi.crocheting.service.ProductoService;
 
@@ -41,16 +46,35 @@ public class DashboardController {
     @PreAuthorize("hasAnyRole('ADMIN','MERCADEO')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Ventas por período")
-    public ResponseEntity<List<Map<String, Object>>> ventas() {
-        return ResponseEntity.ok(List.of()); // Sprint 3
+    public ResponseEntity<List<VentasPorPeriodoDTO>> ventas(
+            @RequestParam(required = false) String desde,
+            @RequestParam(required = false) String hasta) {
+        
+        LocalDateTime desdeDate = desde != null ? 
+            LocalDateTime.parse(desde + "T00:00:00") : 
+            LocalDateTime.now().minusDays(30);
+        
+        LocalDateTime hastaDate = hasta != null ? 
+            LocalDateTime.parse(hasta + "T23:59:59") : 
+            LocalDateTime.now();
+
+        return ResponseEntity.ok(dashboardService.obtenerVentasPorPeriodo(desdeDate, hastaDate));
     }
 
     @GetMapping("/categorias")
     @PreAuthorize("hasAnyRole('ADMIN','MERCADEO')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Ventas por categoría")
-    public ResponseEntity<List<Map<String, Object>>> categorias() {
-        return ResponseEntity.ok(List.of()); // Sprint 3
+    public ResponseEntity<List<VentasPorCategoriaDTO>> categorias() {
+        return ResponseEntity.ok(dashboardService.obtenerVentasPorCategoria());
+    }
+
+    @GetMapping("/top-productos")
+    @PreAuthorize("hasAnyRole('ADMIN','MERCADEO')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Top 5 productos más vendidos")
+    public ResponseEntity<List<Map<String, Object>>> topProductos() {
+        return ResponseEntity.ok(dashboardService.obtenerTopProductos());
     }
 
     @GetMapping("/pedidos-recientes")

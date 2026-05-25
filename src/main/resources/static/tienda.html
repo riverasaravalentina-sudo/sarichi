@@ -178,11 +178,43 @@
   }
 
   function verDetalle(id) {
-    showToast('Detalle de producto disponible en Sprint 3 🧸', 'info');
+    showToast('Detalle de producto disponible en Sprint 4 🧸', 'info');
   }
 
-  function agregarCarrito(id, nombre) {
-    showToast(`🛒 "${nombre}" agregado al carrito (Sprint 3)`, 'success');
+  async function agregarCarrito(productoId, nombre) {
+    try {
+      const producto = (await apiGet(`/productos/${productoId}`));
+      
+      // Diálogo para cantidad y color
+      const cantidad = prompt('¿Cuántos deseas? (máximo ' + producto.stock + ')', '1');
+      if (cantidad === null) return;
+      
+      const cantNum = parseInt(cantidad);
+      if (isNaN(cantNum) || cantNum <= 0 || cantNum > producto.stock) {
+        showToast('Cantidad inválida', 'error');
+        return;
+      }
+      
+      let color = '';
+      if (producto.coloresDisponibles && producto.coloresDisponibles.length > 0) {
+        color = prompt('Selecciona el color (opciones: ' + producto.coloresDisponibles.join(', ') + ')', 
+                      producto.coloresDisponibles[0]);
+        if (color === null) return;
+      }
+      
+      Carrito.agregar({
+        id: producto.id,
+        nombre: producto.nombre,
+        precioBase: producto.precioBase,
+        stock: producto.stock,
+        fotosUrls: producto.fotosUrls
+      }, cantNum, color);
+      
+      Carrito.actualizarBadge();
+      
+    } catch(e) {
+      showToast('Error: ' + e.message, 'error');
+    }
   }
 
   cargarCatalogo();

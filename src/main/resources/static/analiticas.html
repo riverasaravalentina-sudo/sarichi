@@ -4,6 +4,64 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Analíticas — Sarichi Crocheting</title>
   <link rel="stylesheet" href="sarichi.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .graficas-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .grafica-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--sombra);
+    }
+    .filtros-analíticas {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .filtro-input {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--gris-l);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .btn-filtrar {
+      padding: 0.5rem 1.5rem;
+      background: var(--rosa);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-filtrar:hover {
+      background: #e91e63;
+    }
+    .tabla-top-productos {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    .tabla-top-productos th {
+      background: var(--gris-l);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid var(--gris);
+    }
+    .tabla-top-productos td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--gris-l);
+    }
+    .tabla-top-productos tr:hover {
+      background: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
 <div class="page-app">
@@ -17,29 +75,207 @@
     </aside>
     <main class="main-content">
       <h2 class="section-title">📈 Panel Mercadeo — Analíticas</h2>
-      <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-icon">👁️</div>
-          <div class="kpi-label">Visitas esta semana</div><div class="kpi-value">1.240</div></div>
-        <div class="kpi-card celeste"><div class="kpi-icon">📸</div>
-          <div class="kpi-label">Desde Instagram</div><div class="kpi-value">68%</div></div>
-        <div class="kpi-card verde"><div class="kpi-icon">🛒</div>
-          <div class="kpi-label">Tasa conversión</div><div class="kpi-value">4.2%</div></div>
-        <div class="kpi-card naranja"><div class="kpi-icon">📝</div>
-          <div class="kpi-label">Artículos publicados</div><div class="kpi-value">7</div></div>
+      
+      <div class="filtros-analíticas">
+        <input type="date" id="fechaDesde" class="filtro-input" placeholder="Desde">
+        <input type="date" id="fechaHasta" class="filtro-input" placeholder="Hasta">
+        <button class="btn-filtrar" onclick="cargarAnaliticas()">Actualizar Datos</button>
       </div>
-      <div class="card">
-        <h3 class="section-title">📊 Métricas de tráfico</h3>
-        <div class="empty-state">
-          <div class="cat">🐱</div>
-          <h3>Conectando con analíticas</h3>
-          <p>Las gráficas de tráfico real estarán en el Sprint 2 📈</p>
+      
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-icon">💰</div>
+          <div class="kpi-label">Ventas del Período</div><div class="kpi-value" id="kpiVentas">$0</div></div>
+        <div class="kpi-card celeste"><div class="kpi-icon">📦</div>
+          <div class="kpi-label">Pedidos Totales</div><div class="kpi-value" id="kpiPedidos">0</div></div>
+        <div class="kpi-card verde"><div class="kpi-icon">📊</div>
+          <div class="kpi-label">Ticket Promedio</div><div class="kpi-value" id="kpiTicket">$0</div></div>
+        <div class="kpi-card naranja"><div class="kpi-icon">🏆</div>
+          <div class="kpi-label">Categoría Top</div><div class="kpi-value" id="kpiCategoria">-</div></div>
+      </div>
+
+      <div class="graficas-container">
+        <div class="grafica-card">
+          <h3 style="margin-bottom: 1rem;">📈 Ventas por Período</h3>
+          <canvas id="chartVentas"></canvas>
         </div>
+        <div class="grafica-card">
+          <h3 style="margin-bottom: 1rem;">🎯 Ventas por Categoría</h3>
+          <canvas id="chartCategorias"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1rem;">🏅 Top 5 Productos</h3>
+        <table class="tabla-top-productos" id="tablaTopProductos">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Producto</th>
+              <th>Cantidad Vendida</th>
+              <th>Ingresos</th>
+            </tr>
+          </thead>
+          <tbody id="topProductosBody">
+            <tr><td colspan="4" style="text-align: center; color: var(--gris);">Cargando...</td></tr>
+          </tbody>
+        </table>
       </div>
     </main>
   </div>
 </div>
 <div id="toast" class="toast"></div>
 <script src="sarichi.js"></script>
-<script>requireAuth(); renderNav(Auth.getRol());</script>
+<script>
+  requireAuth();
+  renderNav(Auth.getRol());
+
+  let chartVentas, chartCategorias;
+
+  function obtenerFechasPorDefecto() {
+    const hasta = new Date();
+    const desde = new Date();
+    desde.setDate(desde.getDate() - 30);
+    
+    return {
+      desde: desde.toISOString().split('T')[0],
+      hasta: hasta.toISOString().split('T')[0]
+    };
+  }
+
+  function inicializarFechas() {
+    const fechas = obtenerFechasPorDefecto();
+    document.getElementById('fechaDesde').value = fechas.desde;
+    document.getElementById('fechaHasta').value = fechas.hasta;
+  }
+
+  async function cargarAnaliticas() {
+    try {
+      const desde = document.getElementById('fechaDesde').value;
+      const hasta = document.getElementById('fechaHasta').value;
+
+      if (!desde || !hasta) {
+        showToast('Por favor selecciona ambas fechas', 'error');
+        return;
+      }
+
+      // Cargar ventas por período
+      const ventasPeriodo = await apiGet(`/dashboard/ventas?desde=${desde}&hasta=${hasta}`);
+      renderizarGraficoVentas(ventasPeriodo);
+
+      // Cargar ventas por categoría
+      const ventasCategoria = await apiGet('/dashboard/categorias');
+      renderizarGraficoCategorias(ventasCategoria);
+
+      // Cargar top productos
+      const topProductos = await apiGet('/dashboard/top-productos');
+      renderizarTopProductos(topProductos);
+
+      // Actualizar KPIs
+      actualizarKpis(ventasPeriodo, ventasCategoria, topProductos);
+
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
+  function renderizarGraficoVentas(datos) {
+    const ctx = document.getElementById('chartVentas').getContext('2d');
+    
+    if (chartVentas) chartVentas.destroy();
+
+    chartVentas = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: datos.map(d => d.fecha),
+        datasets: [{
+          label: 'Ventas ($)',
+          data: datos.map(d => d.total),
+          borderColor: '#e91e63',
+          backgroundColor: 'rgba(233, 30, 99, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#e91e63',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: true }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { callback: v => '$' + v.toLocaleString() }
+          }
+        }
+      }
+    });
+  }
+
+  function renderizarGraficoCategorias(datos) {
+    const ctx = document.getElementById('chartCategorias').getContext('2d');
+    
+    if (chartCategorias) chartCategorias.destroy();
+
+    const colores = ['#e91e63', '#3498db', '#f39c12', '#27ae60', '#9b59b6', '#1abc9c'];
+
+    chartCategorias = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: datos.map(d => d.categoria),
+        datasets: [{
+          data: datos.map(d => d.porcentaje),
+          backgroundColor: colores.slice(0, datos.length),
+          borderColor: '#fff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: ctx => ctx.parsed + '%' } }
+        }
+      }
+    });
+  }
+
+  function renderizarTopProductos(datos) {
+    const tbody = document.getElementById('topProductosBody');
+    
+    if (datos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--gris);">Sin datos</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = datos.map((p, i) => `
+      <tr>
+        <td style="font-weight: 700; font-size: 1.2rem;">${i + 1}</td>
+        <td>${p.nombreProducto}</td>
+        <td style="text-align: center;">${p.cantidadVendida}</td>
+        <td style="text-align: right; font-weight: 600;">$${p.ingresos.toLocaleString('es-CO', {maximumFractionDigits: 2})}</td>
+      </tr>
+    `).join('');
+  }
+
+  function actualizarKpis(ventasPeriodo, ventasCategoria, topProductos) {
+    const totalVentas = ventasPeriodo.reduce((sum, v) => sum + v.total, 0);
+    const totalPedidos = ventasPeriodo.reduce((sum, v) => sum + v.cantidadPedidos, 0);
+    const ticketPromedio = totalPedidos > 0 ? totalVentas / totalPedidos : 0;
+    const categoriaTop = ventasCategoria.length > 0 ? ventasCategoria[0].categoria : '-';
+
+    document.getElementById('kpiVentas').textContent = '$' + totalVentas.toLocaleString('es-CO', {maximumFractionDigits: 2});
+    document.getElementById('kpiPedidos').textContent = totalPedidos;
+    document.getElementById('kpiTicket').textContent = '$' + ticketPromedio.toLocaleString('es-CO', {maximumFractionDigits: 2});
+    document.getElementById('kpiCategoria').textContent = categoriaTop;
+  }
+
+  // Inicializar
+  inicializarFechas();
+  cargarAnaliticas();
+</script>
 </body>
 </html>
