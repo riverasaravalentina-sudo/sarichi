@@ -63,6 +63,10 @@ public class SecurityConfig {
                     "/", "/*.html", "/*.css", "/*.js"
                 ).permitAll()
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("GET", "/productos").permitAll()
+                .requestMatchers("GET", "/productos/**").permitAll()
+                .requestMatchers("GET", "/colores-hilo").permitAll()
+                .requestMatchers("GET", "/colores-hilo/**").permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
                 ).permitAll()
