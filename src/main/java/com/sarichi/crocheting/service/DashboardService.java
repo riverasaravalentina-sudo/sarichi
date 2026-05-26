@@ -14,11 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sarichi.crocheting.dto.DashboardKpisDTO;
+import com.sarichi.crocheting.dto.EstadisticasLogisticaDTO;
 import com.sarichi.crocheting.dto.VentasPorCategoriaDTO;
 import com.sarichi.crocheting.dto.VentasPorPeriodoDTO;
 import com.sarichi.crocheting.entity.Pedido;
 import com.sarichi.crocheting.entity.Producto;
+import com.sarichi.crocheting.repository.ActividadProduccionRepository;
 import com.sarichi.crocheting.repository.ColorHiloRepository;
+import com.sarichi.crocheting.repository.DespachoRepository;
 import com.sarichi.crocheting.repository.PedidoRepository;
 import com.sarichi.crocheting.repository.ProductoRepository;
 import com.sarichi.crocheting.repository.UsuarioRepository;
@@ -39,6 +42,12 @@ public class DashboardService {
 
     @Autowired
     private PedidoRepository pedidoRepository;
+
+    @Autowired
+    private DespachoRepository despachoRepository;
+
+    @Autowired
+    private ActividadProduccionRepository actividadRepository;
 
     /**
      * KPIs generales del dashboard.
@@ -173,5 +182,46 @@ public class DashboardService {
                     return result;
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Métricas de logística: despachos hoy, pedidos por despachar, promedio entrega
+     */
+    public EstadisticasLogisticaDTO obtenerMetricasLogistica() {
+        LocalDateTime hoy = LocalDateTime.now();
+        LocalDateTime inicioHoy = hoy.withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime finHoy = hoy.withHour(23).withMinute(59).withSecond(59);
+        LocalDateTime inicioSemana = hoy.minusDays(7);
+
+        long despachosHoy = despachoRepository.findByFechaDespachoBetween(inicioHoy, finHoy).size();
+        long despachosSemana = despachoRepository.findByFechaDespachoBetween(inicioSemana, finHoy).size();
+        long pedidosPendientes = pedidoRepository.findByEstado("LISTO").size();
+
+        return EstadisticasLogisticaDTO.builder()
+                .despachosHoy(despachosHoy)
+                .despachosSemana(despachosSemana)
+                .pedidosPendientesDespacho(pedidosPendientes)
+                .promedioEntregaDias(3.0)
+                .build();
+    }
+
+    /**
+     * Métricas de producción: actividades en progreso, completadas esta semana
+     */
+    public Map<String, Object> obtenerMetricasProduccion() {
+        LocalDateTime hoy = LocalDateTime.now();
+        LocalDateTime inicioSemana = hoy.minusDays(7);
+
+        long actividadesEnProgreso = actividadRepository.findByEstado("EN_PROGRESO").size();
+        long actividadesCompletadasSemana = actividadRepository.findByEstado("COMPLETADO")
+                .stream()
+                .filter(a -> a.getFechaFinalizacion() != null && a.getFechaFinalizacion().isAfter(inicioSemana))
+                .count();
+
+        Map<String, Object> metricas = new HashMap<>();
+        metricas.put("actividadesEnProgreso", actividadesEnProgreso);
+        metricas.put("actividadesCompletadasSemana", actividadesCompletadasSemana);
+
+        return metricas;
     }
 }

@@ -1,0 +1,15 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.5)
+
+2026-05-26T12:48:30.351-05:00  INFO 24064 --- [SarichiCrocheting] [           main] c.s.c.SarichiCrochetingApplication       : Starting SarichiCrochetingApplication v1 using Java 24.0.2 with PID 24064 (C:\TrabajosSprint\SarichiCrocheting\target\crocheting-1.jar started by Sara Rivera in C:\TrabajosSprint\SarichiCrocheting)
+2026-05-26T12:48:30.353-05:00 DEBUG 24064 --- [SarichiCrocheting] [           main] c.s.c.SarichiCrochetingApplication       : Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-05-26T12:48:30.353-05:00  INFO 24064 --- [SarichiCrocheting] [           main] c.s.c.SarichiCrochetingApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-05-26T12:48:33.529-05:00  INFO 24064 --- [SarichiCrocheting] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2026-05-26T12:48:34.365-05:00  INFO 24064 --- [SarichiCrocheting] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 766 ms. Found 9 MongoDB repository interfaces.

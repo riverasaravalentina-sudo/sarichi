@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.sarichi.crocheting.exception.CredencialesInvalidasException;
+import com.sarichi.crocheting.exception.DespachoException;
+import com.sarichi.crocheting.exception.DevolucionException;
+import com.sarichi.crocheting.exception.ProduccionException;
 import com.sarichi.crocheting.exception.StockInsuficienteException;
 import com.sarichi.crocheting.exception.TokenInvalidoException;
 import com.sarichi.crocheting.exception.UnauthorizedException;
@@ -48,6 +51,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> manejarUnauthorized(
             UnauthorizedException ex) {
         return error(HttpStatus.FORBIDDEN, "No autorizado", ex.getMessage());
+    }
+
+    @ExceptionHandler(DespachoException.class)
+    public ResponseEntity<Map<String, Object>> manejarDespacho(
+            DespachoException ex) {
+        return error(HttpStatus.CONFLICT, "Error en despacho", ex.getMessage());
+    }
+
+    @ExceptionHandler(DevolucionException.class)
+    public ResponseEntity<Map<String, Object>> manejarDevolucion(
+            DevolucionException ex) {
+        return error(HttpStatus.CONFLICT, "Error en devolución", ex.getMessage());
+    }
+
+    @ExceptionHandler(ProduccionException.class)
+    public ResponseEntity<Map<String, Object>> manejarProduccion(
+            ProduccionException ex) {
+        return error(HttpStatus.CONFLICT, "Error en producción", ex.getMessage());
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)

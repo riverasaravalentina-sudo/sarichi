@@ -11,11 +11,14 @@ import com.sarichi.crocheting.dto.CrearPedidoDTO;
 import com.sarichi.crocheting.dto.ItemPedidoDTO;
 import com.sarichi.crocheting.dto.ItemPedidoRequest;
 import com.sarichi.crocheting.dto.PedidoDTO;
+import com.sarichi.crocheting.entity.ActividadProduccion;
 import com.sarichi.crocheting.entity.ItemPedido;
 import com.sarichi.crocheting.entity.Pedido;
 import com.sarichi.crocheting.entity.Producto;
 import com.sarichi.crocheting.entity.Usuario;
+import com.sarichi.crocheting.exception.ProduccionException;
 import com.sarichi.crocheting.exception.StockInsuficienteException;
+import com.sarichi.crocheting.repository.ActividadProduccionRepository;
 import com.sarichi.crocheting.repository.PedidoRepository;
 import com.sarichi.crocheting.repository.ProductoRepository;
 import com.sarichi.crocheting.repository.UsuarioRepository;
@@ -31,6 +34,9 @@ public class PedidoService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ActividadProduccionRepository actividadRepository;
 
     public PedidoDTO crearPedido(String usuarioId, CrearPedidoDTO dto) {
         // Validar stock disponible
@@ -101,9 +107,24 @@ public class PedidoService {
                 .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado"));
     }
 
-    public PedidoDTO actualizarEstado(String pedidoId, String nuevoEstado) {
+    public PedidoDTO actualizarEstado(String pedidoId, String nuevoEstado) throws ProduccionException {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado"));
+        
+        // Si cambia a EN_PRODUCCION, crear actividad (pero sin asignar artesana aún)
+        if ("EN_PRODUCCION".equals(nuevoEstado) && !"EN_PRODUCCION".equals(pedido.getEstado())) {
+            // Esta lógica se ejecutará cuando ADMIN asigne el pedido a una artesana
+            // Por ahora solo marcamos el estado
+        }
+        
+        // Si cambia a LISTO, verificar que actividad esté COMPLETADA
+        if ("LISTO".equals(nuevoEstado) && !"LISTO".equals(pedido.getEstado())) {
+            var actividad = actividadRepository.findByPedidoId(pedidoId);
+            if (actividad.isPresent() && !"COMPLETADO".equals(actividad.get().getEstado())) {
+                throw new ProduccionException("La actividad de producción debe estar COMPLETADA antes de marcar LISTO");
+            }
+        }
+        
         pedido.setEstado(nuevoEstado);
         return entityToDto(pedidoRepository.save(pedido));
     }
@@ -114,6 +135,13 @@ public class PedidoService {
 
     public List<PedidoDTO> obtenerPedidosPorFecha(LocalDateTime desde, LocalDateTime hasta) {
         return pedidoRepository.findByFechaPedidoBetween(desde, hasta)
+                .stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<PedidoDTO> listarPedidosListos() {
+        return pedidoRepository.findByEstado("LISTO")
                 .stream()
                 .map(this::entityToDto)
                 .collect(Collectors.toList());

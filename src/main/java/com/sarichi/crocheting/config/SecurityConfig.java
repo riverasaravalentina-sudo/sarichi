@@ -68,6 +68,7 @@ public class SecurityConfig {
                 .requestMatchers("GET", "/colores-hilo").permitAll()
                 .requestMatchers("GET", "/colores-hilo/**").permitAll()
                 .requestMatchers("GET", "/resenas/**").permitAll()
+                .requestMatchers("GET", "/despachos/seguimiento/**").permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
                 ).permitAll()

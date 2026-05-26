@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.sarichi.crocheting.dto.DashboardKpisDTO;
+import com.sarichi.crocheting.dto.EstadisticasLogisticaDTO;
 import com.sarichi.crocheting.dto.ProductoDTO;
 import com.sarichi.crocheting.dto.VentasPorCategoriaDTO;
 import com.sarichi.crocheting.dto.VentasPorPeriodoDTO;
@@ -99,5 +100,21 @@ public class DashboardController {
     @Operation(summary = "Productos con stock crítico")
     public ResponseEntity<List<ProductoDTO>> stockCritico() {
         return ResponseEntity.ok(productoService.obtenerStockCritico(2));
+    }
+
+    @GetMapping("/logistica")
+    @PreAuthorize("hasAnyRole('LOGISTICA','ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Métricas de logística")
+    public ResponseEntity<EstadisticasLogisticaDTO> metricasLogistica() {
+        return ResponseEntity.ok(dashboardService.obtenerMetricasLogistica());
+    }
+
+    @GetMapping("/produccion")
+    @PreAuthorize("hasAnyRole('ARTESANA','ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Métricas de producción")
+    public ResponseEntity<Map<String, Object>> metricasProduccion() {
+        return ResponseEntity.ok(dashboardService.obtenerMetricasProduccion());
     }
 }
