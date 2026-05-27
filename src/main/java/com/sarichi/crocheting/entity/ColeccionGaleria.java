@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Document(collection = "coleccionesGaleria")
 @Data
@@ -29,4 +30,7 @@ public class ColeccionGaleria {
     
     @Indexed
     private String estado; // ACTIVA, INACTIVA
+    
+    private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaActualizacion;
 }
