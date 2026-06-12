@@ -129,11 +129,12 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
-            .oauth2Login(oauth2 -> oauth2
-                .successHandler(oAuth2LoginSuccessHandler)
-                .loginPage("/web/login")
-                .permitAll()
-            )
+            // OAuth2 Google Login — activar SOLO si hay GOOGLE_CLIENT_ID configurado
+            // .oauth2Login(oauth2 -> oauth2
+            //     .successHandler(oAuth2LoginSuccessHandler)
+            //     .loginPage("/web/login")
+            //     .permitAll()
+            // )
             .addFilterBefore(jwtAuthenticationFilter(),
                     UsernamePasswordAuthenticationFilter.class);
 
