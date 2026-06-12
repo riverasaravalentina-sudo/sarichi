@@ -27,6 +27,7 @@ import com.sarichi.crocheting.service.DashboardService;
 import com.sarichi.crocheting.service.DespachoService;
 import com.sarichi.crocheting.service.PedidoService;
 import com.sarichi.crocheting.service.ProductoService;
+import com.sarichi.crocheting.service.WishlistService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -46,6 +47,7 @@ public class WebController {
     @Autowired private DespachoService   despachoService;
     @Autowired private AutenticacionService autenticacionService;
     @Autowired private ChatService       chatService;
+    @Autowired private WishlistService   wishlistService;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PasswordEncoder   passwordEncoder;
 
@@ -474,6 +476,44 @@ public class WebController {
             model.addAttribute("despachos", List.of());
         }
         return "web/despachos/listar";
+    }
+
+    // ── Wishlist ────────────────────────────────────────────────────────
+
+    @GetMapping("/wishlist")
+    public String verWishlist(Model model, HttpSession session) {
+        if (!estaAutenticado(session)) return "redirect:/web/login";
+        String usuarioWebId = (String) session.getAttribute("usuarioWebId");
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
+        try {
+            model.addAttribute("items", wishlistService.listarPorUsuario(usuarioWebId));
+        } catch (Exception e) {
+            model.addAttribute("items", List.of());
+        }
+        return "web/cliente/wishlist";
+    }
+
+    @PostMapping("/wishlist/agregar/{productoId}")
+    public String agregarWishlist(@PathVariable String productoId,
+                                   RedirectAttributes ra, HttpSession session) {
+        if (!estaAutenticado(session)) return "redirect:/web/login";
+        try {
+            wishlistService.agregar((String) session.getAttribute("usuarioWebId"), productoId);
+            ra.addFlashAttribute("success", "Producto agregado a tu lista de deseos");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/web/wishlist";
+    }
+
+    @GetMapping("/wishlist/eliminar/{productoId}")
+    public String eliminarWishlist(@PathVariable String productoId,
+                                    RedirectAttributes ra, HttpSession session) {
+        if (!estaAutenticado(session)) return "redirect:/web/login";
+        wishlistService.eliminar((String) session.getAttribute("usuarioWebId"), productoId);
+        ra.addFlashAttribute("success", "Producto eliminado de tu lista de deseos");
+        return "redirect:/web/wishlist";
     }
 
     // ── Chat de pedidos ─────────────────────────────────────────────────

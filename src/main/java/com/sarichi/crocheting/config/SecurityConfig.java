@@ -100,6 +100,9 @@ public class SecurityConfig {
                 // ── WebSocket endpoint ─────────────────────────────────────────────
                 .requestMatchers("/ws-chat/**").permitAll()
 
+                // ── API wishlist ─────────────────────────────────────────────────────
+                .requestMatchers("/wishlist/**").permitAll()
+
                 // ── API mensajes (chat history) ────────────────────────────────────
                 .requestMatchers("GET", "/mensajes/pedido/**").permitAll()
                 .requestMatchers("POST", "/mensajes/pedido/**").permitAll()
