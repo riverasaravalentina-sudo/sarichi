@@ -21,6 +21,7 @@ import com.sarichi.crocheting.entity.Usuario;
 import com.sarichi.crocheting.entity.UserRole;
 import com.sarichi.crocheting.repository.UsuarioRepository;
 import com.sarichi.crocheting.service.AutenticacionService;
+import com.sarichi.crocheting.service.ChatService;
 import com.sarichi.crocheting.service.ColorHiloService;
 import com.sarichi.crocheting.service.DashboardService;
 import com.sarichi.crocheting.service.DespachoService;
@@ -44,6 +45,7 @@ public class WebController {
     @Autowired private PedidoService     pedidoService;
     @Autowired private DespachoService   despachoService;
     @Autowired private AutenticacionService autenticacionService;
+    @Autowired private ChatService       chatService;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PasswordEncoder   passwordEncoder;
 
@@ -472,6 +474,26 @@ public class WebController {
             model.addAttribute("despachos", List.of());
         }
         return "web/despachos/listar";
+    }
+
+    // ── Chat de pedidos ─────────────────────────────────────────────────
+
+    @GetMapping("/chat/{pedidoId}")
+    public String chatPedido(@PathVariable String pedidoId, Model model, HttpSession session) {
+        if (!estaAutenticado(session)) return "redirect:/web/login";
+        String usuarioWebId = (String) session.getAttribute("usuarioWebId");
+        String usuarioWeb = (String) session.getAttribute("usuarioWeb");
+        String rolWeb = (String) session.getAttribute("usuarioWebRol");
+        model.addAttribute("usuarioWeb", usuarioWeb);
+        model.addAttribute("rolWeb", rolWeb);
+        model.addAttribute("usuarioWebId", usuarioWebId);
+        model.addAttribute("pedidoId", pedidoId);
+        try {
+            model.addAttribute("mensajes", chatService.obtenerMensajes(pedidoId));
+        } catch (Exception e) {
+            model.addAttribute("mensajes", List.of());
+        }
+        return "web/cliente/chat";
     }
 
     // ── Carrito y checkout web ─────────────────────────────────────────

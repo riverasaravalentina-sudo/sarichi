@@ -81,6 +81,7 @@
               <th>Total</th>
               <th>Items</th>
               <th>Estado</th>
+              <th>Chat</th>
             </tr>
           </thead>
           <tbody>
@@ -108,6 +109,11 @@
                 <span class="badge-entregado"  th:if="${p.estado == 'ENTREGADO'}"><i class="bi bi-check-all me-1"></i>Entregado</span>
                 <span class="badge-cancelado"  th:if="${p.estado == 'CANCELADO'}"><i class="bi bi-x me-1"></i>Cancelado</span>
                 <span class="text-muted" th:if="${p.estado == null}">—</span>
+              </td>
+              <td>
+                <a th:href="@{/web/chat/{id}(id=${p.id})}" class="btn btn-sm btn-outline-info" title="Chat del pedido">
+                  <i class="bi bi-chat-dots"></i>
+                </a>
               </td>
             </tr>
           </tbody>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - Pedido <span th:text="${pedidoId}">0</span></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --sarichi-pink: #E8527A; --sarichi-teal: #2DB5C8; --sarichi-cream: #FDFAF6; --sarichi-dark: #2C2C2C; }
+    body { background: var(--sarichi-cream); font-family: 'Inter', sans-serif; }
+    .chat-container { max-width: 800px; margin: 0 auto; height: calc(100vh - 80px); display: flex; flex-direction: column; }
+    .chat-header { background: #fff; border-bottom: 2px solid var(--sarichi-pink); padding: 16px 24px; border-radius: 16px 16px 0 0; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px 24px; background: #fff; display: flex; flex-direction: column; gap: 8px; }
+    .message { max-width: 75%; padding: 10px 16px; border-radius: 18px; word-wrap: break-word; }
+    .message-cliente { background: var(--sarichi-pink); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .message-artesana { background: #e9ecef; color: var(--sarichi-dark); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .message-admin { background: #fff3cd; color: #856404; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .message-time { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; display: block; }
+    .chat-input { background: #fff; border-top: 1px solid #e9ecef; padding: 16px 24px; border-radius: 0 0 16px 16px; }
+    .no-messages { color: #999; text-align: center; padding: 40px; }
+    .badge-rol { font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; }
+    .typing-indicator { font-size: 0.8rem; color: #999; padding: 4px 24px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header d-flex justify-content-between align-items-center">
+      <div>
+        <a href="/web/dashboard" class="text-decoration-none text-dark me-2">&larr;</a>
+        <strong>🧵 Chat del pedido</strong>
+        <span class="badge bg-secondary ms-2" th:text="${pedidoId}">ID</span>
+      </div>
+      <span class="text-muted small" th:text="${usuarioWeb}">Usuario</span>
+    </div>
+
+    <input type="hidden" id="pedidoId" th:value="${pedidoId}">
+    <input type="hidden" id="usuarioId" th:value="${usuarioWebId}">
+    <input type="hidden" id="usuarioNombre" th:value="${usuarioWeb}">
+    <input type="hidden" id="usuarioRol" th:value="${rolWeb}">
+
+    <div id="typingIndicator" class="typing-indicator">
+      <span class="text-muted">La artesana está escribiendo...</span>
+    </div>
+
+    <div id="chatMessages" class="chat-messages">
+      <div th:if="${mensajes.empty}" class="no-messages">
+        <div style="font-size: 3rem;">🐱</div>
+        <p>No hay mensajes aún. ¡Escribe algo para empezar!</p>
+      </div>
+      <div th:each="m : ${mensajes}" th:classappend="'message ' + |message-${#strings.toLowerCase(m.remitenteRol)}|">
+        <div class="d-flex justify-content-between align-items-start">
+          <small class="fw-bold" th:text="${m.remitenteNombre}">Nombre</small>
+          <span class="badge-rol badge bg-light text-dark ms-2" th:text="${m.remitenteRol}">ROL</span>
+        </div>
+        <div th:text="${m.contenido}" class="mt-1">Mensaje</div>
+        <small class="message-time" th:text="${m.timestamp}">fecha</small>
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <form id="chatForm" onsubmit="return enviarMensaje(event)">
+        <div class="input-group">
+          <input type="text" id="mensajeInput" class="form-control" placeholder="Escribe tu mensaje..." required autocomplete="off">
+          <button type="submit" class="btn" style="background: var(--sarichi-pink); color: #fff;">
+            <i class="bi bi-send"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script>
+    var pedidoId = document.getElementById('pedidoId').value;
+    var usuarioId = document.getElementById('usuarioId').value;
+    var usuarioNombre = document.getElementById('usuarioNombre').value;
+    var usuarioRol = document.getElementById('usuarioRol').value;
+
+    var stompClient = null;
+    var chatMessages = document.getElementById('chatMessages');
+
+    function conectarWebSocket() {
+      var socket = new SockJS('/api/ws-chat');
+      stompClient = Stomp.over(socket);
+      stompClient.connect({}, function(frame) {
+        stompClient.subscribe('/topic/chat/' + pedidoId, function(mensaje) {
+          var data = JSON.parse(mensaje.body);
+          agregarMensaje(data);
+        });
+        stompClient.subscribe('/topic/chat/' + pedidoId + '/typing', function(msg) {
+          var data = JSON.parse(msg.body);
+          var indicator = document.getElementById('typingIndicator');
+          if (data.usuarioId !== usuarioId) {
+            indicator.style.display = 'block';
+            clearTimeout(indicator._timeout);
+            indicator._timeout = setTimeout(function() {
+              indicator.style.display = 'none';
+            }, 2000);
+          }
+        });
+      });
+    }
+
+    function enviarMensaje(event) {
+      event.preventDefault();
+      var input = document.getElementById('mensajeInput');
+      var contenido = input.value.trim();
+      if (!contenido || !stompClient) return;
+
+      var mensaje = {
+        pedidoId: pedidoId,
+        remitenteId: usuarioId,
+        remitenteNombre: usuarioNombre,
+        remitenteRol: usuarioRol,
+        contenido: contenido
+      };
+
+      stompClient.send('/app/chat/' + pedidoId, {}, JSON.stringify(mensaje));
+      input.value = '';
+    }
+
+    var typingTimeout = null;
+    function onTyping() {
+      if (!stompClient) return;
+      stompClient.send('/app/chat/' + pedidoId + '/typing', {}, JSON.stringify({
+        usuarioId: usuarioId,
+        usuarioNombre: usuarioNombre,
+        usuarioRol: usuarioRol
+      }));
+    }
+
+    document.getElementById('mensajeInput').addEventListener('input', function() {
+      clearTimeout(typingTimeout);
+      onTyping();
+      typingTimeout = setTimeout(function() {}, 2000);
+    });
+
+    function agregarMensaje(data) {
+      var div = document.createElement('div');
+      var rolClass = 'message-' + data.remitenteRol.toLowerCase();
+      div.className = 'message ' + rolClass;
+
+      var header = document.createElement('div');
+      header.className = 'd-flex justify-content-between align-items-start';
+
+      var name = document.createElement('small');
+      name.className = 'fw-bold';
+      name.textContent = data.remitenteNombre;
+
+      var badge = document.createElement('span');
+      badge.className = 'badge-rol badge bg-light text-dark ms-2';
+      badge.textContent = data.remitenteRol;
+
+      var content = document.createElement('div');
+      content.className = 'mt-1';
+      content.textContent = data.contenido;
+
+      var time = document.createElement('small');
+      time.className = 'message-time';
+      time.textContent = data.timestamp || new Date().toLocaleString();
+
+      header.appendChild(name);
+      header.appendChild(badge);
+      div.appendChild(header);
+      div.appendChild(content);
+      div.appendChild(time);
+
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      var noMessages = chatMessages.querySelector('.no-messages');
+      if (noMessages) noMessages.remove();
+    }
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    conectarWebSocket();
+  </script>
+</body>
+</html>

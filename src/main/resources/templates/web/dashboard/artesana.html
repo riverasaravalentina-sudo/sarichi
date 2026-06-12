@@ -36,7 +36,10 @@
                 <td th:text="${p.id}">id</td>
                 <td th:text="${p.usuarioNombre}">Cliente</td>
                 <td><span class="badge" th:classappend="${p.estado == 'EN_PRODUCCION' ? 'bg-info' : p.estado == 'LISTO' ? 'bg-success' : 'bg-warning'}" th:text="${p.estado}">estado</span></td>
-                <td><button class="btn btn-sm btn-outline-primary">Ver detalles</button></td>
+                <td>
+                  <a th:href="@{/web/chat/{id}(id=${p.id})}" class="btn btn-sm btn-outline-info"><i class="bi bi-chat-dots"></i> Chat</a>
+                  <button class="btn btn-sm btn-outline-primary">Ver detalles</button>
+                </td>
               </tr>
             </tbody>
           </table>

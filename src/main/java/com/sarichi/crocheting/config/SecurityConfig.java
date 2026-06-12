@@ -93,6 +93,13 @@ public class SecurityConfig {
                 // ── Health / Actuator ──────────────────────────────────────────────
                 .requestMatchers("/health/**", "/actuator/**").permitAll()
 
+                // ── WebSocket endpoint ─────────────────────────────────────────────
+                .requestMatchers("/ws-chat/**").permitAll()
+
+                // ── API mensajes (chat history) ────────────────────────────────────
+                .requestMatchers("GET", "/mensajes/pedido/**").permitAll()
+                .requestMatchers("POST", "/mensajes/pedido/**").permitAll()
+
                 // ── Webhooks externos ──────────────────────────────────────────────
                 .requestMatchers("POST", "/pagos/webhook").permitAll()
 
