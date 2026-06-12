@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Editor de Blog — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+  <style>
+    /* ── Editor enriquecido ── */
+    .editor-toolbar {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      padding: 8px; background: var(--crema-d);
+      border: 1.5px solid #e5e7eb; border-bottom: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .toolbar-btn {
+      padding: 6px 10px; border: 1px solid #ddd;
+      background: var(--blanco); border-radius: 5px;
+      cursor: pointer; font-size: .85rem; font-family: Arial, sans-serif;
+      transition: .15s;
+    }
+    .toolbar-btn:hover { background: var(--rosa); color: #fff; border-color: var(--rosa); }
+    .toolbar-sep { width: 1px; background: #ddd; margin: 0 4px; }
+    #editor-contenido {
+      min-height: 320px; padding: 16px;
+      border: 1.5px solid #e5e7eb; border-radius: 0 0 8px 8px;
+      outline: none; font-family: 'Inter', sans-serif;
+      font-size: .95rem; line-height: 1.7; background: var(--blanco);
+    }
+    #editor-contenido:focus { border-color: var(--rosa); }
+    #editor-contenido h2 { color: var(--rosa); margin: 16px 0 8px; }
+    #editor-contenido h3 { color: var(--celeste); margin: 12px 0 6px; }
+    #editor-contenido blockquote {
+      border-left: 4px solid var(--rosa); margin: 12px 0;
+      padding: 8px 16px; background: var(--crema-d); border-radius: 0 8px 8px 0;
+    }
+    .char-count { font-size: .78rem; color: var(--gris); text-align: right; margin-top: 4px; }
+    /* ── Tags/categorías ── */
+    .tags-container {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      padding: 8px; border: 1.5px solid #e5e7eb; border-radius: 8px;
+      min-height: 44px; background: var(--crema); cursor: text;
+    }
+    .tags-container:focus-within { border-color: var(--rosa); background: var(--blanco); }
+    .tag {
+      background: var(--rosa); color: #fff; padding: 3px 10px;
+      border-radius: 20px; font-size: .8rem; display: flex; align-items: center; gap: 5px;
+    }
+    .tag-remove { cursor: pointer; font-size: .9rem; font-weight: bold; }
+    .tag-remove:hover { opacity: .7; }
+    .tag-input {
+      border: none; outline: none; background: transparent;
+      font-family: 'Inter', sans-serif; font-size: .9rem; min-width: 120px;
+    }
+    /* ── Lista artículos ── */
+    .articulo-item {
+      padding: 14px 16px; border-bottom: 1px solid #f0e8e8;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    }
+    .articulo-item:hover { background: var(--crema-d); }
+    .estado-badge {
+      padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 600;
+      white-space: nowrap;
+    }
+    .estado-BORRADOR   { background: #fef3c7; color: #92400e; }
+    .estado-PUBLICADO  { background: #d1fae5; color: #065f46; }
+    .estado-ARCHIVADO  { background: #f3f4f6; color: #6b7280; }
+    /* ── Preview SEO ── */
+    .seo-preview {
+      background: var(--crema-d); border-radius: 8px; padding: 14px;
+      border: 1px solid #e5e7eb; margin-top: 8px;
+    }
+    .seo-url   { color: #1a73e8; font-size: .85rem; }
+    .seo-title { color: #1a0dab; font-size: 1rem; font-weight: 600; margin: 2px 0; }
+    .seo-desc  { color: #545454; font-size: .83rem; }
+  </style>
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <a href="dashboard.html"     class="sidebar-item">📊 Dashboard</a>
+      <a href="blog-admin.html"    class="sidebar-item active">✍️ Editor Blog</a>
+      <a href="blog.html"          class="sidebar-item">📖 Ver Blog</a>
+      <a href="galeria-admin.html" class="sidebar-item">🖼️ Galería</a>
+      <a href="retos-admin.html"   class="sidebar-item">🏆 Retos</a>
+      <a href="analiticas-mercadeo.html" class="sidebar-item">📈 Analíticas</a>
+      <a href="reportes.html"      class="sidebar-item">📊 Reportes</a>
+    </aside>
+
+    <main class="main-content">
+      <h2 class="section-title">✍️ Editor de Blog</h2>
+
+      <div class="dash-grid">
+
+        <!-- ── FORMULARIO CREAR/EDITAR ── -->
+        <div class="card" style="grid-column:1/-1">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 class="section-title" id="form-titulo" style="margin-bottom:0">
+              ➕ Nuevo Artículo
+            </h3>
+            <div style="display:flex;gap:8px">
+              <button onclick="guardarBorrador()"
+                      class="btn btn-outline btn-sm" id="btnBorrador">
+                💾 Guardar borrador
+              </button>
+              <button onclick="publicarArticulo()"
+                      class="btn btn-secondary btn-sm" id="btnPublicar">
+                🚀 Publicar
+              </button>
+              <button onclick="limpiarFormulario()"
+                      class="btn btn-sm"
+                      style="background:var(--gris-l);border:none">
+                ✕ Limpiar
+              </button>
+            </div>
+          </div>
+
+          <div id="form-error"   class="alert alert-error"   style="display:none"></div>
+          <div id="form-success" class="alert alert-success" style="display:none"></div>
+
+          <input type="hidden" id="art-id">
+
+          <!-- Título -->
+          <div class="form-group">
+            <label>Título del artículo *</label>
+            <input type="text" id="art-titulo"
+                   placeholder="Ej: Cómo hacer un amigurumi paso a paso"
+                   oninput="actualizarSlug(); actualizarSEOPreview()" required>
+          </div>
+
+          <!-- Slug (auto) -->
+          <div class="form-group">
+            <label>Slug (URL amigable) — se genera automáticamente</label>
+            <input type="text" id="art-slug" placeholder="como-hacer-amigurumi-paso-a-paso"
+                   style="color:var(--celeste);background:var(--crema-d)"
+                   oninput="actualizarSEOPreview()">
+          </div>
+
+          <!-- Resumen -->
+          <div class="form-group">
+            <label>Resumen / Descripción corta *</label>
+            <textarea id="art-resumen" rows="2"
+                      placeholder="Describe brevemente de qué trata el artículo (máx. 200 caracteres)"
+                      maxlength="200" style="resize:vertical"
+                      oninput="this.nextElementSibling.textContent=this.value.length+'/200'; actualizarSEOPreview()"></textarea>
+            <div class="char-count">0/200</div>
+          </div>
+
+          <!-- Editor enriquecido -->
+          <div class="form-group">
+            <label>Contenido del artículo *</label>
+            <div class="editor-toolbar" id="toolbar">
+              <button class="toolbar-btn" onclick="cmd('bold')"           title="Negrita"><b>B</b></button>
+              <button class="toolbar-btn" onclick="cmd('italic')"         title="Cursiva"><i>I</i></button>
+              <button class="toolbar-btn" onclick="cmd('underline')"      title="Subrayado"><u>U</u></button>
+              <div class="toolbar-sep"></div>
+              <button class="toolbar-btn" onclick="cmd('formatBlock','h2')"  title="Título 2">H2</button>
+              <button class="toolbar-btn" onclick="cmd('formatBlock','h3')"  title="Título 3">H3</button>
+              <button class="toolbar-btn" onclick="cmd('formatBlock','p')"   title="Párrafo">P</button>
+              <div class="toolbar-sep"></div>
+              <button class="toolbar-btn" onclick="cmd('insertUnorderedList')" title="Lista">• Lista</button>
+              <button class="toolbar-btn" onclick="cmd('insertOrderedList')"   title="Numerada">1. Num</button>
+              <button class="toolbar-btn" onclick="cmd('formatBlock','blockquote')" title="Cita">❝ Cita</button>
+              <div class="toolbar-sep"></div>
+              <button class="toolbar-btn" onclick="insertarEnlace()"        title="Enlace">🔗</button>
+              <button class="toolbar-btn" onclick="insertarImagen()"        title="Imagen">🖼️</button>
+              <div class="toolbar-sep"></div>
+              <button class="toolbar-btn" onclick="cmd('removeFormat')"     title="Quitar formato">✕ Fmt</button>
+            </div>
+            <div id="editor-contenido" contenteditable="true"
+                 oninput="contarPalabras()"
+                 placeholder="Escribe el contenido del artículo aquí...">
+            </div>
+            <div class="char-count" id="palabras-count">0 palabras · ~0 min de lectura</div>
+          </div>
+
+          <!-- Categorías (tags) -->
+          <div class="form-group">
+            <label>Categorías</label>
+            <div class="tags-container" id="categorias-container"
+                 onclick="document.getElementById('cat-input').focus()">
+              <input class="tag-input" id="cat-input"
+                     placeholder="Escribe y presiona Enter..."
+                     onkeydown="agregarTag(event,'cat-input','categorias-container','categorias-data')">
+            </div>
+            <input type="hidden" id="categorias-data" value="[]">
+          </div>
+
+          <!-- Etiquetas (tags) -->
+          <div class="form-group">
+            <label>Etiquetas / Tags</label>
+            <div class="tags-container" id="etiquetas-container"
+                 onclick="document.getElementById('eta-input').focus()">
+              <input class="tag-input" id="eta-input"
+                     placeholder="Ej: amigurumi, tutorial, principiantes..."
+                     onkeydown="agregarTag(event,'eta-input','etiquetas-container','etiquetas-data')">
+            </div>
+            <input type="hidden" id="etiquetas-data" value="[]">
+          </div>
+
+          <!-- Imagen principal -->
+          <div class="form-group">
+            <label>URL Imagen principal</label>
+            <input type="url" id="art-imagen"
+                   placeholder="https://..." oninput="actualizarSEOPreview()">
+          </div>
+
+          <!-- Tiempo de lectura -->
+          <div class="form-group">
+            <label>Tiempo de lectura (minutos)</label>
+            <input type="number" id="art-tiempo" min="1" max="60" value="3">
+          </div>
+
+          <!-- SEO -->
+          <div style="background:var(--crema-d);border-radius:8px;padding:16px;margin-bottom:16px">
+            <h4 style="color:var(--celeste);margin-bottom:12px">🔍 SEO — Meta etiquetas</h4>
+            <div class="form-group">
+              <label>Meta título SEO (máx. 60 caracteres)</label>
+              <input type="text" id="art-meta-titulo" maxlength="60"
+                     placeholder="Título para Google..." oninput="actualizarSEOPreview()">
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label>Meta descripción SEO (máx. 160 caracteres)</label>
+              <textarea id="art-meta-desc" rows="2" maxlength="160"
+                        placeholder="Descripción para Google..." style="resize:none"
+                        oninput="actualizarSEOPreview()"></textarea>
+            </div>
+            <!-- Preview SEO -->
+            <label style="font-size:.82rem;color:var(--gris)">
+              Preview en Google:
+            </label>
+            <div class="seo-preview">
+              <div class="seo-url" id="seo-url">
+                localhost:8080/api/blog/<span id="seo-slug">slug-del-articulo</span>
+              </div>
+              <div class="seo-title" id="seo-title">Título del artículo</div>
+              <div class="seo-desc"  id="seo-desc">Descripción del artículo para Google...</div>
+            </div>
+          </div>
+
+        </div><!-- fin form -->
+
+        <!-- ── LISTA DE ARTÍCULOS ── -->
+        <div class="card full">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 class="section-title" style="margin-bottom:0">📋 Artículos</h3>
+            <div style="display:flex;gap:8px">
+              <button onclick="cargarArticulos('PUBLICADO')"
+                      class="btn btn-sm" id="filtro-pub"
+                      style="background:#d1fae5;color:#065f46;border:none">
+                ✅ Publicados
+              </button>
+              <button onclick="cargarArticulos('BORRADOR')"
+                      class="btn btn-sm" id="filtro-bor"
+                      style="background:#fef3c7;color:#92400e;border:none">
+                💾 Borradores
+              </button>
+              <button onclick="cargarArticulos()"
+                      class="btn btn-outline btn-sm">
+                Todos
+              </button>
+            </div>
+          </div>
+          <div id="lista-articulos">
+            <div style="text-align:center;padding:24px">
+              <span class="spinner"></span> Cargando...
+            </div>
+          </div>
+        </div>
+
+      </div><!-- fin dash-grid -->
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="sarichi.js"></script>
+<script>
+  requireAuth();
+  const rolActual = Auth.getRol();
+  if (!['ADMIN','MERCADEO'].includes(rolActual)) Auth.redirectByRol(rolActual);
+  renderNav(rolActual);
+  registrarVisita('/blog-admin.html');
+
+  // ── Editor ────────────────────────────────────────────────────────────
+  function cmd(comando, valor = null) {
+    document.getElementById('editor-contenido').focus();
+    document.execCommand(comando, false, valor);
+  }
+
+  function contarPalabras() {
+    const texto = document.getElementById('editor-contenido').innerText || '';
+    const palabras = texto.trim().split(/\s+/).filter(Boolean).length;
+    const minutos  = Math.max(1, Math.ceil(palabras / 200));
+    document.getElementById('palabras-count').textContent =
+      `${palabras} palabras · ~${minutos} min de lectura`;
+    document.getElementById('art-tiempo').value = minutos;
+  }
+
+  function insertarEnlace() {
+    const url = prompt('URL del enlace:');
+    if (url) cmd('createLink', url);
+  }
+
+  function insertarImagen() {
+    const url = prompt('URL de la imagen:');
+    if (url) cmd('insertImage', url);
+  }
+
+  // ── Tags ──────────────────────────────────────────────────────────────
+  function agregarTag(event, inputId, containerId, dataId) {
+    if (event.key !== 'Enter' && event.key !== ',') return;
+    event.preventDefault();
+    const input  = document.getElementById(inputId);
+    const valor  = input.value.trim().replace(/,$/, '');
+    if (!valor) return;
+
+    const data = JSON.parse(document.getElementById(dataId).value || '[]');
+    if (data.includes(valor)) { input.value = ''; return; }
+    data.push(valor);
+    document.getElementById(dataId).value = JSON.stringify(data);
+
+    const container = document.getElementById(containerId);
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.innerHTML = `${valor} <span class="tag-remove"
+      onclick="eliminarTag(this,'${dataId}','${containerId}')">×</span>`;
+    container.insertBefore(tag, input);
+    input.value = '';
+  }
+
+  function eliminarTag(btn, dataId, containerId) {
+    const texto = btn.previousSibling?.textContent?.trim() ||
+                  btn.parentElement.textContent.replace('×','').trim();
+    const tagEl = btn.parentElement;
+    let data = JSON.parse(document.getElementById(dataId).value || '[]');
+    data = data.filter(t => t !== texto);
+    document.getElementById(dataId).value = JSON.stringify(data);
+    tagEl.remove();
+  }
+
+  // ── Slug automático ───────────────────────────────────────────────────
+  function actualizarSlug() {
+    const titulo = document.getElementById('art-titulo').value;
+    const slug = titulo.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim().replace(/\s+/g, '-');
+    document.getElementById('art-slug').value = slug;
+  }
+
+  // ── Preview SEO ───────────────────────────────────────────────────────
+  function actualizarSEOPreview() {
+    const titulo = document.getElementById('art-meta-titulo').value
+                || document.getElementById('art-titulo').value;
+    const desc   = document.getElementById('art-meta-desc').value
+                || document.getElementById('art-resumen').value;
+    const slug   = document.getElementById('art-slug').value || 'slug-del-articulo';
+    document.getElementById('seo-title').textContent = titulo || 'Título del artículo';
+    document.getElementById('seo-desc').textContent  = desc   || 'Descripción del artículo...';
+    document.getElementById('seo-slug').textContent  = slug;
+  }
+
+  // ── Guardar borrador ──────────────────────────────────────────────────
+  async function guardarBorrador() {
+    await enviarFormulario('BORRADOR');
+  }
+
+  // ── Publicar ──────────────────────────────────────────────────────────
+  async function publicarArticulo() {
+    const idActual = document.getElementById('art-id').value;
+    if (idActual) {
+      // Artículo existente: llamar endpoint publicar
+      try {
+        await apiFetch(`/blog/${idActual}/publicar`, 'PUT');
+        showToast('¡Artículo publicado exitosamente!', 'success');
+        cargarArticulos();
+        limpiarFormulario();
+      } catch(e) {
+        showToast(e.message, 'error');
+      }
+    } else {
+      // Artículo nuevo: crear y publicar
+      await enviarFormulario('PUBLICADO');
+    }
+  }
+
+  async function enviarFormulario(estadoFinal) {
+    const err = document.getElementById('form-error');
+    const ok  = document.getElementById('form-success');
+    err.style.display = 'none'; ok.style.display = 'none';
+
+    const titulo    = document.getElementById('art-titulo').value.trim();
+    const contenido = document.getElementById('editor-contenido').innerHTML;
+    const resumen   = document.getElementById('art-resumen').value.trim();
+
+    if (!titulo)    { err.textContent='El título es obligatorio'; err.style.display='block'; return; }
+    if (!resumen)   { err.textContent='El resumen es obligatorio'; err.style.display='block'; return; }
+    if (!contenido || contenido === '<br>') {
+      err.textContent='El contenido no puede estar vacío'; err.style.display='block'; return;
+    }
+
+    const dto = {
+      titulo, contenidoHtml: contenido, resumen,
+      categorias:    JSON.parse(document.getElementById('categorias-data').value || '[]'),
+      etiquetas:     JSON.parse(document.getElementById('etiquetas-data').value  || '[]'),
+      imagenPrincipalUrl: document.getElementById('art-imagen').value || null,
+      metaTituloSeo:      document.getElementById('art-meta-titulo').value || null,
+      metaDescripcionSeo: document.getElementById('art-meta-desc').value   || null,
+      tiempoLecturaMinutos: Number(document.getElementById('art-tiempo').value) || 3,
+    };
+
+    const idActual = document.getElementById('art-id').value;
+
+    try {
+      let resultado;
+      if (idActual) {
+        resultado = await apiFetch(`/blog/${idActual}`, 'PUT', dto);
+        ok.textContent = '✅ Artículo actualizado';
+      } else {
+        resultado = await apiFetch('/blog', 'POST', dto);
+        document.getElementById('art-id').value = resultado.id;
+        ok.textContent = '✅ Artículo creado como borrador';
+      }
+      ok.style.display = 'block';
+
+      if (estadoFinal === 'PUBLICADO' && resultado.id) {
+        await apiFetch(`/blog/${resultado.id}/publicar`, 'PUT');
+        ok.textContent = '🚀 ¡Artículo publicado exitosamente!';
+      }
+
+      showToast(ok.textContent, 'success');
+      cargarArticulos();
+    } catch(e) {
+      err.textContent = e.message;
+      err.style.display = 'block';
+    }
+  }
+
+  // ── Cargar artículos ──────────────────────────────────────────────────
+  async function cargarArticulos(estadoFiltro = null) {
+    const lista = document.getElementById('lista-articulos');
+    lista.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span></div>';
+    try {
+      let url = '/blog/todos';
+      if (estadoFiltro) url += '?estado=' + estadoFiltro;
+      const arts = await apiGet(url);
+
+      if (!arts || arts.length === 0) {
+        lista.innerHTML = `<div class="empty-state" style="padding:30px">
+          <div class="cat">🐱</div>
+          <h3>Sin artículos aún</h3>
+          <p>Crea el primer artículo del blog de Sarichi ✍️</p>
+        </div>`;
+        return;
+      }
+
+      lista.innerHTML = arts.map(a => `
+        <div class="articulo-item">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <strong style="font-size:.95rem">${a.titulo}</strong>
+              <span class="estado-badge estado-${a.estado}">${a.estado}</span>
+            </div>
+            <div style="font-size:.8rem;color:var(--gris)">
+              /${a.slug} &nbsp;·&nbsp;
+              👁️ ${a.visitas || 0} visitas &nbsp;·&nbsp;
+              📅 ${formatearFecha(a.fechaPublicacion || a.fechaCreacion)}
+            </div>
+            <div style="font-size:.82rem;color:var(--gris);margin-top:2px">
+              ${truncar(a.resumen, 100)}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            ${a.estado !== 'PUBLICADO' ? `
+            <button onclick="publicarDesdelista('${a.id}')"
+                    class="btn btn-sm"
+                    style="background:#d1fae5;color:#065f46;border:none;font-size:.8rem">
+              🚀 Publicar
+            </button>` : ''}
+            <button onclick="editarArticulo('${a.id}')"
+                    class="btn btn-outline btn-sm">✏️</button>
+            <button onclick="archivarArticulo('${a.id}','${a.titulo}')"
+                    class="btn btn-sm"
+                    style="background:#fee2e2;color:#991b1b;border:none">
+              🗑️
+            </button>
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      lista.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    }
+  }
+
+  async function publicarDesdelista(id) {
+    try {
+      await apiFetch(`/blog/${id}/publicar`, 'PUT');
+      showToast('¡Artículo publicado!', 'success');
+      cargarArticulos();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function editarArticulo(id) {
+    try {
+      const a = await apiGet(`/blog/id/${id}`);
+      document.getElementById('art-id').value       = a.id;
+      document.getElementById('art-titulo').value   = a.titulo;
+      document.getElementById('art-slug').value     = a.slug;
+      document.getElementById('art-resumen').value  = a.resumen || '';
+      document.getElementById('art-imagen').value   = a.imagenPrincipalUrl || '';
+      document.getElementById('art-tiempo').value   = a.tiempoLecturaMinutos || 3;
+      document.getElementById('art-meta-titulo').value = a.metaTituloSeo || '';
+      document.getElementById('art-meta-desc').value   = a.metaDescripcionSeo || '';
+      document.getElementById('editor-contenido').innerHTML = a.contenidoHtml || '';
+
+      // Cargar categorías
+      cargarTagsExistentes(a.categorias || [], 'cat-input', 'categorias-container', 'categorias-data');
+      cargarTagsExistentes(a.etiquetas  || [], 'eta-input', 'etiquetas-container',  'etiquetas-data');
+
+      document.getElementById('form-titulo').textContent = '✏️ Editando: ' + a.titulo;
+      actualizarSEOPreview();
+      contarPalabras();
+      window.scrollTo(0, 0);
+      showToast('Artículo cargado para edición', 'info');
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  function cargarTagsExistentes(arr, inputId, containerId, dataId) {
+    const container = document.getElementById(containerId);
+    // Limpiar tags anteriores
+    container.querySelectorAll('.tag').forEach(t => t.remove());
+    document.getElementById(dataId).value = JSON.stringify(arr);
+    const input = document.getElementById(inputId);
+    arr.forEach(valor => {
+      const tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.innerHTML = `${valor} <span class="tag-remove"
+        onclick="eliminarTag(this,'${dataId}','${containerId}')">×</span>`;
+      container.insertBefore(tag, input);
+    });
+  }
+
+  async function archivarArticulo(id, titulo) {
+    if (!confirm(`¿Archivar "${titulo}"? Dejará de aparecer en el blog público.`)) return;
+    try {
+      await apiFetch(`/blog/${id}`, 'DELETE');
+      showToast('Artículo archivado', 'success');
+      cargarArticulos();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  function limpiarFormulario() {
+    document.getElementById('art-id').value       = '';
+    document.getElementById('art-titulo').value   = '';
+    document.getElementById('art-slug').value     = '';
+    document.getElementById('art-resumen').value  = '';
+    document.getElementById('art-imagen').value   = '';
+    document.getElementById('art-tiempo').value   = '3';
+    document.getElementById('art-meta-titulo').value = '';
+    document.getElementById('art-meta-desc').value   = '';
+    document.getElementById('editor-contenido').innerHTML = '';
+    ['categorias','etiquetas'].forEach(tipo => {
+      document.getElementById(tipo+'-container')
+        .querySelectorAll('.tag').forEach(t => t.remove());
+      document.getElementById(tipo+'-data').value = '[]';
+    });
+    document.getElementById('form-titulo').textContent = '➕ Nuevo Artículo';
+    document.getElementById('form-error').style.display   = 'none';
+    document.getElementById('form-success').style.display = 'none';
+    actualizarSEOPreview();
+  }
+
+  // Cargar al iniciar
+  cargarArticulos();
+</script>
+</body>
+</html>

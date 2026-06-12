@@ -1,6 +1,5 @@
 package com.sarichi.crocheting.config;
 
-import com.sarichi.crocheting.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +17,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.sarichi.crocheting.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -55,59 +56,26 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
-
-            // ✅ IF_REQUIRED: permite HttpSession para /web/** (Thymeleaf)
-            // Las rutas /api/** siguen siendo efectivamente stateless porque
-            // el JwtAuthenticationFilter ignora /web/** por shouldNotFilter().
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-
-                // ── Capa web Thymeleaf — SIEMPRE pública ──────────────────────────
-                .requestMatchers("/web/**").permitAll()
-
-                // ── Recursos estáticos y HTML públicos ────────────────────────────
                 .requestMatchers(
-                    "/", "/*.html", "/*.css", "/*.js",
-                    "/sarichi.css", "/sarichi.js", "/sarichi-ext.js",
-                    "/css/**", "/js/**", "/images/**", "/fonts/**",
-                    "/favicon.ico"
+                    "/", "/*.html", "/*.css", "/*.js"
                 ).permitAll()
-
-                // ── API Auth pública ───────────────────────────────────────────────
                 .requestMatchers("/auth/**").permitAll()
-
-                // ── API catálogo público ───────────────────────────────────────────
+                .requestMatchers("/web/**").permitAll()
+                .requestMatchers("/health/**").permitAll() 
                 .requestMatchers("GET", "/productos").permitAll()
                 .requestMatchers("GET", "/productos/**").permitAll()
                 .requestMatchers("GET", "/colores-hilo").permitAll()
                 .requestMatchers("GET", "/colores-hilo/**").permitAll()
                 .requestMatchers("GET", "/resenas/**").permitAll()
-                .requestMatchers("GET", "/blog").permitAll()
-                .requestMatchers("GET", "/blog/**").permitAll()
-                .requestMatchers("GET", "/galeria").permitAll()
-                .requestMatchers("GET", "/galeria/**").permitAll()
                 .requestMatchers("GET", "/despachos/seguimiento/**").permitAll()
-
-                // ── Health / Actuator ──────────────────────────────────────────────
-                .requestMatchers("/health/**", "/actuator/**").permitAll()
-
-                // ── Webhooks externos ──────────────────────────────────────────────
-                .requestMatchers("POST", "/pagos/webhook").permitAll()
-
-                // ── Swagger / OpenAPI ──────────────────────────────────────────────
                 .requestMatchers(
-                    "/v3/api-docs/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/swagger-resources/**",
-                    "/webjars/**"
+                    "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
                 ).permitAll()
-
-                // ── Todo lo demás requiere JWT ─────────────────────────────────────
-                .anyRequest().authenticated()
-            )
+                .requestMatchers("/actuator/**").permitAll()
+                .anyRequest().authenticated())
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter(),
                     UsernamePasswordAuthenticationFilter.class);
@@ -115,8 +83,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Evitar que Spring Boot registre el filtro JWT como filtro de servlet global,
-    // ya que solo debe actuar cuando Spring Security lo invoca explícitamente.
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
             JwtAuthenticationFilter filter) {

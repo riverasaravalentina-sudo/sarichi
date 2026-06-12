@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>🐱 Blog Crocheting Sarichi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --rosa: #E8527A; --celeste: #2DB5C8; --crema: #FDFAF6; --oscuro: #3a2a2a; }
+        body { background: var(--crema); font-family: 'Inter', sans-serif; color: var(--oscuro); }
+        .navbar-sarichi { background: #fff; border-bottom: 2px solid #f0d0da; padding: 12px 0; }
+        .navbar-brand-sarichi { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--rosa) !important; text-decoration: none; }
+        .nav-link { font-weight: 600; color: var(--oscuro) !important; }
+        .nav-link:hover { color: var(--rosa) !important; }
+        .page-header { background: linear-gradient(135deg, #fff0f4 0%, #e8f9fb 100%); border-bottom: 2px solid #f0d0da; padding: 40px 0; margin-bottom: 40px; }
+        .page-header h1 { font-family: 'Playfair Display', serif; color: var(--rosa); font-size: 2.5rem; }
+        .article-card { background: #fff; border-radius: 12px; border: 1.5px solid #f0d0da; overflow: hidden; transition: all 0.3s; }
+        .article-card:hover { transform: translateY(-8px); box-shadow: 0 12px 30px rgba(232, 82, 122, 0.18); }
+        .article-thumb { background: linear-gradient(135deg, #fff0f4 0%, #e8f9fb 100%); height: 180px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+        .article-body { padding: 20px; }
+        .article-title { font-family: 'Playfair Display', serif; color: var(--rosa); font-size: 1.3rem; margin-bottom: 10px; }
+        .article-meta { font-size: 0.85rem; color: #888; margin-bottom: 10px; }
+        .article-excerpt { color: #666; line-height: 1.6; margin-bottom: 15px; }
+        .article-link { color: var(--celeste); font-weight: 600; text-decoration: none; }
+        .article-link:hover { text-decoration: underline; }
+        footer { background: #fff; border-top: 1.5px solid #f0d0da; padding: 24px 0; margin-top: 60px; text-align: center; color: #aaa; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-sarichi sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand-sarichi" href="/api/web/">🐱 Sarichi</a>
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link" href="/api/web/">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/api/web/tienda">Tienda</a></li>
+                <li class="nav-item"><a class="nav-link" href="/api/web/blog">Blog</a></li>
+                <li class="nav-item"><a class="nav-link" href="/api/web/galeria">Galería</a></li>
+                <li class="nav-item ms-3">
+                    <th:block th:if="${usuarioWeb}">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person"></i> <span th:text="${usuarioWeb}"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/api/web/dashboard">Mi Dashboard</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/api/web/logout">Cerrar Sesión</a></li>
+                            </ul>
+                        </div>
+                    </th:block>
+                    <th:block th:unless="${usuarioWeb}">
+                        <a href="/api/web/login" class="btn btn-sm btn-primary"><i class="bi bi-box-arrow-in-right"></i> Ingresar</a>
+                    </th:block>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="bi bi-journal-text"></i> Blog</h1>
+            <p class="text-muted">Tips, tutoriales y historias de nuestros amigurumis 📝🧵</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row g-4 mb-5">
+            <!-- Artículo Destacado (Placeholder) -->
+            <div class="col-md-12">
+                <div class="article-card" style="border-color: var(--rosa); border-width: 2px;">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <div class="article-thumb" style="height: 250px;">📌</div>
+                        </div>
+                        <div class="col-md-8 d-flex flex-column justify-content-center">
+                            <div class="article-body">
+                                <span class="badge bg-danger mb-2">Destacado</span>
+                                <h3 class="article-title">Guía: Cómo Hacer tu Primer Amigurumi</h3>
+                                <div class="article-meta"><i class="bi bi-calendar"></i> Publicado hace 2 semanas</div>
+                                <p class="article-excerpt">Aprende paso a paso cómo crear tu primer amigurumi. Incluye materials, técnicas básicas y errores comunes...</p>
+                                <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Otros Artículos -->
+            <div class="col-md-6">
+                <div class="article-card">
+                    <div class="article-thumb">🎨</div>
+                    <div class="article-body">
+                        <h5 class="article-title">Combinaciones de Colores Perfectas</h5>
+                        <div class="article-meta"><i class="bi bi-calendar"></i> Hace 1 semana</div>
+                        <p class="article-excerpt">Descubre cómo combinar colores de hilo para crear amigurumis visualmente atractivos...</p>
+                        <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="article-card">
+                    <div class="article-thumb">✨</div>
+                    <div class="article-body">
+                        <h5 class="article-title">Personalizaciones Especiales</h5>
+                        <div class="article-meta"><i class="bi bi-calendar"></i> Hace 3 días</div>
+                        <p class="article-excerpt">Explora diferentes formas de personalizar tus amigurumis con bordar y detalles únicos...</p>
+                        <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="article-card">
+                    <div class="article-thumb">🧵</div>
+                    <div class="article-body">
+                        <h5 class="article-title">Cuidado de Amigurumis: Limpieza y Conservación</h5>
+                        <div class="article-meta"><i class="bi bi-calendar"></i> Hace 5 días</div>
+                        <p class="article-excerpt">Tips para mantener tus amigurumis en perfectas condiciones durante años...</p>
+                        <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="article-card">
+                    <div class="article-thumb">🎁</div>
+                    <div class="article-body">
+                        <h5 class="article-title">Amigurumis como Regalos Personalizados</h5>
+                        <div class="article-meta"><i class="bi bi-calendar"></i> Hace 1 mes</div>
+                        <p class="article-excerpt">Por qué los amigurumis son el regalo perfecto y cómo personalizarlos para tus seres queridos...</p>
+                        <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Paginación" class="mb-5">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#"><i class="bi bi-chevron-left"></i> Anterior</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Siguiente <i class="bi bi-chevron-right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>🐱 Crocheting Sarichi · Tejidos artesanales con amor 🧵🩷</p>
+            <small>&copy; 2026 Todos los derechos reservados</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐱 Crocheting Sarichi — Amigurumis & Tejidos Artesanales</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sarichi-pink:  #E8527A;
+      --sarichi-teal:  #2DB5C8;
+      --sarichi-cream: #FDFAF6;
+      --sarichi-dark:  #2C2C2C;
+    }
+    body { background: var(--sarichi-cream); font-family: 'Inter', system-ui, Arial; color: var(--sarichi-dark); }
+    h1, h2, h3, h4, .display-title { font-family: 'Playfair Display', serif; }
+    .navbar { background: #fff; border-bottom: 2px solid #f3e8ed; }
+    .navbar-brand { color: var(--sarichi-pink) !important; font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+    .btn-sarichi  { background: var(--sarichi-pink);  color: #fff; border: none; }
+    .btn-sarichi:hover  { background: #d43f68; color: #fff; }
+    .btn-outline-sarichi { border: 2px solid var(--sarichi-pink); color: var(--sarichi-pink); }
+    .btn-outline-sarichi:hover { background: var(--sarichi-pink); color: #fff; }
+    .btn-teal  { background: var(--sarichi-teal);  color: #fff; border: none; }
+    .btn-teal:hover  { background: #259dad; color: #fff; }
+    .hero { background: linear-gradient(135deg, #fce4ed 0%, #e3f6f8 100%); padding: 80px 0 60px; }
+    .hero h1 { color: var(--sarichi-pink); font-size: 3rem; }
+    .badge-cat { background: var(--sarichi-teal); color: #fff; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; }
+    .card-producto { border: none; border-radius: 16px; transition: transform .2s, box-shadow .2s; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+    .card-producto:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(232,82,122,.15); }
+    .precio { color: var(--sarichi-pink); font-weight: 700; font-size: 1.1rem; }
+    .section-title { color: var(--sarichi-pink); font-family: 'Playfair Display', serif; }
+    .feature-icon { font-size: 2.5rem; }
+    footer { background: var(--sarichi-dark); color: #ccc; padding: 40px 0 20px; }
+    footer a { color: var(--sarichi-teal); text-decoration: none; }
+    .nav-link { color: var(--sarichi-dark) !important; font-weight: 500; }
+    .nav-link:hover { color: var(--sarichi-pink) !important; }
+    .user-badge { background: var(--sarichi-pink); color: #fff; border-radius: 20px; padding: 4px 14px; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ─────────────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand" href="/web/">🐱 Crocheting Sarichi</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="/web/tienda"><i class="bi bi-shop"></i> Tienda</a></li>
+        <li class="nav-item"><a class="nav-link" href="/web/blog"><i class="bi bi-journal-richtext"></i> Blog</a></li>
+        <li class="nav-item"><a class="nav-link" href="/web/galeria"><i class="bi bi-images"></i> Galería</a></li>
+      </ul>
+      <div class="d-flex gap-2 align-items-center">
+        <!-- Si hay sesión activa -->
+        <th:block th:if="${usuarioWeb != null}">
+          <span class="user-badge">👋 <span th:text="${usuarioWeb}">Usuario</span></span>
+          <a th:href="@{/web/dashboard}" class="btn btn-sarichi btn-sm">Mi Panel</a>
+          <a href="/web/logout" class="btn btn-outline-secondary btn-sm">Salir</a>
+        </th:block>
+        <!-- Si no hay sesión -->
+        <th:block th:if="${usuarioWeb == null}">
+          <a href="/web/login"    class="btn btn-outline-sarichi btn-sm">Iniciar sesión</a>
+          <a href="/web/registro" class="btn btn-sarichi btn-sm">Registrarse</a>
+        </th:block>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────────────── -->
+<section class="hero text-center">
+  <div class="container">
+    <div class="mb-3" style="font-size:4rem;">🧵</div>
+    <h1 class="display-title fw-bold mb-3">Crocheting Sarichi</h1>
+    <p class="lead text-muted mb-1">Amigurumis · Accesorios · Detalles Personalizados</p>
+    <p class="text-muted mb-4" style="font-size:.95rem;">🩷 Creaciones tejidas a mano con mucho amor 🎀</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="/web/tienda" class="btn btn-sarichi btn-lg px-4">
+        <i class="bi bi-shop me-2"></i>Ver Catálogo
+      </a>
+      <a href="/web/tienda?categoria=Amigurumis" class="btn btn-teal btn-lg px-4">
+        <i class="bi bi-stars me-2"></i>Ver Amigurumis 🧸
+      </a>
+      <th:block th:if="${usuarioWeb == null}">
+        <a href="/web/registro" class="btn btn-outline-sarichi btn-lg px-4">
+          <i class="bi bi-person-plus me-2"></i>Únete
+        </a>
+      </th:block>
+    </div>
+  </div>
+</section>
+
+<!-- ── CARACTERÍSTICAS ────────────────────────────────────────────── -->
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <div class="feature-icon mb-2">🐱</div>
+        <h5 class="fw-bold">Hecho a mano</h5>
+        <p class="text-muted small">Cada pieza es única, tejida con amor y dedicación.</p>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-icon mb-2">🎀</div>
+        <h5 class="fw-bold">100% Personalizable</h5>
+        <p class="text-muted small">Elige colores, tamaño y añade tu mensaje especial.</p>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-icon mb-2">🚚</div>
+        <h5 class="fw-bold">Envío a todo Colombia</h5>
+        <p class="text-muted small">Coordinadora e Interrapidísimo para que llegue seguro.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRODUCTOS DESTACADOS ───────────────────────────────────────── -->
+<section class="py-5" style="background: #f9f0f3;">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="section-title mb-0">✨ Productos Destacados</h2>
+      <a href="/web/tienda" class="btn btn-outline-sarichi btn-sm">Ver todo <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <!-- Si hay productos -->
+    <div class="row g-3" th:if="${productosDestacados != null and !productosDestacados.empty}">
+      <div class="col-md-4 col-sm-6" th:each="p : ${productosDestacados}">
+        <div class="card card-producto h-100 p-3">
+          <div class="text-center mb-3" style="font-size:3rem;">🧸</div>
+          <div class="card-body p-0">
+            <span class="badge-cat" th:text="${p.categoria}">Categoría</span>
+            <h6 class="mt-2 fw-bold" th:text="${p.nombre}">Nombre del producto</h6>
+            <p class="text-muted small" th:text="${p.descripcion}">Descripción breve...</p>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="precio">$<span th:text="${p.precioBase}">0</span></span>
+              <span class="text-muted small">Stock: <span th:text="${p.stock}">0</span></span>
+            </div>
+          </div>
+          <div class="card-footer p-0 pt-3 border-0 bg-transparent">
+            <a href="/web/tienda" class="btn btn-sarichi btn-sm w-100">Ver en tienda</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Si no hay productos -->
+    <div class="text-center py-5" th:if="${productosDestacados == null or productosDestacados.empty}">
+      <div style="font-size:4rem;">🐱</div>
+      <p class="text-muted">Próximamente nuevos productos disponibles</p>
+      <a href="/web/tienda" class="btn btn-sarichi">Explorar catálogo</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── CATEGORÍAS ─────────────────────────────────────────────────── -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-4">Explora por categoría</h2>
+    <div class="row g-3 text-center">
+      <div class="col-6 col-md-3">
+        <a href="/web/tienda?categoria=Amigurumis" class="text-decoration-none">
+          <div class="card border-0 shadow-sm p-4 h-100" style="border-radius:16px; transition:.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:2.5rem;">🧸</div>
+            <h6 class="mt-2 fw-bold" style="color:var(--sarichi-pink)">Amigurumis</h6>
+            <p class="text-muted small mb-0">Muñecos y figuras únicas</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="/web/tienda?categoria=Accesorios" class="text-decoration-none">
+          <div class="card border-0 shadow-sm p-4 h-100" style="border-radius:16px; transition:.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:2.5rem;">👜</div>
+            <h6 class="mt-2 fw-bold" style="color:var(--sarichi-teal)">Accesorios</h6>
+            <p class="text-muted small mb-0">Bolsos, monederos y más</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="/web/tienda?categoria=Ropa" class="text-decoration-none">
+          <div class="card border-0 shadow-sm p-4 h-100" style="border-radius:16px; transition:.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:2.5rem;">🧣</div>
+            <h6 class="mt-2 fw-bold" style="color:var(--sarichi-pink)">Ropa</h6>
+            <p class="text-muted small mb-0">Tops, gorros y bufandas</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="/web/tienda?categoria=Hogar" class="text-decoration-none">
+          <div class="card border-0 shadow-sm p-4 h-100" style="border-radius:16px; transition:.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:2.5rem;">🏠</div>
+            <h6 class="mt-2 fw-bold" style="color:var(--sarichi-teal)">Hogar</h6>
+            <p class="text-muted small mb-0">Tapetes, cojines y cestas</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA REGISTRO ───────────────────────────────────────────────── -->
+<section class="py-5 text-center" style="background: linear-gradient(135deg, #E8527A 0%, #2DB5C8 100%);" th:if="${usuarioWeb == null}">
+  <div class="container">
+    <h2 class="text-white fw-bold mb-2" style="font-family:'Playfair Display',serif;">¿Quieres un amigurumi personalizado? 🐱</h2>
+    <p class="text-white opacity-75 mb-4">Regístrate gratis y chatea directamente con la artesana para crear tu pieza única.</p>
+    <a href="/web/registro" class="btn btn-light btn-lg px-5 fw-bold" style="color:var(--sarichi-pink)">
+      <i class="bi bi-person-heart me-2"></i>Crear cuenta gratis
+    </a>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <h5 style="color:#fff; font-family:'Playfair Display',serif;">🐱 Crocheting Sarichi</h5>
+        <p class="small">Amigurumis · Accesorios · Detalles Personalizados<br>🧵 Bucaramanga, Colombia</p>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h6 style="color:#fff;">Explora</h6>
+        <ul class="list-unstyled small">
+          <li><a href="/web/tienda">Tienda</a></li>
+          <li><a href="/web/blog">Blog</a></li>
+          <li><a href="/web/galeria">Galería</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h6 style="color:#fff;">Mi cuenta</h6>
+        <ul class="list-unstyled small">
+          <li><a href="/web/login">Iniciar sesión</a></li>
+          <li><a href="/web/registro">Registrarse</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr style="border-color:#444;">
+    <p class="text-center small mb-0">© 2026 Crocheting Sarichi · UTS Desarrollo de Aplicaciones Empresariales 🩷</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

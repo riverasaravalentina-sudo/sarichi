@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión — Crocheting Sarichi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --sarichi-pink: #E8527A; --sarichi-teal: #2DB5C8; --sarichi-cream: #FDFAF6; }
+    body { background: linear-gradient(135deg, #fce4ed 0%, #e3f6f8 100%); min-height: 100vh; font-family: 'Inter', system-ui, Arial; }
+    .card-login { border: none; border-radius: 20px; box-shadow: 0 8px 32px rgba(232,82,122,.15); }
+    .btn-sarichi { background: var(--sarichi-pink); color: #fff; border: none; }
+    .btn-sarichi:hover { background: #d43f68; color: #fff; }
+    .brand-title { color: var(--sarichi-pink); font-family: 'Playfair Display', serif; }
+    .form-control:focus { border-color: var(--sarichi-pink); box-shadow: 0 0 0 .25rem rgba(232,82,122,.18); }
+    a { color: var(--sarichi-pink); }
+    .divider { color: #aaa; font-size: .85rem; }
+  </style>
+</head>
+<body>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height:100vh; padding: 2rem 1rem;">
+  <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+
+    <!-- Logo / Brand -->
+    <div class="text-center mb-4">
+      <div style="font-size:3rem;">🐱</div>
+      <h2 class="brand-title fw-bold">Crocheting Sarichi</h2>
+      <p class="text-muted small">🧵 Amigurumis · Accesorios · Detalles Personalizados</p>
+    </div>
+
+    <div class="card card-login p-4">
+      <h5 class="text-center mb-4 fw-semibold">Iniciar Sesión</h5>
+
+      <!-- ✅ Alerta de error desde el controlador (Thymeleaf) -->
+      <div th:if="${error}" class="alert alert-danger py-2 small" role="alert">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        <span th:text="${error}">Error</span>
+      </div>
+
+      <!-- ✅ Formulario NATIVO Thymeleaf — POST directo al WebController -->
+      <!-- method="post" action="/web/login" — Spring recibe @RequestParam -->
+      <form th:action="@{/web/login}" method="post">
+
+        <div class="mb-3">
+          <label for="correo" class="form-label fw-medium">Correo electrónico</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email"
+                   class="form-control"
+                   id="correo"
+                   name="correo"
+                   placeholder="tu@correo.com"
+                   required
+                   autocomplete="email">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="contrasena" class="form-label fw-medium">Contraseña</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password"
+                   class="form-control"
+                   id="contrasena"
+                   name="contrasena"
+                   placeholder="••••••••"
+                   required
+                   autocomplete="current-password">
+            <button class="btn btn-outline-secondary" type="button" id="togglePass"
+                    onclick="togglePassword()">
+              <i class="bi bi-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="d-grid mb-3">
+          <button type="submit" class="btn btn-sarichi btn-lg fw-semibold">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+          </button>
+        </div>
+
+      </form>
+
+      <div class="text-center small text-muted divider mb-3">— o —</div>
+
+      <div class="text-center small">
+        <a href="/recuperar.html">¿Olvidaste tu contraseña?</a>
+        &nbsp;·&nbsp;
+        <a href="/web/registro">Crear cuenta</a>
+      </div>
+
+      <hr class="my-3">
+
+      <div class="text-center">
+        <a href="/web/" class="text-muted small text-decoration-none">
+          <i class="bi bi-arrow-left me-1"></i>Volver al inicio
+        </a>
+      </div>
+    </div>
+
+    <p class="text-center text-muted small mt-3">
+      © 2026 Crocheting Sarichi 🩷 · UTS
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function togglePassword() {
+    const input   = document.getElementById('contrasena');
+    const icon    = document.getElementById('eyeIcon');
+    const visible = input.type === 'text';
+    input.type    = visible ? 'password' : 'text';
+    icon.className = visible ? 'bi bi-eye' : 'bi bi-eye-slash';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventario de Hilos — Crocheting Sarichi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --rosa:#E8527A; --celeste:#2DB5C8; --crema:#FDFAF6; }
+    body { background:var(--crema); font-family:'Inter',sans-serif; }
+    .navbar { background:#fff; border-bottom:2px solid #f0d0da; padding:10px 0; }
+    .navbar-brand { font-family:'Playfair Display',serif; color:var(--rosa)!important; font-size:1.3rem; }
+    .nav-link { color:#666; font-weight:500; padding:6px 14px; border-radius:8px; transition:.2s; }
+    .nav-link:hover { background:#fff0f4; color:var(--rosa); }
+
+    .page-title { font-family:'Playfair Display',serif; color:var(--rosa); }
+    .btn-nueva  { background:var(--celeste);color:#fff;border:none;border-radius:20px;padding:8px 22px;font-weight:600;transition:.2s;text-decoration:none; }
+    .btn-nueva:hover { background:#1fa0b2;color:#fff; }
+
+    .table-card { background:#fff;border-radius:16px;border:1.5px solid #b0e8f0;overflow:hidden; }
+    .table thead th { background:#e8f9fb;color:var(--celeste);font-weight:700;font-size:.85rem;border:none;padding:12px 16px; }
+    .table tbody td { padding:12px 16px;vertical-align:middle;font-size:.9rem;border-color:#e0f5f8; }
+
+    .color-swatch { width:28px;height:28px;border-radius:8px;border:2px solid rgba(0,0,0,.1);display:inline-block;vertical-align:middle; }
+    .badge-ok  { background:#d1e7dd;color:#0f5132;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+    .badge-low { background:#fff3cd;color:#856404;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+    .badge-crit{ background:#f8d7da;color:#842029;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+
+    .btn-edit { background:#e8f9fb;color:var(--celeste);border:1.5px solid #b0e8f0;border-radius:8px;padding:5px 12px;font-size:.82rem;font-weight:600;text-decoration:none;transition:.2s; }
+    .btn-edit:hover { background:var(--celeste);color:#fff; }
+    .btn-del  { background:#fde8e8;color:#dc3545;border:1.5px solid #f5a0a8;border-radius:8px;padding:5px 12px;font-size:.82rem;font-weight:600;text-decoration:none;transition:.2s; }
+    .btn-del:hover { background:#dc3545;color:#fff; }
+
+    .empty-state { text-align:center;padding:60px 20px;color:#ccc; }
+
+    /* Fila crítica highlight */
+    .fila-critica { background:#fff8f8!important; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/web/}">🐱 Crocheting Sarichi</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto ms-3 gap-1">
+        <li><a class="nav-link" th:href="@{/web/dashboard}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+        <li><a class="nav-link" th:href="@{/web/productos}"><i class="bi bi-grid-3x3-gap me-1"></i>Productos</a></li>
+        <li><a class="nav-link" th:href="@{/web/colores}" style="background:#e8f9fb;color:var(--celeste)"><i class="bi bi-palette me-1"></i>Inventario</a></li>
+        <li><a class="nav-link" th:href="@{/web/pedidos}"><i class="bi bi-bag-check me-1"></i>Pedidos</a></li>
+        <li><a class="nav-link" th:href="@{/web/despachos}"><i class="bi bi-truck me-1"></i>Despachos</a></li>
+      </ul>
+      <a th:href="@{/web/logout}" class="btn btn-sm" style="background:#fff0f4;color:var(--rosa);border:1.5px solid #f0d0da;border-radius:8px;font-weight:600">
+        <i class="bi bi-box-arrow-right me-1"></i>Salir
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="page-title mb-0">🎨 Inventario de Hilos</h2>
+      <p class="text-muted mb-0" style="font-size:.85rem">
+        <span th:text="${colores != null ? colores.size() : 0}">0</span> color(es) registrado(s)
+      </p>
+    </div>
+    <a th:href="@{/web/colores/nuevo}" class="btn-nueva">
+      <i class="bi bi-plus-lg me-1"></i>Nuevo Color
+    </a>
+  </div>
+
+  <!-- Alertas -->
+  <div class="alert alert-success alert-dismissible fade show" th:if="${success}">
+    <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div class="alert alert-danger alert-dismissible fade show" th:if="${error}">
+    <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Alerta stock crítico -->
+  <div class="alert" style="background:#fff3cd;border:1.5px solid #ffe69c;border-radius:12px;color:#856404"
+       th:if="${colores != null and #lists.size(colores.?[stockMetros <= stockMinimo]) > 0}">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <strong>Stock crítico:</strong>
+    <span th:text="${#lists.size(colores.?[stockMetros <= stockMinimo])}">0</span>
+    color(es) por debajo del mínimo. Las filas marcadas en rojo requieren atención.
+  </div>
+
+  <div class="table-card">
+    <div th:if="${colores != null and !colores.isEmpty()}">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Color</th>
+            <th>Código Hex</th>
+            <th>Stock (metros)</th>
+            <th>Stock Mínimo</th>
+            <th>Proveedor</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="c : ${colores}"
+              th:classappend="${c.stockMetros <= c.stockMinimo} ? 'fila-critica' : ''">
+            <td>
+              <span class="color-swatch" th:style="'background-color:' + ${c.codigoHex}"></span>
+              <strong class="ms-2" th:text="${c.nombre}">Nombre</strong>
+            </td>
+            <td>
+              <code style="background:#f5f5f5;padding:2px 8px;border-radius:6px;font-size:.85rem"
+                    th:text="${c.codigoHex}">#000000</code>
+            </td>
+            <td>
+              <span th:text="${c.stockMetros != null ? c.stockMetros + ' m' : '0 m'}">0 m</span>
+            </td>
+            <td>
+              <span th:text="${c.stockMinimo != null ? c.stockMinimo + ' m' : '5 m'}">5 m</span>
+            </td>
+            <td>
+              <span th:text="${c.proveedor} ?: '—'" class="text-muted">—</span>
+            </td>
+            <td>
+              <span class="badge-ok"   th:if="${c.stockMetros > c.stockMinimo}">OK</span>
+              <span class="badge-low"  th:if="${c.stockMetros <= c.stockMinimo and c.stockMetros > 0}">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>Bajo
+              </span>
+              <span class="badge-crit" th:if="${c.stockMetros == 0}">
+                <i class="bi bi-x-circle-fill me-1"></i>Agotado
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="d-flex gap-1 justify-content-center">
+                <a th:href="@{/web/colores/editar/{id}(id=${c.id})}" class="btn-edit">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <a th:href="@{/web/colores/eliminar/{id}(id=${c.id})}" class="btn-del"
+                   onclick="return confirm('¿Eliminar este color?')">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" th:if="${colores == null or colores.isEmpty()}">
+      <div style="font-size:3.5rem;margin-bottom:12px">🎨</div>
+      <p style="font-weight:600;color:#999">No hay colores de hilo registrados aún</p>
+      <a th:href="@{/web/colores/nuevo}" class="btn-nueva">
+        <i class="bi bi-plus-lg me-1"></i>Agregar primer color
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

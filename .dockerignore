@@ -1,0 +1,13 @@
+.git
+.github
+.mvn/wrapper/maven-wrapper.jar
+target
+*.log
+.settings
+.classpath
+.project
+.factorypath
+.env
+.env.*
+!.env.example
+node_modules

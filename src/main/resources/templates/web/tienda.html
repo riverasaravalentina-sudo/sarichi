@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>🐱 Tienda Crocheting Sarichi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rosa: #E8527A;
+            --celeste: #2DB5C8;
+            --crema: #FDFAF6;
+            --oscuro: #3a2a2a;
+        }
+        
+        body {
+            background: var(--crema);
+            font-family: 'Inter', sans-serif;
+            color: var(--oscuro);
+        }
+        
+        .navbar-sarichi {
+            background: #fff;
+            border-bottom: 2px solid #f0d0da;
+            padding: 12px 0;
+        }
+        
+        .navbar-brand-sarichi {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--rosa) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-link {
+            font-weight: 600;
+            color: var(--oscuro) !important;
+        }
+        
+        .nav-link:hover {
+            color: var(--rosa) !important;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #fff0f4 0%, #e8f9fb 100%);
+            border-bottom: 2px solid #f0d0da;
+            padding: 40px 0;
+            margin-bottom: 40px;
+        }
+        
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--rosa);
+            font-size: 2.5rem;
+        }
+        
+        .product-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1.5px solid #f0d0da;
+            overflow: hidden;
+            transition: all 0.3s;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(232, 82, 122, 0.18);
+            border-color: var(--rosa);
+        }
+        
+        .product-image {
+            background: linear-gradient(135deg, #fff0f4 0%, #e8f9fb 100%);
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        
+        .product-body {
+            padding: 16px;
+        }
+        
+        .product-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--rosa);
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            color: var(--celeste);
+            font-weight: 700;
+            margin: 12px 0;
+        }
+        
+        .product-category {
+            display: inline-block;
+            background: #fff0f4;
+            color: var(--rosa);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .product-stock {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        
+        .btn-sarichi {
+            background: var(--rosa);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-sarichi:hover {
+            background: #d43e68;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 82, 122, 0.4);
+        }
+        
+        .filters {
+            background: #fff;
+            border-radius: 12px;
+            border: 1.5px solid #f0d0da;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        footer {
+            background: #fff;
+            border-top: 1.5px solid #f0d0da;
+            padding: 24px 0;
+            margin-top: 60px;
+            text-align: center;
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-sarichi sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand-sarichi" href="/api/web/">
+                🐱 Sarichi
+            </a>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/api/web/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/api/web/tienda">Tienda</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/api/web/blog">Blog</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/api/web/galeria">Galería</a>
+                </li>
+                <li class="nav-item ms-3">
+                    <th:block th:if="${usuarioWeb}">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person"></i> <span th:text="${usuarioWeb}"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/api/web/dashboard">Mi Dashboard</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/api/web/logout">Cerrar Sesión</a></li>
+                            </ul>
+                        </div>
+                    </th:block>
+                    <th:block th:unless="${usuarioWeb}">
+                        <a href="/api/web/login" class="btn btn-sm btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Ingresar
+                        </a>
+                    </th:block>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="bi bi-shop"></i> Nuestra Tienda</h1>
+            <p class="text-muted">Explora nuestro catálogo de amigurumis, accesorios y detalles personalizados 🧸🎀</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Filtros -->
+        <div class="filters">
+            <h5>Filtros</h5>
+            <form method="get" action="/api/web/tienda" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="buscar" class="form-control" placeholder="Buscar por nombre...">
+                </div>
+                <div class="col-md-4">
+                    <select name="categoria" class="form-select">
+                        <option value="">Todas las categorías</option>
+                        <option value="amigurumis">Amigurumis</option>
+                        <option value="accesorios">Accesorios</option>
+                        <option value="ropa">Ropa</option>
+                        <option value="decoracion">Decoración</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Productos Grid -->
+        <div th:if="${!productos.isEmpty()}">
+            <p class="mb-4 text-muted"><span th:text="${productos.size()}"></span> productos encontrados</p>
+            <div class="row g-4 mb-5">
+                <div th:each="producto : ${productos}" class="col-lg-4 col-md-6">
+                    <div class="product-card">
+                        <div class="product-image">
+                            🧸
+                        </div>
+                        <div class="product-body">
+                            <span class="product-category" th:text="${producto.categoria}"></span>
+                            <h5 class="product-title" th:text="${producto.nombre}"></h5>
+                            <p class="text-muted" th:text="${#strings.abbreviate(producto.descripcion, 80)}"></p>
+                            <div class="product-price">
+                                <span>$</span><span th:text="${#numbers.formatDecimal(producto.precioBase, 0, 0)}"></span>
+                            </div>
+                            <div class="product-stock">
+                                <i class="bi bi-box-seam"></i>
+                                <span th:if="${producto.stock > 0}">
+                                    <span th:text="${producto.stock}"></span> disponibles
+                                </span>
+                                <span th:unless="${producto.stock > 0}" class="text-danger">
+                                    Agotado
+                                </span>
+                            </div>
+                            <form method="post" th:action="@{/web/carrito/agregar}">
+                                <input type="hidden" name="productoId" th:value="${producto.id}">
+                                <input type="hidden" name="cantidad" value="1">
+                                <button type="submit" class="btn-sarichi w-100 justify-content-center"
+                                        th:disabled="${producto.stock <= 0}">
+                                    <i class="bi bi-cart-plus"></i> Agregar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${productos.isEmpty()}" class="empty-state">
+            <div class="empty-state-icon">🐱</div>
+            <h4>No hay productos disponibles</h4>
+            <p class="text-muted">Por favor, intenta con otros filtros o vuelve más tarde.</p>
+            <a href="/api/web/tienda" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-clockwise"></i> Recargar
+            </a>
+        </div>
+
+        <!-- Error Alert -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> <strong>Error:</strong> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>🐱 Crocheting Sarichi · Tejidos artesanales con amor 🧵🩷</p>
+            <small>&copy; 2026 Todos los derechos reservados</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

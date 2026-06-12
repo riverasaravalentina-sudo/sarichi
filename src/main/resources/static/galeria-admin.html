@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gestión Galería — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+  <style>
+    /* ── Colecciones grid ── */
+    .colecciones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+    .coleccion-card {
+      background: var(--blanco); border-radius: var(--radio);
+      box-shadow: var(--sombra); overflow: hidden; cursor: pointer;
+      border: 2px solid transparent; transition: .2s;
+    }
+    .coleccion-card:hover { border-color: var(--rosa);
+      transform: translateY(-3px); }
+    .coleccion-card.seleccionada { border-color: var(--rosa);
+      box-shadow: 0 0 0 3px rgba(232,82,122,.2); }
+    .coleccion-portada {
+      width: 100%; height: 120px; object-fit: cover;
+      background: var(--crema-d);
+      display: flex; align-items: center;
+      justify-content: center; font-size: 2.5rem;
+    }
+    .coleccion-body { padding: 12px; }
+    .coleccion-nombre { font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
+    .coleccion-desc   { font-size: .78rem; color: var(--gris); }
+
+    /* ── Fotos grid ── */
+    .fotos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 12px;
+    }
+    .foto-card {
+      background: var(--blanco); border-radius: 10px;
+      box-shadow: var(--sombra); overflow: hidden;
+      position: relative; transition: .2s;
+    }
+    .foto-card:hover { transform: translateY(-3px); }
+    .foto-img {
+      width: 100%; height: 130px; object-fit: cover;
+      background: var(--crema-d);
+      display: flex; align-items: center;
+      justify-content: center; font-size: 2rem;
+    }
+    .foto-body { padding: 8px 10px; }
+    .foto-titulo { font-size: .82rem; font-weight: 600;
+                   white-space: nowrap; overflow: hidden;
+                   text-overflow: ellipsis; }
+    .foto-meta   { font-size: .75rem; color: var(--gris); }
+    .foto-acciones {
+      position: absolute; top: 6px; right: 6px;
+      display: flex; gap: 4px; opacity: 0; transition: .15s;
+    }
+    .foto-card:hover .foto-acciones { opacity: 1; }
+    .foto-btn {
+      background: rgba(255,255,255,.92); border: none;
+      border-radius: 6px; padding: 4px 7px;
+      cursor: pointer; font-size: .8rem;
+    }
+    .foto-btn:hover { background: #fff; }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border: 2px dashed var(--rosa); border-radius: 12px;
+      padding: 28px; text-align: center;
+      background: var(--crema-d); cursor: pointer;
+      transition: .2s;
+    }
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      background: rgba(232,82,122,.08);
+      border-color: var(--rosa-d);
+    }
+    .upload-zone .upload-icon { font-size: 2.5rem; margin-bottom: 8px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 1000;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--blanco); border-radius: 16px;
+      padding: 28px; width: 100%; max-width: 480px;
+      max-height: 90vh; overflow-y: auto;
+      border-top: 4px solid var(--rosa);
+    }
+    .modal-titulo {
+      font-family: 'Playfair Display', serif;
+      color: var(--rosa); font-size: 1.2rem;
+      margin-bottom: 16px;
+    }
+
+    /* ── Tab panel ── */
+    .tab-bar {
+      display: flex; gap: 4px; margin-bottom: 20px;
+      border-bottom: 2px solid var(--crema-d);
+    }
+    .tab-btn {
+      padding: 8px 18px; border: none; background: none;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      font-size: .9rem; color: var(--gris);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: .15s;
+    }
+    .tab-btn.activo { color: var(--rosa);
+      border-bottom-color: var(--rosa); font-weight: 600; }
+
+    .tab-panel { display: none; }
+    .tab-panel.activo { display: block; }
+  </style>
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="dashboard.html"     class="sidebar-item">📊 Dashboard</a>
+      <a href="blog-admin.html"    class="sidebar-item">✍️ Blog</a>
+      <a href="galeria.html"       class="sidebar-item">🖼️ Ver Galería</a>
+      <a href="galeria-admin.html" class="sidebar-item active">⚙️ Gestión Galería</a>
+      <a href="retos-admin.html"   class="sidebar-item">🏆 Retos</a>
+      <a href="analiticas-mercadeo.html" class="sidebar-item">📈 Analíticas</a>
+    </aside>
+
+    <main class="main-content">
+      <h2 class="section-title">🖼️ Gestión de Galería</h2>
+
+      <!-- Tabs -->
+      <div class="tab-bar">
+        <button class="tab-btn activo" onclick="cambiarTab('colecciones',this)">
+          📁 Colecciones
+        </button>
+        <button class="tab-btn" onclick="cambiarTab('fotos',this)">
+          🖼️ Fotos
+        </button>
+      </div>
+
+      <!-- ══ TAB: COLECCIONES ══ -->
+      <div class="tab-panel activo" id="tab-colecciones">
+        <div style="display:flex;justify-content:space-between;
+                    align-items:center;margin-bottom:20px">
+          <h3 class="section-title" style="margin-bottom:0">
+            📁 Colecciones
+          </h3>
+          <button onclick="abrirModalColeccion()"
+                  class="btn btn-primary btn-sm">
+            ➕ Nueva colección
+          </button>
+        </div>
+
+        <div class="colecciones-grid" id="colecciones-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:32px">
+            <span class="spinner"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TAB: FOTOS ══ -->
+      <div class="tab-panel" id="tab-fotos">
+
+        <!-- Selector de colección -->
+        <div class="form-group" style="max-width:320px">
+          <label>Colección</label>
+          <select id="sel-coleccion" onchange="cargarFotosDeColeccion()">
+            <option value="">— Selecciona una colección —</option>
+          </select>
+        </div>
+
+        <!-- Upload zone -->
+        <div id="upload-section" style="display:none">
+          <div class="upload-zone" id="upload-zone"
+               onclick="document.getElementById('file-input').click()"
+               ondragover="dragOver(event)" ondragleave="dragLeave(event)"
+               ondrop="dropFotos(event)">
+            <div class="upload-icon">📸</div>
+            <p style="font-weight:600;color:var(--rosa);margin-bottom:4px">
+              Agregar foto a la colección
+            </p>
+            <p style="font-size:.85rem;color:var(--gris)">
+              Ingresa la URL de la foto o arrastra aquí
+            </p>
+          </div>
+          <input type="file" id="file-input" accept="image/*"
+                 style="display:none" onchange="previsualizarFoto(event)">
+
+          <!-- Form agregar foto por URL -->
+          <div class="card" style="margin-top:16px" id="form-foto-card">
+            <h4 style="color:var(--celeste);margin-bottom:14px">
+              ➕ Agregar foto por URL
+            </h4>
+            <div id="foto-form-error" class="alert alert-error"
+                 style="display:none"></div>
+            <div class="form-group">
+              <label>URL de la imagen *</label>
+              <input type="url" id="foto-url"
+                     placeholder="https://...">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="foto-titulo"
+                       placeholder="Ej: Amigurumi Conejo Rosa">
+              </div>
+              <div class="form-group">
+                <label>Horas de elaboración</label>
+                <input type="number" id="foto-horas"
+                       placeholder="8" min="0.5" step="0.5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <input type="text" id="foto-desc"
+                     placeholder="Breve descripción de la foto">
+            </div>
+            <div class="form-group">
+              <label>Historia del proceso</label>
+              <textarea id="foto-historia" rows="3"
+                        placeholder="Cuenta cómo lo hiciste..."
+                        style="resize:vertical"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Producto vinculado (ID)</label>
+              <input type="text" id="foto-producto-id"
+                     placeholder="ID del producto en tienda (opcional)">
+              <small style="color:var(--gris);font-size:.78rem">
+                Al vincular, aparecerá botón "Ver en tienda" en el lightbox
+              </small>
+            </div>
+            <button onclick="agregarFoto()" class="btn btn-primary">
+              💾 Agregar foto
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid de fotos -->
+        <div id="fotos-grid-wrap" style="margin-top:20px;display:none">
+          <div style="display:flex;justify-content:space-between;
+                      align-items:center;margin-bottom:14px">
+            <h4 style="color:var(--negro)" id="fotos-titulo">
+              Fotos de la colección
+            </h4>
+            <span id="fotos-count"
+                  style="font-size:.82rem;color:var(--gris)"></span>
+          </div>
+          <div class="fotos-grid" id="fotos-grid">
+          </div>
+        </div>
+
+        <div id="fotos-vacio" class="empty-state" style="display:none">
+          <div class="cat">🐱</div>
+          <h3>Sin fotos en esta colección</h3>
+          <p>Agrega la primera foto con el formulario de arriba</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── MODAL COLECCIÓN ── -->
+<div class="modal-overlay" id="modal-coleccion">
+  <div class="modal-box">
+    <h3 class="modal-titulo" id="modal-col-titulo">
+      ➕ Nueva Colección
+    </h3>
+    <div id="modal-col-error" class="alert alert-error"
+         style="display:none"></div>
+    <input type="hidden" id="col-id">
+    <div class="form-group">
+      <label>Nombre *</label>
+      <input type="text" id="col-nombre"
+             placeholder="Ej: Amigurumis 2026" required
+             oninput="autoSlugColeccion()">
+    </div>
+    <div class="form-group">
+      <label>Slug (URL)</label>
+      <input type="text" id="col-slug"
+             placeholder="amigurumis-2026"
+             style="color:var(--celeste)">
+    </div>
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea id="col-desc" rows="2"
+                placeholder="Descripción breve..."
+                style="resize:none"></textarea>
+    </div>
+    <div class="form-group">
+      <label>URL Portada</label>
+      <input type="url" id="col-portada"
+             placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label>Orden (número)</label>
+      <input type="number" id="col-orden" value="1" min="1">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button onclick="guardarColeccion()"
+              class="btn btn-primary" id="btn-guardar-col">
+        💾 Guardar
+      </button>
+      <button onclick="cerrarModal('modal-coleccion')"
+              class="btn btn-outline">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL EDITAR FOTO ── -->
+<div class="modal-overlay" id="modal-foto">
+  <div class="modal-box">
+    <h3 class="modal-titulo">✏️ Editar Foto</h3>
+    <div id="modal-foto-error" class="alert alert-error"
+         style="display:none"></div>
+    <input type="hidden" id="edit-foto-id">
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" id="edit-foto-titulo">
+    </div>
+    <div class="form-group">
+      <label>Descripción</label>
+      <input type="text" id="edit-foto-desc">
+    </div>
+    <div class="form-group">
+      <label>Historia</label>
+      <textarea id="edit-foto-historia" rows="3"
+                style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Horas de elaboración</label>
+      <input type="number" id="edit-foto-horas" min="0.5" step="0.5">
+    </div>
+    <div class="form-group">
+      <label>Producto vinculado (ID)</label>
+      <input type="text" id="edit-foto-producto"
+             placeholder="ID del producto (opcional)">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button onclick="guardarEdicionFoto()"
+              class="btn btn-primary">
+        💾 Guardar cambios
+      </button>
+      <button onclick="cerrarModal('modal-foto')"
+              class="btn btn-outline">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  requireAuth();
+  const rolActual = Auth.getRol();
+  if (!['ADMIN','MERCADEO'].includes(rolActual)) Auth.redirectByRol(rolActual);
+  renderNav(rolActual);
+  registrarVisita('/galeria-admin.html');
+
+  // ── Tabs ───────────────────────────────────────────────────────────
+  function cambiarTab(tab, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p =>
+      p.classList.remove('activo'));
+    document.querySelectorAll('.tab-btn').forEach(b =>
+      b.classList.remove('activo'));
+    document.getElementById('tab-' + tab).classList.add('activo');
+    btn.classList.add('activo');
+    if (tab === 'fotos') cargarSelectorColecciones();
+  }
+
+  // ── Modales ────────────────────────────────────────────────────────
+  function cerrarModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  // ── COLECCIONES ────────────────────────────────────────────────────
+  async function cargarColecciones() {
+    const grid = document.getElementById('colecciones-grid');
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;' +
+      'padding:32px"><span class="spinner"></span></div>';
+    try {
+      const cols = await apiGet('/galeria/colecciones');
+      if (!cols.length) {
+        grid.innerHTML = `<div class="empty-state"
+          style="grid-column:1/-1;padding:40px">
+          <div class="cat">🐱</div>
+          <h3>Sin colecciones</h3>
+          <p>Crea la primera colección para organizar las fotos</p>
+        </div>`;
+        return;
+      }
+      grid.innerHTML = cols.map(c => `
+        <div class="coleccion-card" onclick="abrirFotosColeccion('${c.id}','${c.nombre}')">
+          ${c.portadaUrl
+            ? `<img src="${c.portadaUrl}" class="coleccion-portada"
+                    alt="${c.nombre}"
+                    onerror="this.outerHTML='<div class=\\'coleccion-portada\\'>🧸</div>'">`
+            : `<div class="coleccion-portada">🧸</div>`}
+          <div class="coleccion-body">
+            <div class="coleccion-nombre">${c.nombre}</div>
+            <div class="coleccion-desc">${c.descripcion || 'Sin descripción'}</div>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button onclick="event.stopPropagation();
+                               editarColeccion('${c.id}')"
+                      class="btn btn-outline btn-sm">✏️</button>
+              <button onclick="event.stopPropagation();
+                               eliminarColeccion('${c.id}','${c.nombre}')"
+                      class="btn btn-sm"
+                      style="background:#fee2e2;color:#991b1b;border:none">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      grid.innerHTML = `<div class="alert alert-error"
+        style="grid-column:1/-1">${e.message}</div>`;
+    }
+  }
+
+  function abrirFotosColeccion(id, nombre) {
+    // Cambiar a tab fotos con la colección seleccionada
+    document.querySelectorAll('.tab-panel').forEach(p =>
+      p.classList.remove('activo'));
+    document.querySelectorAll('.tab-btn').forEach(b =>
+      b.classList.remove('activo'));
+    document.getElementById('tab-fotos').classList.add('activo');
+    document.querySelectorAll('.tab-btn')[1].classList.add('activo');
+    cargarSelectorColecciones(id);
+  }
+
+  function abrirModalColeccion() {
+    document.getElementById('col-id').value    = '';
+    document.getElementById('col-nombre').value = '';
+    document.getElementById('col-slug').value   = '';
+    document.getElementById('col-desc').value   = '';
+    document.getElementById('col-portada').value = '';
+    document.getElementById('col-orden').value  = '1';
+    document.getElementById('modal-col-titulo').textContent = '➕ Nueva Colección';
+    document.getElementById('modal-col-error').style.display = 'none';
+    document.getElementById('modal-coleccion').classList.add('open');
+  }
+
+  async function editarColeccion(id) {
+    try {
+      const cols = await apiGet('/galeria/colecciones');
+      const c = cols.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('col-id').value     = c.id;
+      document.getElementById('col-nombre').value = c.nombre;
+      document.getElementById('col-slug').value   = c.slug || '';
+      document.getElementById('col-desc').value   = c.descripcion || '';
+      document.getElementById('col-portada').value = c.portadaUrl || '';
+      document.getElementById('col-orden').value  = c.orden || 1;
+      document.getElementById('modal-col-titulo').textContent = '✏️ Editar Colección';
+      document.getElementById('modal-col-error').style.display = 'none';
+      document.getElementById('modal-coleccion').classList.add('open');
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  function autoSlugColeccion() {
+    const nombre = document.getElementById('col-nombre').value;
+    document.getElementById('col-slug').value = nombre.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-');
+  }
+
+  async function guardarColeccion() {
+    const err = document.getElementById('modal-col-error');
+    err.style.display = 'none';
+    const nombre = document.getElementById('col-nombre').value.trim();
+    if (!nombre) {
+      err.textContent = 'El nombre es obligatorio';
+      err.style.display = 'block'; return;
+    }
+    const dto = {
+      nombre, slug: document.getElementById('col-slug').value.trim(),
+      descripcion:  document.getElementById('col-desc').value.trim(),
+      portadaUrl:   document.getElementById('col-portada').value.trim() || null,
+      orden:    Number(document.getElementById('col-orden').value) || 1,
+      estado: 'ACTIVA',
+    };
+    const id = document.getElementById('col-id').value;
+    try {
+      if (id) await apiFetch(`/galeria/colecciones/${id}`, 'PUT', dto);
+      else    await apiFetch('/galeria/colecciones', 'POST', dto);
+      cerrarModal('modal-coleccion');
+      showToast('Colección guardada', 'success');
+      cargarColecciones();
+    } catch(e) {
+      err.textContent = e.message;
+      err.style.display = 'block';
+    }
+  }
+
+  async function eliminarColeccion(id, nombre) {
+    if (!confirm(`¿Eliminar la colección "${nombre}"?`)) return;
+    try {
+      await apiFetch(`/galeria/colecciones/${id}`, 'DELETE');
+      showToast('Colección eliminada', 'success');
+      cargarColecciones();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  // ── FOTOS ──────────────────────────────────────────────────────────
+  async function cargarSelectorColecciones(preseleccion = null) {
+    try {
+      const cols = await apiGet('/galeria/colecciones');
+      const sel  = document.getElementById('sel-coleccion');
+      sel.innerHTML = '<option value="">— Selecciona una colección —</option>';
+      cols.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id; opt.textContent = c.nombre;
+        sel.appendChild(opt);
+      });
+      if (preseleccion) {
+        sel.value = preseleccion;
+        cargarFotosDeColeccion();
+      }
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function cargarFotosDeColeccion() {
+    const colId = document.getElementById('sel-coleccion').value;
+    const uploadSection  = document.getElementById('upload-section');
+    const fotosGridWrap  = document.getElementById('fotos-grid-wrap');
+    const fotosVacio     = document.getElementById('fotos-vacio');
+
+    if (!colId) {
+      uploadSection.style.display  = 'none';
+      fotosGridWrap.style.display  = 'none';
+      fotosVacio.style.display     = 'none';
+      return;
+    }
+
+    uploadSection.style.display = 'block';
+
+    try {
+      const fotos = await apiGet(`/galeria/coleccion-id/${colId}`);
+      const colNombre = document.getElementById('sel-coleccion')
+        .selectedOptions[0]?.textContent || '';
+      document.getElementById('fotos-titulo').textContent =
+        `Fotos de "${colNombre}"`;
+      document.getElementById('fotos-count').textContent =
+        `${fotos.length} foto${fotos.length !== 1 ? 's' : ''}`;
+
+      if (!fotos.length) {
+        fotosGridWrap.style.display = 'none';
+        fotosVacio.style.display    = 'block';
+        return;
+      }
+
+      fotosGridWrap.style.display = 'block';
+      fotosVacio.style.display    = 'none';
+      renderFotosGrid(fotos);
+    } catch(e) {
+      fotosGridWrap.style.display = 'none';
+      fotosVacio.style.display    = 'block';
+    }
+  }
+
+  function renderFotosGrid(fotos) {
+    const grid = document.getElementById('fotos-grid');
+    grid.innerHTML = fotos.map(f => `
+      <div class="foto-card">
+        ${f.urlFoto
+          ? `<img src="${f.urlFoto}" class="foto-img" alt="${f.titulo||''}"
+                  onerror="this.outerHTML='<div class=\\'foto-img\\'>🧸</div>'">`
+          : `<div class="foto-img">🧸</div>`}
+        <div class="foto-body">
+          <div class="foto-titulo">${f.titulo || 'Sin título'}</div>
+          <div class="foto-meta">
+            ${f.tiempoElaboracionHoras ? `⏱️ ${f.tiempoElaboracionHoras}h` : ''}
+            &nbsp;❤️ ${f.likes || 0}
+          </div>
+        </div>
+        <div class="foto-acciones">
+          <button class="foto-btn" title="Editar"
+                  onclick="abrirModalEditarFoto('${f.id}')">✏️</button>
+          <button class="foto-btn" title="Eliminar"
+                  onclick="eliminarFoto('${f.id}')"
+                  style="color:#991b1b">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function agregarFoto() {
+    const err = document.getElementById('foto-form-error');
+    err.style.display = 'none';
+    const colId = document.getElementById('sel-coleccion').value;
+    const url   = document.getElementById('foto-url').value.trim();
+    if (!colId) { err.textContent='Selecciona una colección'; err.style.display='block'; return; }
+    if (!url)   { err.textContent='La URL de la imagen es obligatoria'; err.style.display='block'; return; }
+
+    const dto = {
+      urlFoto:   url,
+      titulo:    document.getElementById('foto-titulo').value.trim() || null,
+      descripcion: document.getElementById('foto-desc').value.trim() || null,
+      historia:  document.getElementById('foto-historia').value.trim() || null,
+      tiempoElaboracionHoras:
+        Number(document.getElementById('foto-horas').value) || null,
+      idProducto: document.getElementById('foto-producto-id').value.trim() || null,
+    };
+    try {
+      await apiFetch(`/galeria/colecciones/${colId}/fotos`, 'POST', dto);
+      showToast('Foto agregada', 'success');
+      // Limpiar form
+      ['foto-url','foto-titulo','foto-desc','foto-historia',
+       'foto-horas','foto-producto-id'].forEach(id =>
+        document.getElementById(id).value = '');
+      cargarFotosDeColeccion();
+    } catch(e) {
+      err.textContent = e.message; err.style.display = 'block';
+    }
+  }
+
+  async function abrirModalEditarFoto(id) {
+    try {
+      // Buscar la foto en el grid actual para obtener sus datos
+      const colId = document.getElementById('sel-coleccion').value;
+      const fotos = await apiGet(`/galeria/coleccion-id/${colId}`);
+      const f = fotos.find(x => x.id === id);
+      if (!f) return;
+      document.getElementById('edit-foto-id').value      = f.id;
+      document.getElementById('edit-foto-titulo').value  = f.titulo || '';
+      document.getElementById('edit-foto-desc').value    = f.descripcion || '';
+      document.getElementById('edit-foto-historia').value= f.historia || '';
+      document.getElementById('edit-foto-horas').value   = f.tiempoElaboracionHoras || '';
+      document.getElementById('edit-foto-producto').value= f.idProducto || '';
+      document.getElementById('modal-foto-error').style.display = 'none';
+      document.getElementById('modal-foto').classList.add('open');
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function guardarEdicionFoto() {
+    const err = document.getElementById('modal-foto-error');
+    err.style.display = 'none';
+    const id  = document.getElementById('edit-foto-id').value;
+    const dto = {
+      titulo:     document.getElementById('edit-foto-titulo').value.trim(),
+      descripcion:document.getElementById('edit-foto-desc').value.trim(),
+      historia:   document.getElementById('edit-foto-historia').value.trim(),
+      tiempoElaboracionHoras:
+        Number(document.getElementById('edit-foto-horas').value) || null,
+      idProducto: document.getElementById('edit-foto-producto').value.trim() || null,
+    };
+    try {
+      await apiFetch(`/galeria/fotos/${id}`, 'PUT', dto);
+      cerrarModal('modal-foto');
+      showToast('Foto actualizada', 'success');
+      cargarFotosDeColeccion();
+    } catch(e) {
+      err.textContent = e.message; err.style.display = 'block';
+    }
+  }
+
+  async function eliminarFoto(id) {
+    if (!confirm('¿Eliminar esta foto de la galería?')) return;
+    try {
+      await apiFetch(`/galeria/fotos/${id}`, 'DELETE');
+      showToast('Foto eliminada', 'success');
+      cargarFotosDeColeccion();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  // ── Drag & Drop (visual, sube por URL) ────────────────────────────
+  function dragOver(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.add('drag-over');
+  }
+  function dragLeave() {
+    document.getElementById('upload-zone').classList.remove('drag-over');
+  }
+  function dropFotos(e) {
+    e.preventDefault();
+    dragLeave();
+    showToast('Para agregar fotos usa el campo URL de imagen', 'info');
+  }
+  function previsualizarFoto() {
+    showToast('Para agregar fotos usa el campo URL de imagen', 'info');
+  }
+
+  // ── Inicializar ───────────────────────────────────────────────────
+  cargarColecciones();
+</script>
+</body>
+</html>

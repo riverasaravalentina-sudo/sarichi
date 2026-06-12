@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pedidos — Crocheting Sarichi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --rosa:#E8527A; --celeste:#2DB5C8; --crema:#FDFAF6; }
+    body { background:var(--crema); font-family:'Inter',sans-serif; }
+    .navbar { background:#fff; border-bottom:2px solid #f0d0da; padding:10px 0; }
+    .navbar-brand { font-family:'Playfair Display',serif; color:var(--rosa)!important; font-size:1.3rem; }
+    .nav-link { color:#666; font-weight:500; padding:6px 14px; border-radius:8px; transition:.2s; }
+    .nav-link:hover { background:#fff0f4; color:var(--rosa); }
+
+    .page-title { font-family:'Playfair Display',serif; color:var(--rosa); }
+    .table-card { background:#fff;border-radius:16px;border:1.5px solid #f0d0da;overflow:hidden; }
+    .table thead th { background:#fff0f4;color:var(--rosa);font-weight:700;font-size:.85rem;border:none;padding:12px 16px; }
+    .table tbody td { padding:12px 16px;vertical-align:middle;font-size:.9rem;border-color:#fde; }
+
+    .badge-pendiente   { background:#fff3cd;color:#856404;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+    .badge-produccion  { background:#cff4fc;color:#0c5460;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+    .badge-listo       { background:#d1e7dd;color:#0f5132;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+    .badge-despachado  { background:#e2e3e5;color:#383d41;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+    .badge-entregado   { background:#d4edda;color:#155724;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+    .badge-cancelado   { background:#f8d7da;color:#842029;padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600; }
+
+    .empty-state { text-align:center;padding:60px 20px;color:#ccc; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/web/}">🐱 Crocheting Sarichi</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto ms-3 gap-1">
+        <li><a class="nav-link" th:href="@{/web/dashboard}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+        <li><a class="nav-link" th:href="@{/web/productos}"><i class="bi bi-grid-3x3-gap me-1"></i>Productos</a></li>
+        <li><a class="nav-link" th:href="@{/web/colores}"><i class="bi bi-palette me-1"></i>Inventario</a></li>
+        <li><a class="nav-link" th:href="@{/web/pedidos}" style="background:#fff0f4;color:var(--rosa)"><i class="bi bi-bag-check me-1"></i>Pedidos</a></li>
+        <li><a class="nav-link" th:href="@{/web/despachos}"><i class="bi bi-truck me-1"></i>Despachos</a></li>
+      </ul>
+      <a th:href="@{/web/logout}" class="btn btn-sm" style="background:#fff0f4;color:var(--rosa);border:1.5px solid #f0d0da;border-radius:8px;font-weight:600">
+        <i class="bi bi-box-arrow-right me-1"></i>Salir
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="page-title mb-0">📦 Pedidos</h2>
+      <p class="text-muted mb-0" style="font-size:.85rem">
+        <span th:text="${pedidos != null ? pedidos.size() : 0}">0</span> pedido(s) en el sistema
+      </p>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="alert alert-danger" th:if="${error}">
+    <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+  </div>
+
+  <div class="table-card">
+    <div th:if="${pedidos != null and !pedidos.isEmpty()}">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ID Pedido</th>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th>Items</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="p, iter : ${pedidos}">
+              <td class="text-muted" th:text="${iter.count}">1</td>
+              <td>
+                <code style="background:#fff0f4;color:var(--rosa);padding:2px 8px;border-radius:6px;font-size:.8rem"
+                      th:text="${#strings.abbreviate(p.id, 12)}">ID</code>
+              </td>
+              <td>
+                <span th:text="${p.fechaPedido != null ? #temporals.format(p.fechaPedido, 'dd/MM/yyyy') : '—'}">Fecha</span>
+              </td>
+              <td>
+                <strong style="color:var(--rosa)"
+                        th:text="${p.total != null} ? '$' + ${#numbers.formatDecimal(p.total, 0, 'COMMA', 0, 'POINT')} : '$0'">$0</strong>
+              </td>
+              <td>
+                <span th:text="${p.items != null ? p.items.size() : 0} + ' ítem(s)'" class="text-muted" style="font-size:.85rem">0</span>
+              </td>
+              <td>
+                <span class="badge-pendiente"  th:if="${p.estado == 'PENDIENTE'}"><i class="bi bi-clock me-1"></i>Pendiente</span>
+                <span class="badge-produccion" th:if="${p.estado == 'EN_PRODUCCION'}"><i class="bi bi-gear me-1"></i>En Producción</span>
+                <span class="badge-listo"      th:if="${p.estado == 'LISTO'}"><i class="bi bi-check me-1"></i>Listo</span>
+                <span class="badge-despachado" th:if="${p.estado == 'DESPACHADO'}"><i class="bi bi-truck me-1"></i>Despachado</span>
+                <span class="badge-entregado"  th:if="${p.estado == 'ENTREGADO'}"><i class="bi bi-check-all me-1"></i>Entregado</span>
+                <span class="badge-cancelado"  th:if="${p.estado == 'CANCELADO'}"><i class="bi bi-x me-1"></i>Cancelado</span>
+                <span class="text-muted" th:if="${p.estado == null}">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="empty-state" th:if="${pedidos == null or pedidos.isEmpty()}">
+      <div style="font-size:3.5rem;margin-bottom:12px">📦</div>
+      <p style="font-weight:600;color:#999">No hay pedidos registrados aún</p>
+      <p style="font-size:.85rem;color:#bbb">Los pedidos se crean desde la tienda web o la API.</p>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

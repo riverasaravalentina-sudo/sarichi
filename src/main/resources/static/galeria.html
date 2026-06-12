@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Galería — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+  <style>
+    /* ── Masonry Grid ── */
+    .masonry-grid {
+      columns: 4; column-gap: 16px;
+    }
+    @media(max-width:1100px){ .masonry-grid { columns: 3; } }
+    @media(max-width:700px) { .masonry-grid { columns: 2; } }
+    @media(max-width:420px) { .masonry-grid { columns: 1; } }
+
+    .masonry-item {
+      break-inside: avoid; margin-bottom: 16px;
+      border-radius: 12px; overflow: hidden;
+      background: var(--blanco); box-shadow: var(--sombra);
+      cursor: pointer; transition: transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .masonry-item:hover { transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(232,82,122,.18); }
+
+    .masonry-img {
+      width: 100%; display: block; object-fit: cover;
+      background: var(--crema-d);
+    }
+    .masonry-info {
+      padding: 12px 14px;
+    }
+    .masonry-titulo {
+      font-size: .9rem; font-weight: 600; color: var(--negro);
+      margin-bottom: 3px;
+    }
+    .masonry-sub {
+      font-size: .78rem; color: var(--gris);
+    }
+    .masonry-overlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(232,82,122,.75); opacity: 0;
+      transition: opacity .2s; display: flex;
+      align-items: center; justify-content: center; gap: 12px;
+      border-radius: 12px;
+    }
+    .masonry-item:hover .masonry-overlay { opacity: 1; }
+    .overlay-btn {
+      background: rgba(255,255,255,.9); border: none;
+      border-radius: 50%; width: 44px; height: 44px;
+      font-size: 1.2rem; cursor: pointer; transition: .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .overlay-btn:hover { background: #fff; transform: scale(1.1); }
+
+    /* ── Placeholder imagen ── */
+    .img-placeholder {
+      width: 100%; background: var(--crema-d);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; min-height: 180px;
+    }
+
+    /* ── Filtros colecciones ── */
+    .colecciones-filtro {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 24px;
+    }
+    .col-btn {
+      padding: 7px 16px; border-radius: 20px; border: 2px solid #e5e7eb;
+      background: var(--blanco); cursor: pointer; font-size: .85rem;
+      font-family: 'Inter', sans-serif; transition: .15s; font-weight: 500;
+    }
+    .col-btn:hover, .col-btn.activo {
+      border-color: var(--rosa); background: var(--rosa); color: #fff;
+    }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.92); z-index: 2000;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-inner {
+      background: var(--blanco); border-radius: 16px;
+      max-width: 900px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      position: relative;
+    }
+    @media(max-width:640px){
+      .lightbox-inner { grid-template-columns: 1fr; }
+    }
+    .lightbox-img {
+      width: 100%; object-fit: cover;
+      border-radius: 16px 0 0 16px; max-height: 520px;
+    }
+    @media(max-width:640px){
+      .lightbox-img { border-radius: 16px 16px 0 0; max-height: 300px; }
+    }
+    .lightbox-info {
+      padding: 28px; display: flex;
+      flex-direction: column; justify-content: space-between;
+    }
+    .lightbox-close {
+      position: absolute; top: 14px; right: 14px;
+      background: var(--rosa); color: #fff;
+      border: none; border-radius: 50%;
+      width: 36px; height: 36px; font-size: 1.1rem;
+      cursor: pointer; font-weight: bold; z-index: 10;
+    }
+    .lightbox-prev, .lightbox-next {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: var(--rosa); color: #fff; border: none;
+      border-radius: 50%; width: 40px; height: 40px;
+      font-size: 1.2rem; cursor: pointer; z-index: 10;
+    }
+    .lightbox-prev { left: -20px; }
+    .lightbox-next { right: -20px; }
+    @media(max-width:640px){
+      .lightbox-prev { left: 10px; top: 250px; }
+      .lightbox-next { right: 10px; top: 250px; }
+    }
+
+    /* ── Likes ── */
+    .like-btn {
+      background: none; border: 2px solid var(--rosa);
+      color: var(--rosa); padding: 6px 14px;
+      border-radius: 20px; cursor: pointer;
+      font-size: .85rem; font-family: 'Inter', sans-serif;
+      transition: .15s; font-weight: 600;
+    }
+    .like-btn.liked, .like-btn:hover {
+      background: var(--rosa); color: #fff;
+    }
+
+    /* ── Hero ── */
+    .galeria-hero {
+      background: linear-gradient(135deg, var(--rosa) 0%, #c93f62 100%);
+      color: #fff; padding: 48px 28px; text-align: center;
+      border-radius: 16px; margin-bottom: 32px;
+    }
+    .galeria-hero h1 {
+      font-size: 2.2rem; margin-bottom: 8px;
+    }
+    .galeria-hero p {
+      opacity: .9; font-size: 1.05rem;
+    }
+
+    /* ── Cargar más ── */
+    #btn-cargar-mas {
+      display: block; margin: 24px auto 0;
+    }
+  </style>
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div style="padding:28px;max-width:1200px;margin:0 auto">
+
+    <!-- Hero -->
+    <div class="galeria-hero">
+      <div style="font-size:3rem;margin-bottom:12px">🧵</div>
+      <h1>Galería Sarichi</h1>
+      <p>Creaciones tejidas a mano con mucho amor 🩷</p>
+    </div>
+
+    <!-- Filtros por colección -->
+    <div class="colecciones-filtro" id="filtros-colecciones">
+      <button class="col-btn activo" onclick="filtrarColeccion(null, this)">
+        🎨 Todas
+      </button>
+    </div>
+
+    <!-- Grid Masonry -->
+    <div class="masonry-grid" id="masonry-grid">
+      <div style="column-span:all;text-align:center;padding:40px">
+        <span class="spinner"></span> Cargando galería...
+      </div>
+    </div>
+
+    <!-- Cargar más -->
+    <button id="btn-cargar-mas" class="btn btn-outline"
+            onclick="cargarMasFotos()" style="display:none">
+      ➕ Cargar más fotos
+    </button>
+
+    <!-- Estado vacío -->
+    <div id="galeria-vacia" class="empty-state" style="display:none">
+      <div class="cat">🐱</div>
+      <h3>Galería en construcción</h3>
+      <p>Pronto habrá fotos del proceso de tejido aquí 🧶</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── LIGHTBOX ── -->
+<div class="lightbox" id="lightbox" onclick="cerrarLightbox(event)">
+  <div class="lightbox-inner" id="lightbox-inner">
+    <button class="lightbox-close" onclick="cerrarLightbox()">✕</button>
+    <button class="lightbox-prev"  onclick="navegarLightbox(-1)">‹</button>
+    <button class="lightbox-next"  onclick="navegarLightbox(1)">›</button>
+
+    <!-- Placeholder imagen -->
+    <div id="lb-img-wrapper">
+      <div class="img-placeholder" id="lb-placeholder">🧸</div>
+      <img id="lb-img" class="lightbox-img" src="" alt=""
+           onerror="this.style.display='none';
+                    document.getElementById('lb-placeholder').style.display='flex'"
+           onload="document.getElementById('lb-placeholder').style.display='none';
+                   this.style.display='block'">
+    </div>
+
+    <div class="lightbox-info">
+      <div>
+        <h2 id="lb-titulo"
+            style="font-family:'Playfair Display',serif;color:var(--rosa);
+                   font-size:1.3rem;margin-bottom:8px"></h2>
+        <p id="lb-descripcion"
+           style="color:var(--gris);font-size:.9rem;margin-bottom:12px"></p>
+        <div id="lb-historia"
+             style="font-size:.88rem;color:var(--negro);line-height:1.6;
+                    margin-bottom:12px"></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+          <span id="lb-tiempo"
+                style="font-size:.82rem;color:var(--celeste);font-weight:600"></span>
+          <span id="lb-coleccion"
+                style="font-size:.82rem;color:var(--gris)"></span>
+        </div>
+        <!-- Producto vinculado -->
+        <div id="lb-producto-wrap" style="display:none;margin-bottom:16px">
+          <a id="lb-producto-link" href="tienda.html"
+             class="btn btn-secondary btn-sm">
+            🛍️ Ver en tienda
+          </a>
+        </div>
+      </div>
+      <div>
+        <!-- Likes -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <button class="like-btn" id="lb-like-btn"
+                  onclick="darLike()">
+            ❤️ <span id="lb-likes">0</span>
+          </button>
+          <span style="font-size:.8rem;color:var(--gris)">Me encanta</span>
+        </div>
+        <!-- Compartir -->
+        <div style="margin-bottom:8px">
+          <p style="font-size:.82rem;font-weight:600;color:var(--gris);
+                    margin-bottom:8px">Compartir:</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button onclick="compartirFotoWA()"
+                    class="btn btn-sm"
+                    style="background:#25D366;color:#fff;border:none">
+              WhatsApp
+            </button>
+            <button onclick="copiarEnlace()"
+                    class="btn btn-sm"
+                    style="background:var(--celeste);color:#fff;border:none">
+              🔗 Copiar enlace
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  // Inicializar nav (funciona para usuarios logueados y anónimos)
+  if (Auth.isLoggedIn()) renderNav(Auth.getRol());
+  else {
+    const nav = document.getElementById('topnav');
+    if (nav) nav.innerHTML = `
+      <div class="nav-brand">🐱 Sarichi Crocheting</div>
+      <div class="nav-right">
+        <a href="tienda.html"  class="btn btn-outline btn-sm">🛍️ Tienda</a>
+        <a href="login.html"   class="btn btn-primary btn-sm">Iniciar Sesión</a>
+      </div>`;
+  }
+  registrarVisita('/galeria.html');
+
+  // ── Estado global ──────────────────────────────────────────────────
+  let todasLasFotos    = [];
+  let fotosFiltradas   = [];
+  let fotoActualIdx    = 0;
+  let coleccionActual  = null;
+  let offsetFotos      = 0;
+  const FOTOS_POR_CARGA = 12;
+
+  // ── Cargar colecciones para filtros ───────────────────────────────
+  async function cargarColecciones() {
+    try {
+      const cols = await apiGet('/galeria/colecciones');
+      const filtros = document.getElementById('filtros-colecciones');
+      cols.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'col-btn';
+        btn.textContent = c.nombre;
+        btn.onclick = () => filtrarColeccion(c.id, btn);
+        filtros.appendChild(btn);
+      });
+    } catch(e) { /* sin colecciones */ }
+  }
+
+  // ── Cargar fotos recientes o por colección ─────────────────────────
+  async function cargarFotos(colId = null, reiniciar = true) {
+    if (reiniciar) {
+      offsetFotos = 0;
+      todasLasFotos = [];
+      document.getElementById('masonry-grid').innerHTML =
+        '<div style="column-span:all;text-align:center;padding:40px">' +
+        '<span class="spinner"></span></div>';
+    }
+
+    try {
+      let url = colId
+        ? `/galeria/coleccion-id/${colId}?pagina=${Math.floor(offsetFotos/FOTOS_POR_CARGA)}&tamano=${FOTOS_POR_CARGA}`
+        : `/galeria/recientes?limit=${FOTOS_POR_CARGA}&offset=${offsetFotos}`;
+
+      const fotos = await apiGet(url);
+
+      if (reiniciar) todasLasFotos = fotos;
+      else todasLasFotos = [...todasLasFotos, ...fotos];
+
+      fotosFiltradas = todasLasFotos;
+      offsetFotos   += fotos.length;
+
+      renderMasonry(reiniciar);
+      document.getElementById('btn-cargar-mas').style.display =
+        fotos.length >= FOTOS_POR_CARGA ? 'block' : 'none';
+
+      if (!todasLasFotos.length) {
+        document.getElementById('masonry-grid').innerHTML = '';
+        document.getElementById('galeria-vacia').style.display = 'block';
+      } else {
+        document.getElementById('galeria-vacia').style.display = 'none';
+      }
+    } catch(e) {
+      document.getElementById('masonry-grid').innerHTML =
+        `<div class="alert alert-error" style="column-span:all">${e.message}</div>`;
+    }
+  }
+
+  // ── Render masonry ────────────────────────────────────────────────
+  function renderMasonry(reiniciar = true) {
+    const grid = document.getElementById('masonry-grid');
+    const items = fotosFiltradas.map((foto, idx) => {
+      const emoji = ['🧸','🐰','🐻','🐱','🌸','🎀','🧶','🌈'][idx % 8];
+      return `
+        <div class="masonry-item" onclick="abrirLightbox(${idx})">
+          ${foto.urlFoto
+            ? `<img class="masonry-img" src="${foto.urlFoto}"
+                    alt="${foto.titulo || ''}"
+                    loading="lazy"
+                    onerror="this.style.display='none';
+                             this.nextElementSibling.style.display='flex'">`
+            : ''}
+          <div class="img-placeholder"
+               style="${foto.urlFoto ? 'display:none' : ''}">${emoji}</div>
+          <div class="masonry-info">
+            <div class="masonry-titulo">${foto.titulo || 'Sin título'}</div>
+            <div class="masonry-sub">
+              ${foto.tiempoElaboracionHoras
+                ? `⏱️ ${foto.tiempoElaboracionHoras}h`
+                : ''}
+              ${foto.likes > 0 ? ` &nbsp;❤️ ${foto.likes}` : ''}
+            </div>
+          </div>
+          <div class="masonry-overlay">
+            <button class="overlay-btn" title="Ver detalle">🔍</button>
+            <button class="overlay-btn"
+                    onclick="event.stopPropagation();
+                             compartirWhatsApp('¡Mira esta creación de Sarichi! 🧵',
+                             window.location.origin+'/api/galeria.html#'+${idx})"
+                    title="Compartir">📤</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    if (reiniciar) grid.innerHTML = items;
+    else grid.innerHTML += items;
+  }
+
+  // ── Filtrar por colección ─────────────────────────────────────────
+  function filtrarColeccion(colId, btn) {
+    document.querySelectorAll('.col-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    coleccionActual = colId;
+    cargarFotos(colId, true);
+  }
+
+  // ── Cargar más fotos ──────────────────────────────────────────────
+  function cargarMasFotos() {
+    cargarFotos(coleccionActual, false);
+  }
+
+  // ── Lightbox ──────────────────────────────────────────────────────
+  function abrirLightbox(idx) {
+    fotoActualIdx = idx;
+    mostrarFotoEnLightbox(fotosFiltradas[idx]);
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function mostrarFotoEnLightbox(foto) {
+    if (!foto) return;
+
+    const img         = document.getElementById('lb-img');
+    const placeholder = document.getElementById('lb-placeholder');
+
+    img.style.display = 'none';
+    placeholder.style.display = 'flex';
+
+    if (foto.urlFoto) {
+      img.src = foto.urlFoto;
+      img.alt = foto.titulo || '';
+    }
+
+    document.getElementById('lb-titulo').textContent =
+      foto.titulo || 'Sin título';
+    document.getElementById('lb-descripcion').textContent =
+      foto.descripcion || '';
+    document.getElementById('lb-historia').textContent =
+      foto.historia || '';
+    document.getElementById('lb-likes').textContent =
+      foto.likes || 0;
+    document.getElementById('lb-like-btn').classList.remove('liked');
+
+    const tiempoEl = document.getElementById('lb-tiempo');
+    tiempoEl.textContent = foto.tiempoElaboracionHoras
+      ? `⏱️ ${foto.tiempoElaboracionHoras} horas de trabajo` : '';
+
+    // Producto vinculado
+    const prodWrap = document.getElementById('lb-producto-wrap');
+    if (foto.idProducto) {
+      prodWrap.style.display = 'block';
+      document.getElementById('lb-producto-link').href =
+        `tienda.html?producto=${foto.idProducto}`;
+    } else {
+      prodWrap.style.display = 'none';
+    }
+  }
+
+  function cerrarLightbox(e) {
+    if (e && e.target !== document.getElementById('lightbox')) return;
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function navegarLightbox(delta) {
+    fotoActualIdx = (fotoActualIdx + delta + fotosFiltradas.length)
+                    % fotosFiltradas.length;
+    mostrarFotoEnLightbox(fotosFiltradas[fotoActualIdx]);
+  }
+
+  // Navegar con teclado
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key === 'ArrowRight') navegarLightbox(1);
+    if (e.key === 'ArrowLeft')  navegarLightbox(-1);
+    if (e.key === 'Escape')     cerrarLightbox();
+  });
+
+  // ── Likes ─────────────────────────────────────────────────────────
+  async function darLike() {
+    const foto = fotosFiltradas[fotoActualIdx];
+    if (!foto) return;
+    const btn = document.getElementById('lb-like-btn');
+    if (btn.classList.contains('liked')) return;
+    try {
+      // Optimistic UI
+      btn.classList.add('liked');
+      const likesEl = document.getElementById('lb-likes');
+      likesEl.textContent = (parseInt(likesEl.textContent) || 0) + 1;
+      await apiFetch(`/galeria/fotos/${foto.id}/like`, 'POST');
+      // Actualizar en array local
+      fotosFiltradas[fotoActualIdx].likes =
+        (fotosFiltradas[fotoActualIdx].likes || 0) + 1;
+      showToast('❤️ ¡Gracias por tu like!', 'success');
+    } catch(e) {
+      btn.classList.remove('liked');
+      showToast('Inicia sesión para dar like', 'info');
+    }
+  }
+
+  // ── Compartir desde lightbox ───────────────────────────────────────
+  function compartirFotoWA() {
+    const foto = fotosFiltradas[fotoActualIdx];
+    if (!foto) return;
+    const texto = `¡Mira esta creación de Sarichi Crocheting! 🧵🩷\n${foto.titulo || ''}`;
+    const url   = window.location.href;
+    compartirWhatsApp(texto, url);
+  }
+
+  async function copiarEnlace() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      showToast('¡Enlace copiado!', 'success');
+    } catch(e) {
+      showToast('No se pudo copiar el enlace', 'error');
+    }
+  }
+
+  // ── Inicializar ───────────────────────────────────────────────────
+  cargarColecciones();
+  cargarFotos();
+</script>
+</body>
+</html>

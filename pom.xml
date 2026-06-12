@@ -13,53 +13,79 @@
 
     <groupId>com.sarichi</groupId>
     <artifactId>crocheting</artifactId>
-    <version>1</version>
+    <!-- ✅ version debe tener formato x.y.z — "1" solo puede dar warning en algunos IDEs -->
+    <version>1.0.0</version>
     <name>SarichiCrocheting</name>
     <description>Plataforma web Crocheting Sarichi</description>
+    <packaging>jar</packaging>
 
     <properties>
         <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+<maven.resources.overrideFilters>false</maven.resources.overrideFilters>    
     </properties>
 
     <dependencies>
 
-        <!-- Web -->
+        <!-- ── Web ──────────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- MongoDB -->
+        <!-- ── Thymeleaf (capa web MVC) ─────────────────────────────────── -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+        <!-- ── MongoDB ──────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
 
-        <!-- Security -->
+        <!-- ── Security ─────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- Validation -->
+        <!-- ── Thymeleaf + Spring Security extras (th:sec:authorize) ─────── -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
+        <!-- ── Validation ───────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- Mail -->
+        <!-- ── Mail ─────────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-        <!-- Actuator -->
+        <!-- ── Cloudinary (subida de imágenes) ─────────────────────────── -->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http44</artifactId>
+            <version>1.36.0</version>
+        </dependency>
+
+        <!-- ── Actuator ─────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- DevTools -->
+        <!-- ── DevTools ─────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -67,14 +93,14 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Lombok -->
+        <!-- ── Lombok ───────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- JJWT 0.12.x -->
+        <!-- ── JJWT 0.12.x ──────────────────────────────────────────────── -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -93,14 +119,14 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Swagger / OpenAPI -->
+        <!-- ── Swagger / OpenAPI ────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.8.3</version>
         </dependency>
 
-        <!-- iText PDF (Sprint 5) -->
+        <!-- ── iText PDF ─────────────────────────────────────────────────── -->
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itext7-core</artifactId>
@@ -108,27 +134,25 @@
             <type>pom</type>
         </dependency>
 
-        <!-- Apache POI Excel (Sprint 5) -->
+        <!-- ── Apache POI Excel ─────────────────────────────────────────── -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.5</version>
         </dependency>
 
-        <!-- Spring Cache -->
+        <!-- ── Cache ────────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
-
-        <!-- Caffeine Cache (Sprint 5) -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>3.1.8</version>
         </dependency>
 
-        <!-- Test -->
+        <!-- ── Test ─────────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
