@@ -2,32 +2,131 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Sarichi Crocheting</title>
+  <title>🐱 Crocheting Sarichi — Amigurumis & Tejidos Artesanales</title>
   <link rel="stylesheet" href="sarichi.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --sarichi-pink:#E8527A; --sarichi-teal:#2DB5C8; --sarichi-cream:#FDFAF6; --sarichi-dark:#2C2C2C; }
+    body { background:var(--sarichi-cream); font-family:'Inter',sans-serif; color:var(--sarichi-dark); }
+    h1,h2,h3,.display-title { font-family:'Playfair Display',serif; }
+    .hero { background:linear-gradient(135deg,#fce4ed 0%,#e3f6f8 100%); padding:80px 0; text-align:center; }
+    .hero h1 { color:var(--sarichi-pink); font-size:3rem; }
+    .btn-primary { background:var(--sarichi-pink); border-color:var(--sarichi-pink); }
+    .btn-primary:hover { background:#d43f68; border-color:#d43f68; }
+    .btn-outline-primary { border-color:var(--sarichi-pink); color:var(--sarichi-pink); }
+    .btn-outline-primary:hover { background:var(--sarichi-pink); color:#fff; }
+    .section-title { color:var(--sarichi-pink); font-family:'Playfair Display',serif; }
+    .card { border:none; border-radius:16px; transition:transform .2s; }
+    .card:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(232,82,122,.12); }
+    .navbar { background:#fff; border-bottom:2px solid #f3e8ed; }
+    .navbar-brand { color:var(--sarichi-pink)!important; font-family:'Playfair Display',serif; font-weight:700; }
+    footer { background:var(--sarichi-dark); color:#ccc; padding:40px 0 20px; }
+    footer a { color:var(--sarichi-teal); }
+    .feature-icon { font-size:2.5rem; }
+  </style>
 </head>
 <body>
-<div class="page-auth" style="flex-direction:column;gap:32px;text-align:center">
-  <div>
-    <div style="font-size:5rem;margin-bottom:16px">🐱</div>
-    <h1 style="color:var(--rosa);font-size:2.5rem">Crocheting Sarichi</h1>
-    <p style="color:var(--gris);font-size:1.1rem;margin-top:8px">
-      Amigurumis · Accesorios · Detalles Personalizados 🎀🧸
-    </p>
-    <p style="color:var(--gris);font-size:.9rem;margin-top:4px">
-      Creaciones tejidas a mano con mucho amor 🧵🩷
-    </p>
-  </div>
-  <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
-    <a href="login.html"    class="btn btn-primary"   style="min-width:160px">🔐 Iniciar Sesión</a>
-    <a href="register.html" class="btn btn-secondary" style="min-width:160px">✨ Crear Cuenta</a>
-  </div>
-  <p style="color:var(--gris);font-size:.8rem">
-    UTS — Desarrollo de Aplicaciones Empresariales · 2026
-  </p>
-</div>
-<script src="sarichi.js"></script>
-<script>
-  if (Auth.isLoggedIn()) Auth.redirectByRol(Auth.getRol());
-</script>
+  <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="/">🐱 Crocheting Sarichi</a>
+      <div class="ms-auto">
+        <a href="login.html" class="btn btn-outline-primary btn-sm me-2">Iniciar sesión</a>
+        <a href="register.html" class="btn btn-primary btn-sm">Registrarse</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div style="font-size:4rem;">🧵</div>
+      <h1 class="fw-bold mb-3">Crocheting Sarichi</h1>
+      <p class="lead text-muted mb-1">Amigurumis · Accesorios · Detalles Personalizados</p>
+      <p class="text-muted mb-4">Creaciones tejidas a mano con mucho amor 🩷</p>
+      <a href="tienda.html" class="btn btn-primary btn-lg px-4"><i class="bi bi-shop me-2"></i>Ver Catálogo</a>
+    </div>
+  </section>
+
+  <!-- Caracteristicas -->
+  <section class="py-5">
+    <div class="container">
+      <div class="row g-4 text-center">
+        <div class="col-md-4">
+          <div class="feature-icon mb-2">🐱</div>
+          <h5>Hecho a mano</h5>
+          <p class="text-muted small">Cada pieza es única, tejida con amor.</p>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-icon mb-2">🎀</div>
+          <h5>Personalizable</h5>
+          <p class="text-muted small">Elige colores, tamaño y mensaje bordado.</p>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-icon mb-2">🚚</div>
+          <h5>Envío nacional</h5>
+          <p class="text-muted small">Coordinadora e Interrapidísimo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Catalogo dinamico -->
+  <section class="py-5" style="background:#f9f0f3;">
+    <div class="container">
+      <h2 class="section-title text-center mb-4">✨ Productos Destacados</h2>
+      <div id="productosContainer" class="row g-3"></div>
+      <div class="text-center mt-3">
+        <a href="tienda.html" class="btn btn-outline-primary">Ver todo <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-5 text-center" style="background:linear-gradient(135deg,#E8527A 0%,#2DB5C8 100%);">
+    <div class="container">
+      <h2 class="text-white fw-bold mb-2" style="font-family:'Playfair Display',serif;">¿Quieres un amigurumi personalizado? 🐱</h2>
+      <p class="text-white opacity-75 mb-4">Regístrate gratis y chatea con la artesana.</p>
+      <a href="register.html" class="btn btn-light btn-lg px-5 fw-bold" style="color:var(--sarichi-pink)">Crear cuenta gratis</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container text-center">
+      <p class="small mb-0">🐱 Crocheting Sarichi · Bucaramanga, Colombia</p>
+      <p class="small mb-0">© 2026 · UTS Desarrollo de Aplicaciones Empresariales 🩷</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="sarichi.js"></script>
+  <script>
+    if (Auth.isLoggedIn()) Auth.redirectByRol(Auth.getRol());
+
+    var API = '/api';
+    function apiGet(path) { return fetch(API + path).then(function(r) { return r.json(); }); }
+
+    apiGet('/productos').then(function(productos) {
+      var container = document.getElementById('productosContainer');
+      var toShow = productos.slice(0, 6);
+      toShow.forEach(function(p) {
+        var col = document.createElement('div');
+        col.className = 'col-md-4 col-sm-6 mb-3';
+        col.innerHTML =
+          '<div class="card shadow-sm p-3 h-100">' +
+            '<div class="text-center mb-2" style="font-size:3rem;">🧸</div>' +
+            '<h6 class="fw-bold">' + p.nombre + '</h6>' +
+            '<p class="text-muted small">' + (p.categoria || '') + '</p>' +
+            '<p class="fw-bold" style="color:var(--sarichi-pink)">$' + (p.precioBase || 0) + '</p>' +
+          '</div>';
+        container.appendChild(col);
+      });
+    }).catch(function() {
+      document.getElementById('productosContainer').innerHTML =
+        '<div class="text-center py-5"><div style="font-size:4rem;">🐱</div><p class="text-muted">Próximamente</p></div>';
+    });
+  </script>
 </body>
 </html>

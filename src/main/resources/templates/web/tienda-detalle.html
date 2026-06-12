@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${producto.nombre} + ' - Sarichi'">Producto</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --rosa:#E8527A; --celeste:#2DB5C8; --crema:#FDFAF6; }
+    body { background:var(--crema); font-family:'Inter',sans-serif; }
+    .navbar { background:#fff; border-bottom:2px solid #f0d0da; }
+    .navbar-brand { font-family:'Playfair Display',serif; color:var(--rosa)!important; }
+    .card-producto { background:#fff; border-radius:20px; border:none; }
+    .precio { color:var(--rosa); font-weight:700; font-size:1.5rem; }
+    .badge-cat { background:var(--celeste); color:#fff; padding:4px 12px; border-radius:20px; font-size:.8rem; }
+    h1 { font-family:'Playfair Display',serif; color:var(--rosa); }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/web/">🐱 Sarichi</a>
+      <a href="/web/tienda" class="btn btn-sm btn-outline-secondary">&larr; Volver a tienda</a>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="card card-producto shadow-sm p-4">
+      <div class="row g-4">
+        <div class="col-md-5 text-center">
+          <div style="font-size:6rem;">🧸</div>
+        </div>
+        <div class="col-md-7">
+          <span class="badge-cat" th:text="${producto.categoria}">Categoria</span>
+          <h1 class="mt-2" th:text="${producto.nombre}">Nombre</h1>
+          <p class="text-muted" th:text="${producto.descripcion}">Descripcion</p>
+          <p class="precio">$<span th:text="${producto.precioBase}">0</span></p>
+          <p class="text-muted small">Stock disponible: <span th:text="${producto.stock}">0</span></p>
+
+          <form method="post" th:action="@{/web/carrito/agregar}" class="mt-3">
+            <input type="hidden" name="productoId" th:value="${producto.id}">
+            <div class="input-group mb-3" style="max-width:150px;">
+              <input type="number" name="cantidad" class="form-control" value="1" min="1" th:max="${producto.stock}">
+            </div>
+            <button type="submit" class="btn btn-lg" style="background:var(--rosa);color:#fff;">
+              <i class="bi bi-cart-plus me-2"></i>Agregar al carrito
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

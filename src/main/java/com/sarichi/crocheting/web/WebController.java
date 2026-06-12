@@ -21,6 +21,7 @@ import com.sarichi.crocheting.entity.Usuario;
 import com.sarichi.crocheting.entity.UserRole;
 import com.sarichi.crocheting.repository.UsuarioRepository;
 import com.sarichi.crocheting.service.AutenticacionService;
+import com.sarichi.crocheting.service.BlogService;
 import com.sarichi.crocheting.service.ChatService;
 import com.sarichi.crocheting.service.ColorHiloService;
 import com.sarichi.crocheting.service.DashboardService;
@@ -42,6 +43,7 @@ import jakarta.servlet.http.HttpSession;
 public class WebController {
 
     @Autowired private ProductoService   productoService;
+    @Autowired private BlogService       blogService;
     @Autowired private ColorHiloService  colorHiloService;
     @Autowired private DashboardService  dashboardService;
     @Autowired private PedidoService     pedidoService;
@@ -75,6 +77,18 @@ public class WebController {
 
     // ── Tienda pública (sin login) ─────────────────────────────────────
 
+    @GetMapping("/tienda/{id}")
+    public String tiendaDetalle(@PathVariable String id, Model model, HttpSession session) {
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
+        try {
+            model.addAttribute("producto", productoService.obtenerPorId(id));
+        } catch (Exception e) {
+            return "redirect:/web/tienda";
+        }
+        return "web/tienda-detalle";
+    }
+
     @GetMapping("/tienda")
     public String tienda(@RequestParam(required = false) String categoria,
                          @RequestParam(required = false) String busqueda,
@@ -94,6 +108,19 @@ public class WebController {
         model.addAttribute("busqueda",   busqueda);
         model.addAttribute("categorias", List.of("Amigurumis", "Accesorios", "Ropa", "Hogar"));
         return "web/tienda";
+    }
+
+    @GetMapping("/blog/{slug}")
+    public String blogArticulo(@PathVariable String slug, Model model, HttpSession session) {
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
+        try {
+            var articulo = blogService.obtenerPorSlug(slug);
+            model.addAttribute("articulo", articulo);
+        } catch (Exception e) {
+            return "redirect:/web/blog";
+        }
+        return "web/blog-articulo";
     }
 
     @GetMapping("/blog")
