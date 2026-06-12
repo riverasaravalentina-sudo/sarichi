@@ -26,6 +26,7 @@ import com.sarichi.crocheting.service.ColorHiloService;
 import com.sarichi.crocheting.service.DashboardService;
 import com.sarichi.crocheting.service.DespachoService;
 import com.sarichi.crocheting.service.PedidoService;
+import com.sarichi.crocheting.service.PersonalizadorService;
 import com.sarichi.crocheting.service.ProductoService;
 import com.sarichi.crocheting.service.WishlistService;
 
@@ -48,6 +49,7 @@ public class WebController {
     @Autowired private AutenticacionService autenticacionService;
     @Autowired private ChatService       chatService;
     @Autowired private WishlistService   wishlistService;
+    @Autowired private PersonalizadorService personalizadorService;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PasswordEncoder   passwordEncoder;
 
@@ -514,6 +516,33 @@ public class WebController {
         wishlistService.eliminar((String) session.getAttribute("usuarioWebId"), productoId);
         ra.addFlashAttribute("success", "Producto eliminado de tu lista de deseos");
         return "redirect:/web/wishlist";
+    }
+
+    // ── Personalizador ──────────────────────────────────────────────────
+
+    @GetMapping("/personalizador")
+    public String personalizador(Model model, HttpSession session) {
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
+        try {
+            model.addAttribute("productos", productoService.listarConFiltros(new ProductoFiltroDTO()));
+        } catch (Exception e) {
+            model.addAttribute("productos", List.of());
+        }
+        return "web/personalizador/index";
+    }
+
+    @GetMapping("/pedido-personalizado")
+    public String pedidoPersonalizadoForm(Model model, HttpSession session) {
+        if (!estaAutenticado(session)) return "redirect:/web/login";
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("usuarioWebId", session.getAttribute("usuarioWebId"));
+        try {
+            model.addAttribute("productos", productoService.listarConFiltros(new ProductoFiltroDTO()));
+        } catch (Exception e) {
+            model.addAttribute("productos", List.of());
+        }
+        return "web/cliente/pedido-personalizado";
     }
 
     // ── Chat de pedidos ─────────────────────────────────────────────────

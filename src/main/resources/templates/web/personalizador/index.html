@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personalizador - Sarichi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --rosa:#E8527A; --celeste:#2DB5C8; --crema:#FDFAF6; }
+    body { background:var(--crema); font-family:'Inter',sans-serif; }
+    .navbar { background:#fff; border-bottom:2px solid #f0d0da; }
+    .navbar-brand { font-family:'Playfair Display',serif; color:var(--rosa)!important; }
+    h2 { font-family:'Playfair Display',serif; color:var(--rosa); }
+    canvas { border:2px dashed #ddd; border-radius:16px; background:#fff; width:100%; max-width:400px; height:400px; }
+    .color-btn { width:36px; height:36px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:.2s; }
+    .color-btn:hover, .color-btn.active { border-color:var(--rosa); transform:scale(1.15); }
+    .preview-card { background:#fff; border-radius:16px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/web/">🐱 Personalizador</a>
+      <a href="/web/dashboard" class="btn btn-sm btn-outline-secondary">Volver</a>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <h2 class="mb-3">🎨 Personaliza tu amigurumi</h2>
+
+    <div class="row g-4">
+      <div class="col-md-5">
+        <div class="preview-card shadow-sm p-4 text-center">
+          <canvas id="canvas" width="400" height="400"></canvas>
+          <p class="text-muted small mt-2">Previsualización en tiempo real</p>
+        </div>
+
+        <div class="preview-card shadow-sm p-3 mt-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <small class="text-muted">Precio estimado:</small>
+              <h3 class="mb-0" style="color:var(--rosa);" id="precioFinal">$25,000</h3>
+            </div>
+            <button class="btn" style="background:var(--rosa);color:#fff;" onclick="guardarDisenio()">
+              <i class="bi bi-save me-1"></i>Guardar diseño
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-7">
+        <div class="preview-card shadow-sm p-4">
+          <h5 class="fw-bold mb-3">Opciones de personalización</h5>
+
+          <div class="mb-3">
+            <label class="fw-medium">Producto base</label>
+            <select id="productoSelect" class="form-select" onchange="actualizarPreview()">
+              <option value="">Selecciona un producto</option>
+              <option th:each="p : ${productos}" th:value="${p.id}" th:text="${p.nombre}">Producto</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="fw-medium">Color del cuerpo</label>
+            <div class="d-flex gap-2 mt-1">
+              <div class="color-btn active" style="background:#E8527A;" data-color="#E8527A" onclick="seleccionarColor(this,'cuerpo')"></div>
+              <div class="color-btn" style="background:#2DB5C8;" data-color="#2DB5C8" onclick="seleccionarColor(this,'cuerpo')"></div>
+              <div class="color-btn" style="background:#FFD700;" data-color="#FFD700" onclick="seleccionarColor(this,'cuerpo')"></div>
+              <div class="color-btn" style="background:#90EE90;" data-color="#90EE90" onclick="seleccionarColor(this,'cuerpo')"></div>
+              <div class="color-btn" style="background:#DDA0DD;" data-color="#DDA0DD" onclick="seleccionarColor(this,'cuerpo')"></div>
+              <div class="color-btn" style="background:#87CEEB;" data-color="#87CEEB" onclick="seleccionarColor(this,'cuerpo')"></div>
+              <div class="color-btn" style="background:#fff;border-color:#ccc;" data-color="#FFFFFF" onclick="seleccionarColor(this,'cuerpo')"></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="fw-medium">Color de accesorios</label>
+            <div class="d-flex gap-2 mt-1">
+              <div class="color-btn active" style="background:#2DB5C8;" data-color="#2DB5C8" onclick="seleccionarColor(this,'accesorios')"></div>
+              <div class="color-btn" style="background:#E8527A;" data-color="#E8527A" onclick="seleccionarColor(this,'accesorios')"></div>
+              <div class="color-btn" style="background:#FF69B4;" data-color="#FF69B4" onclick="seleccionarColor(this,'accesorios')"></div>
+              <div class="color-btn" style="background:#FFD700;" data-color="#FFD700" onclick="seleccionarColor(this,'accesorios')"></div>
+              <div class="color-btn" style="background:#8B4513;" data-color="#8B4513" onclick="seleccionarColor(this,'accesorios')"></div>
+              <div class="color-btn" style="background:#fff;border-color:#ccc;" data-color="#FFFFFF" onclick="seleccionarColor(this,'accesorios')"></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="fw-medium">Talla</label>
+            <select id="tallaSelect" class="form-select" onchange="actualizarPreview()">
+              <option value="Pequeño">Pequeño (15 cm) — $0</option>
+              <option value="Mediano" selected>Mediano (25 cm) — $0</option>
+              <option value="Grande">Grande (35 cm) — +$15,000</option>
+              <option value="Extra Grande">Extra Grande (45 cm) — +$30,000</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="fw-medium">Mensaje bordado (máx 20 caracteres)</label>
+            <input type="text" id="mensajeInput" class="form-control" maxlength="20" placeholder="Ej: Te amo 🩷" oninput="actualizarPreview()">
+            <small class="text-muted"><span id="charCount">0</span>/20 caracteres</small>
+          </div>
+
+          <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-lg" style="background:var(--rosa);color:#fff;" onclick="guardarDisenio()">
+              <i class="bi bi-cart-plus me-2"></i>Guardar y añadir al carrito
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var colores = { cuerpo: '#E8527A', accesorios: '#2DB5C8' };
+
+    function seleccionarColor(el, zona) {
+      document.querySelectorAll(`.color-btn[onclick*="${zona}"]`).forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      colores[zona] = el.dataset.color;
+      actualizarPreview();
+    }
+
+    function dibujarAmigurumi() {
+      ctx.clearRect(0, 0, 400, 400);
+      ctx.save();
+      ctx.translate(200, 200);
+
+      // Cuerpo (círculo grande)
+      ctx.beginPath();
+      ctx.arc(0, 30, 90, 0, Math.PI * 2);
+      ctx.fillStyle = colores['cuerpo'];
+      ctx.fill();
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Cabeza
+      ctx.beginPath();
+      ctx.arc(0, -70, 60, 0, Math.PI * 2);
+      ctx.fillStyle = colores['cuerpo'];
+      ctx.fill();
+      ctx.stroke();
+
+      // Orejas
+      ctx.beginPath();
+      ctx.arc(-45, -110, 25, 0, Math.PI * 2);
+      ctx.fillStyle = colores['accesorios'];
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(45, -110, 25, 0, Math.PI * 2);
+      ctx.fillStyle = colores['accesorios'];
+      ctx.fill();
+
+      // Ojos
+      ctx.fillStyle = '#2C2C2C';
+      ctx.beginPath();
+      ctx.arc(-20, -75, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(20, -75, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pupilas
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(-17, -77, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(23, -77, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Nariz
+      ctx.fillStyle = '#FF69B4';
+      ctx.beginPath();
+      ctx.ellipse(0, -60, 6, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Boca
+      ctx.strokeStyle = '#2C2C2C';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, -52, 12, 0.1, Math.PI - 0.1);
+      ctx.stroke();
+
+      // Bigotes
+      ctx.strokeStyle = '#999';
+      ctx.lineWidth = 1.5;
+      [-1, 1].forEach(side => {
+        for (let i = -1; i <= 1; i++) {
+          ctx.beginPath();
+          ctx.moveTo(side * 25, -58 + i * 8);
+          ctx.lineTo(side * 55, -65 + i * 10);
+          ctx.stroke();
+        }
+      });
+
+      // Brazos
+      ctx.fillStyle = colores['cuerpo'];
+      ctx.beginPath();
+      ctx.ellipse(-95, 20, 18, 28, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(95, 20, 18, 28, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Accesorio: moño
+      ctx.fillStyle = colores['accesorios'];
+      ctx.beginPath();
+      ctx.ellipse(0, -125, 18, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(-12, -128, 10, 14, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(12, -128, 10, 14, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mensaje bordado
+      var mensaje = document.getElementById('mensajeInput').value.trim();
+      if (mensaje) {
+        ctx.fillStyle = colores['accesorios'];
+        ctx.font = 'bold 14px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(mensaje, 0, 95);
+      }
+
+      ctx.restore();
+    }
+
+    function actualizarPreview() {
+      dibujarAmigurumi();
+      actualizarPrecio();
+      var input = document.getElementById('mensajeInput');
+      document.getElementById('charCount').textContent = input.value.length;
+    }
+
+    function actualizarPrecio() {
+      var base = 25000;
+      var talla = document.getElementById('tallaSelect').value;
+      if (talla === 'Grande') base += 15000;
+      if (talla === 'Extra Grande') base += 30000;
+      var mensaje = document.getElementById('mensajeInput').value.trim();
+      if (mensaje) base += 5000;
+      document.getElementById('precioFinal').textContent = '$' + base.toLocaleString('es-CO');
+    }
+
+    function guardarDisenio() {
+      var productoId = document.getElementById('productoSelect').value;
+      if (!productoId) { alert('Selecciona un producto base'); return; }
+
+      var data = {
+        productoId: productoId,
+        coloresSeleccionados: colores,
+        talla: document.getElementById('tallaSelect').value,
+        mensajeBordado: document.getElementById('mensajeInput').value.trim()
+      };
+
+      fetch('/api/personalizador/guardar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(function(d) {
+        alert('Diseño guardado! ID: ' + d.id);
+      })
+      .catch(function(e) {
+        alert('Error al guardar: ' + e.message);
+      });
+    }
+
+    actualizarPreview();
+  </script>
+</body>
+</html>
