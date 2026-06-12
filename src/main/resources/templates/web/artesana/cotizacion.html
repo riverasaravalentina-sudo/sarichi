@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cotizaciones - Sarichi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>body{background:#FDFAF6;font-family:'Inter',sans-serif}.brand{color:#E8527A}.navbar{background:#fff;border-bottom:1px solid #e9ecef}</style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+      <a class="navbar-brand brand fw-bold" th:href="@{/web/dashboard/artesana}">🐱 ARTESANA</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" th:href="@{/web/logout}">Salir</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <main class="container py-5">
+    <h2 class="mb-4">Pedidos Personalizados - Pendientes de Cotización</h2>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div th:if="${personalizados != null and !personalizados.isEmpty()}">
+          <table class="table table-hover">
+            <thead><tr><th>Cliente</th><th>Descripción</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr th:each="pp : ${personalizados}">
+                <td th:text="${pp.usuarioNombre}">Cliente</td>
+                <td th:text="${pp.descripcion}">Descripción</td>
+                <td th:text="${pp.fechaSolicitud}">Fecha</td>
+                <td>
+                  <button class="btn btn-sm btn-success">Cotizar</button>
+                  <a class="btn btn-sm btn-outline-info" th:href="@{/web/chat/{id}(id=${pp.id})}">Chat</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div th:if="${personalizados == null or personalizados.isEmpty()}" class="text-center py-5">
+          <div style="font-size:3rem">📋</div>
+          <p class="text-muted">No hay pedidos personalizados pendientes</p>
+        </div>
+      </div>
+    </div>
+    <a th:href="@{/web/dashboard/artesana}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
