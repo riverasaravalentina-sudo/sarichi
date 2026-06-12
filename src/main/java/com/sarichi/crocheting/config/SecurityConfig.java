@@ -1,6 +1,7 @@
 package com.sarichi.crocheting.config;
 
 import com.sarichi.crocheting.security.JwtAuthenticationFilter;
+import com.sarichi.crocheting.security.OAuth2LoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,9 @@ public class SecurityConfig {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -103,6 +107,9 @@ public class SecurityConfig {
                 // ── Webhooks externos ──────────────────────────────────────────────
                 .requestMatchers("POST", "/pagos/webhook").permitAll()
 
+                // ── OAuth2 / Google Login ───────────────────────────────────────────
+                .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
+
                 // ── Swagger / OpenAPI ──────────────────────────────────────────────
                 .requestMatchers(
                     "/v3/api-docs/**",
@@ -116,6 +123,11 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
+            .oauth2Login(oauth2 -> oauth2
+                .successHandler(oAuth2LoginSuccessHandler)
+                .loginPage("/web/login")
+                .permitAll()
+            )
             .addFilterBefore(jwtAuthenticationFilter(),
                     UsernamePasswordAuthenticationFilter.class);
 
