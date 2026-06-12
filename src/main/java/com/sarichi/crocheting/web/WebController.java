@@ -39,7 +39,7 @@ import jakarta.servlet.http.HttpSession;
  * Los @RestController de /api/** NO se modifican.
  */
 @Controller
-@RequestMapping("/web")
+@RequestMapping("/api/web")
 public class WebController {
 
     @Autowired private ProductoService   productoService;

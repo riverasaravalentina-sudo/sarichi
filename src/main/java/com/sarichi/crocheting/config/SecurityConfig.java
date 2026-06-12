@@ -69,7 +69,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
 
                 // ── Capa web Thymeleaf — SIEMPRE pública ──────────────────────────
-                .requestMatchers("/web/**").permitAll()
+                .requestMatchers("/api/web/**").permitAll()
 
                 // ── Recursos estáticos y HTML públicos ────────────────────────────
                 .requestMatchers(
@@ -80,38 +80,38 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // ── API Auth pública ───────────────────────────────────────────────
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
 
                 // ── API catálogo público ───────────────────────────────────────────
-                .requestMatchers("GET", "/productos").permitAll()
-                .requestMatchers("GET", "/productos/**").permitAll()
-                .requestMatchers("GET", "/colores-hilo").permitAll()
-                .requestMatchers("GET", "/colores-hilo/**").permitAll()
-                .requestMatchers("GET", "/resenas/**").permitAll()
-                .requestMatchers("GET", "/blog").permitAll()
-                .requestMatchers("GET", "/blog/**").permitAll()
-                .requestMatchers("GET", "/galeria").permitAll()
-                .requestMatchers("GET", "/galeria/**").permitAll()
-                .requestMatchers("GET", "/despachos/seguimiento/**").permitAll()
+                .requestMatchers("GET", "/api/productos").permitAll()
+                .requestMatchers("GET", "/api/productos/**").permitAll()
+                .requestMatchers("GET", "/api/colores-hilo").permitAll()
+                .requestMatchers("GET", "/api/colores-hilo/**").permitAll()
+                .requestMatchers("GET", "/api/resenas/**").permitAll()
+                .requestMatchers("GET", "/api/blog").permitAll()
+                .requestMatchers("GET", "/api/blog/**").permitAll()
+                .requestMatchers("GET", "/api/galeria").permitAll()
+                .requestMatchers("GET", "/api/galeria/**").permitAll()
+                .requestMatchers("GET", "/api/despachos/seguimiento/**").permitAll()
 
                 // ── Health / Actuator ──────────────────────────────────────────────
-                .requestMatchers("/health/**", "/actuator/**").permitAll()
+                .requestMatchers("/api/health/**", "/api/actuator/**").permitAll()
 
                 // ── WebSocket endpoint ─────────────────────────────────────────────
-                .requestMatchers("/ws-chat/**").permitAll()
+                .requestMatchers("/api/ws-chat/**").permitAll()
 
                 // ── API personalizador ───────────────────────────────────────────────
-                .requestMatchers("/personalizador/**").permitAll()
+                .requestMatchers("/api/personalizador/**").permitAll()
 
                 // ── API wishlist ─────────────────────────────────────────────────────
-                .requestMatchers("/wishlist/**").permitAll()
+                .requestMatchers("/api/wishlist/**").permitAll()
 
                 // ── API mensajes (chat history) ────────────────────────────────────
-                .requestMatchers("GET", "/mensajes/pedido/**").permitAll()
-                .requestMatchers("POST", "/mensajes/pedido/**").permitAll()
+                .requestMatchers("GET", "/api/mensajes/pedido/**").permitAll()
+                .requestMatchers("POST", "/api/mensajes/pedido/**").permitAll()
 
                 // ── Webhooks externos ──────────────────────────────────────────────
-                .requestMatchers("POST", "/pagos/webhook").permitAll()
+                .requestMatchers("POST", "/api/pagos/webhook").permitAll()
 
                 // ── OAuth2 / Google Login ───────────────────────────────────────────
                 .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()

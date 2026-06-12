@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/pedidos")
+@RequestMapping("/api/pedidos")
 @Tag(name = "Pedidos", description = "Gestión de pedidos")
 @SecurityRequirement(name = "bearerAuth")
 public class PedidoController {

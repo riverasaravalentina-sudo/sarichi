@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/dashboard")
+@RequestMapping("/api/dashboard")
 @Tag(name = "Dashboard", description = "KPIs y métricas por rol")
 
 public class DashboardController {

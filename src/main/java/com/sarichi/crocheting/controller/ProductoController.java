@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/productos")
+@RequestMapping("/api/productos")
 @Tag(name = "Productos", description = "Catálogo de productos — CRUD y filtros")
 public class ProductoController {
 

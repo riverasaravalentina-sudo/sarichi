@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
  * Controller para CRUD de colores de hilo.
  */
 @RestController
-@RequestMapping("/colores-hilo")
+@RequestMapping("/api/colores-hilo")
 @Tag(name = "Inventario Hilos", description = "Gestión de colores de hilo")
 public class ColorHiloController {
 

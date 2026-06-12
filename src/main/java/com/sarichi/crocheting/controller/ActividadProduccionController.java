@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/actividades")
+@RequestMapping("/api/actividades")
 @RequiredArgsConstructor
 public class ActividadProduccionController {
     private final ActividadProduccionService actividadService;

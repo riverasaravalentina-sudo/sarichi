@@ -15,7 +15,7 @@ import com.sarichi.crocheting.dto.PersonalizacionDTO;
 import com.sarichi.crocheting.service.PersonalizadorService;
 
 @RestController
-@RequestMapping("/personalizador")
+@RequestMapping("/api/personalizador")
 public class PersonalizadorController {
 
     private final PersonalizadorService personalizadorService;

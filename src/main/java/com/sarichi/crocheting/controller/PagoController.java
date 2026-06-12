@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/pagos")
+@RequestMapping("/api/pagos")
 @Tag(name = "Pagos", description = "Inicio de pagos Wompi y webhook")
 public class PagoController {
 

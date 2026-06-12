@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("/health")
+@RequestMapping("/api/health")
 @Tag(name = "Health", description = "Verificación del estado del sistema")
 public class HealthCheckController {
 

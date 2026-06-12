@@ -15,7 +15,7 @@ import com.sarichi.crocheting.dto.MensajeDTO;
 import com.sarichi.crocheting.service.ChatService;
 
 @RestController
-@RequestMapping("/mensajes")
+@RequestMapping("/api/mensajes")
 public class MensajeController {
 
     private final ChatService chatService;

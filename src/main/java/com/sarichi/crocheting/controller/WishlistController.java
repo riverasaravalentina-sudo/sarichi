@@ -16,7 +16,7 @@ import com.sarichi.crocheting.dto.WishlistDTO;
 import com.sarichi.crocheting.service.WishlistService;
 
 @RestController
-@RequestMapping("/wishlist")
+@RequestMapping("/api/wishlist")
 public class WishlistController {
 
     private final WishlistService wishlistService;

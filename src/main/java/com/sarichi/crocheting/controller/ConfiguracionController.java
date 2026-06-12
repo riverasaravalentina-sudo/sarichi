@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * Controller para obtener y actualizar la configuración global.
  */
 @RestController
-@RequestMapping("/configuracion")
+@RequestMapping("/api/configuracion")
 @Tag(name = "Configuración", description = "Parámetros globales de la aplicación")
 public class ConfiguracionController {
 

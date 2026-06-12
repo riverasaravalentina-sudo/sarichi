@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/devoluciones")
+@RequestMapping("/api/devoluciones")
 @RequiredArgsConstructor
 public class DevolucionController {
     private final DevolucionService devolucionService;
