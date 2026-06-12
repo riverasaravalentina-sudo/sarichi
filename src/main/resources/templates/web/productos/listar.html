@@ -127,22 +127,22 @@
 
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand" th:href="@{/web/}">
+        <a class="navbar-brand" th:href="@{/api/web/}">
             🐱 Crocheting Sarichi
         </a>
 
         <div class="d-flex gap-2">
 
-            <a th:href="@{/web/}" class="btn btn-light">
+            <a th:href="@{/api/web/}" class="btn btn-light">
                 Inicio
             </a>
 
-            <a th:href="@{/web/carrito}" class="btn btn-light">
+            <a th:href="@{/api/web/carrito}" class="btn btn-light">
                 <i class="bi bi-cart3"></i>
             </a>
 
             <a th:if="${usuarioWeb == null}"
-               th:href="@{/web/login}"
+               th:href="@{/api/web/login}"
                class="btn btn-outline-secondary">
                 Ingresar
             </a>
@@ -164,7 +164,7 @@
 
     <div class="filtro-card">
 
-        <form th:action="@{/web/productos}" method="get">
+        <form th:action="@{/api/web/productos}" method="get">
 
             <div class="row">
 
@@ -231,7 +231,7 @@
                          th:text="'$ ' + ${#numbers.formatDecimal(p.precioBase,0,'COMMA',0,'POINT')}">
                     </div>
 
-                    <form th:action="@{/web/carrito/agregar}" method="post">
+                    <form th:action="@{/api/web/carrito/agregar}" method="post">
 
                         <input
                                 type="hidden"

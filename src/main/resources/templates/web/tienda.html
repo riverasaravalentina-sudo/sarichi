@@ -269,7 +269,7 @@
                                     Agotado
                                 </span>
                             </div>
-                            <form method="post" th:action="@{/web/carrito/agregar}">
+                            <form method="post" th:action="@{/api/web/carrito/agregar}">
                                 <input type="hidden" name="productoId" th:value="${producto.id}">
                                 <input type="hidden" name="cantidad" value="1">
                                 <button type="submit" class="btn-sarichi w-100 justify-content-center"

@@ -30,7 +30,7 @@
       <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
       <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
-      <form method="post" th:action="@{/web/registro}" class="row g-3">
+      <form method="post" th:action="@{/api/web/registro}" class="row g-3">
         <div class="col-12">
           <label class="form-label" for="nombre">Nombre completo</label>
           <input class="form-control" id="nombre" name="nombre" required>
@@ -59,9 +59,9 @@
       </form>
 
       <div class="text-center mt-4">
-        <a th:href="@{/web/login}">Ya tengo cuenta</a>
+        <a th:href="@{/api/web/login}">Ya tengo cuenta</a>
         <span class="mx-2 text-muted">|</span>
-        <a th:href="@{/web/}">Volver al inicio</a>
+        <a th:href="@{/api/web/}">Volver al inicio</a>
       </div>
     </section>
   </main>

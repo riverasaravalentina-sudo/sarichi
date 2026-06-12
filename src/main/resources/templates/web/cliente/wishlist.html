@@ -49,14 +49,14 @@
             </small>
           </div>
           <div class="d-flex gap-2 mt-2">
-            <form method="post" th:action="@{/web/carrito/agregar}">
+            <form method="post" th:action="@{/api/web/carrito/agregar}">
               <input type="hidden" name="productoId" th:value="${item.productoId}">
               <input type="hidden" name="cantidad" value="1">
               <button type="submit" class="btn btn-sm" style="background:var(--rosa);color:#fff;">
                 <i class="bi bi-cart-plus"></i>
               </button>
             </form>
-            <a th:href="@{/web/wishlist/eliminar/{id}(id=${item.productoId})}" class="btn btn-sm btn-outline-danger">
+            <a th:href="@{/api/web/wishlist/eliminar/{id}(id=${item.productoId})}" class="btn btn-sm btn-outline-danger">
               <i class="bi bi-trash"></i>
             </a>
           </div>

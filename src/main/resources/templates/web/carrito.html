@@ -83,7 +83,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2 text-end">
-                                    <form method="post" th:action="@{/web/carrito/eliminar/{id}(id=${item.productoId})}" style="display: inline;">
+                                    <form method="post" th:action="@{/api/web/carrito/eliminar/{id}(id=${item.productoId})}" style="display: inline;">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-trash"></i> Eliminar
                                         </button>

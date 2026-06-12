@@ -32,10 +32,10 @@
 
 <nav class="navbar">
   <div class="container d-flex align-items-center gap-3">
-    <a th:href="@{/web/colores}" style="color:var(--celeste);text-decoration:none;font-size:1.2rem">
+    <a th:href="@{/api/web/colores}" style="color:var(--celeste);text-decoration:none;font-size:1.2rem">
       <i class="bi bi-arrow-left-circle"></i>
     </a>
-    <a class="navbar-brand mb-0" th:href="@{/web/}">🐱 Crocheting Sarichi</a>
+    <a class="navbar-brand mb-0" th:href="@{/api/web/}">🐱 Crocheting Sarichi</a>
   </div>
 </nav>
 
@@ -46,7 +46,7 @@
       <span th:text="${accion} + ' Color de Hilo'">Color</span>
     </h3>
 
-    <form th:action="@{/web/colores/guardar}" method="post">
+    <form th:action="@{/api/web/colores/guardar}" method="post">
       <input type="hidden" name="id" th:value="${color.id}">
 
       <div class="row g-3">
@@ -109,7 +109,7 @@
           <button type="submit" class="btn-guardar">
             <i class="bi bi-floppy-fill me-1"></i>Guardar
           </button>
-          <a th:href="@{/web/colores}" class="btn-cancelar">
+          <a th:href="@{/api/web/colores}" class="btn-cancelar">
             <i class="bi bi-x-circle me-1"></i>Cancelar
           </a>
         </div>

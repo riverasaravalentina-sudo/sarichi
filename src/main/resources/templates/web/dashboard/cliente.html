@@ -11,12 +11,12 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/web/}">🐱 CLIENTE</a>
+      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/}">🐱 CLIENTE</a>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/web/carrito}">Carrito</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/web/mis-pedidos}">Mis pedidos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/web/logout}">Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/carrito}">Carrito</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/mis-pedidos}">Mis pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
         </ul>
       </div>
     </div>
@@ -35,7 +35,7 @@
                 <h6 th:text="${p.nombre}">Producto</h6>
                 <p class="text-muted small" th:text="${p.categoria}">Categoría</p>
                 <p class="fw-bold brand">$<span th:text="${p.precioBase}">0</span></p>
-                <form method="post" th:action="@{/web/carrito/agregar}">
+                <form method="post" th:action="@{/api/web/carrito/agregar}">
                   <input type="hidden" name="productoId" th:value="${p.id}">
                   <input type="hidden" name="cantidad" value="1">
                   <button type="submit" class="btn btn-sm btn-primary w-100">Agregar al carrito</button>
@@ -49,12 +49,12 @@
         <div class="card shadow-sm">
           <div class="card-header bg-light"><h5>Acceso rápido</h5></div>
           <div class="card-body">
-            <a th:href="@{/web/carrito}" class="btn btn-outline-primary w-100 mb-2"><i class="bi bi-cart"></i> Ver carrito</a>
-            <a th:href="@{/web/mis-pedidos}" class="btn btn-outline-info w-100 mb-2"><i class="bi bi-box"></i> Mis pedidos</a>
-            <a th:href="@{/web/pedido-personalizado}" class="btn btn-outline-success w-100 mb-2"><i class="bi bi-pencil"></i> Pedido personalizado</a>
-            <a th:href="@{/web/wishlist}" class="btn btn-outline-danger w-100 mb-2"><i class="bi bi-heart"></i> Wishlist</a>
-            <a th:href="@{/web/personalizador}" class="btn btn-outline-secondary w-100 mb-2"><i class="bi bi-palette"></i> Personalizador</a>
-            <a th:href="@{/web/mis-pedidos}" class="btn btn-outline-teal w-100"><i class="bi bi-chat-dots"></i> Chat con artesana</a>
+            <a th:href="@{/api/web/carrito}" class="btn btn-outline-primary w-100 mb-2"><i class="bi bi-cart"></i> Ver carrito</a>
+            <a th:href="@{/api/web/mis-pedidos}" class="btn btn-outline-info w-100 mb-2"><i class="bi bi-box"></i> Mis pedidos</a>
+            <a th:href="@{/api/web/pedido-personalizado}" class="btn btn-outline-success w-100 mb-2"><i class="bi bi-pencil"></i> Pedido personalizado</a>
+            <a th:href="@{/api/web/wishlist}" class="btn btn-outline-danger w-100 mb-2"><i class="bi bi-heart"></i> Wishlist</a>
+            <a th:href="@{/api/web/personalizador}" class="btn btn-outline-secondary w-100 mb-2"><i class="bi bi-palette"></i> Personalizador</a>
+            <a th:href="@{/api/web/mis-pedidos}" class="btn btn-outline-teal w-100"><i class="bi bi-chat-dots"></i> Chat con artesana</a>
           </div>
         </div>
       </div>

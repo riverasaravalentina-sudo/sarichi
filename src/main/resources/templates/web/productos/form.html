@@ -43,10 +43,10 @@
 
 <nav class="navbar">
   <div class="container d-flex align-items-center gap-3">
-    <a th:href="@{/web/productos}" style="color:var(--celeste);text-decoration:none;font-size:1.2rem">
+    <a th:href="@{/api/web/productos}" style="color:var(--celeste);text-decoration:none;font-size:1.2rem">
       <i class="bi bi-arrow-left-circle"></i>
     </a>
-    <a class="navbar-brand mb-0" th:href="@{/web/}">🐱 Crocheting Sarichi</a>
+    <a class="navbar-brand mb-0" th:href="@{/api/web/}">🐱 Crocheting Sarichi</a>
   </div>
 </nav>
 
@@ -57,7 +57,7 @@
       <span th:text="${accion} + ' Producto'">Producto</span>
     </h3>
 
-    <form th:action="@{/web/productos/guardar}" method="post">
+    <form th:action="@{/api/web/productos/guardar}" method="post">
       <!-- ID oculto para edición -->
       <input type="hidden" name="id" th:value="${producto.id}">
 
@@ -114,7 +114,7 @@
           <button type="submit" class="btn-guardar">
             <i class="bi bi-floppy-fill me-1"></i>Guardar
           </button>
-          <a th:href="@{/web/productos}" class="btn-cancelar">
+          <a th:href="@{/api/web/productos}" class="btn-cancelar">
             <i class="bi bi-x-circle me-1"></i>Cancelar
           </a>
         </div>

@@ -58,7 +58,7 @@
         <!-- Si hay sesión activa -->
         <th:block th:if="${usuarioWeb != null}">
           <span class="user-badge">👋 <span th:text="${usuarioWeb}">Usuario</span></span>
-          <a th:href="@{/web/dashboard}" class="btn btn-sarichi btn-sm">Mi Panel</a>
+          <a th:href="@{/api/web/dashboard}" class="btn btn-sarichi btn-sm">Mi Panel</a>
           <a href="/web/logout" class="btn btn-outline-secondary btn-sm">Salir</a>
         </th:block>
         <!-- Si no hay sesión -->
