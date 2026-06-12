@@ -129,7 +129,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
-            // OAuth2 Google Login — activar SOLO si hay GOOGLE_CLIENT_ID configurado
+            // OAuth2 Google Login — pendiente de credenciales (Fase 2)
             // .oauth2Login(oauth2 -> oauth2
             //     .successHandler(oAuth2LoginSuccessHandler)
             //     .loginPage("/web/login")
