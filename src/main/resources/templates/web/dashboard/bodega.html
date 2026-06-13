@@ -70,7 +70,11 @@
         <div class="card shadow-sm">
           <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Productos en stock</h5>
-            <a th:href="@{/api/web/bodega/inventario}" class="btn btn-sm btn-outline-primary">Gestionar</a>
+            <div>
+              <a th:href="@{/api/web/bodega/inventario}" class="btn btn-sm btn-outline-primary">Gestionar</a>
+              <a th:href="@{/api/web/bodega/exportar/pdf}" class="btn btn-sm btn-outline-danger"><i class="bi bi-filetype-pdf"></i></a>
+              <a th:href="@{/api/web/bodega/exportar/excel}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel"></i></a>
+            </div>
           </div>
           <div class="table-responsive">
             <table class="table table-sm mb-0">

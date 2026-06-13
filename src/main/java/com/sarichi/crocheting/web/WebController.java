@@ -30,11 +30,14 @@ import com.sarichi.crocheting.service.DespachoService;
 import com.sarichi.crocheting.service.PedidoService;
 import com.sarichi.crocheting.service.MovimientoBodegaService;
 import com.sarichi.crocheting.service.PersonalizadorService;
+import com.sarichi.crocheting.service.ReporteService;
 import com.sarichi.crocheting.service.ProductoService;
 import com.sarichi.crocheting.service.ResenaService;
 import com.sarichi.crocheting.service.WishlistService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 
 /**
  * Controlador WEB (Thymeleaf) — Capa MVC server-side.
@@ -57,6 +60,7 @@ public class WebController {
     @Autowired private WishlistService   wishlistService;
     @Autowired private PersonalizadorService personalizadorService;
     @Autowired private MovimientoBodegaService movimientoBodegaService;
+    @Autowired private ReporteService reporteService;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PasswordEncoder   passwordEncoder;
 
@@ -454,6 +458,34 @@ public class WebController {
             model.addAttribute("movimientos", List.of());
         }
         return "web/bodega/movimientos";
+    }
+
+    @GetMapping("/bodega/exportar/pdf")
+    public void exportarBodegaPDF(HttpSession session,
+                                   HttpServletResponse response) throws IOException {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN")) return;
+        try {
+            byte[] pdf = reporteService.generarReporteInventarioPDF();
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=inventario.pdf");
+            response.getOutputStream().write(pdf);
+        } catch (Exception e) {
+            response.sendRedirect("/api/web/dashboard/bodega");
+        }
+    }
+
+    @GetMapping("/bodega/exportar/excel")
+    public void exportarBodegaExcel(HttpSession session,
+                                     HttpServletResponse response) throws IOException {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN")) return;
+        try {
+            byte[] excel = reporteService.generarReporteInventarioExcel();
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=inventario.xlsx");
+            response.getOutputStream().write(excel);
+        } catch (Exception e) {
+            response.sendRedirect("/api/web/dashboard/bodega");
+        }
     }
 
     /** MERCADEO: analíticas + blog + galería */

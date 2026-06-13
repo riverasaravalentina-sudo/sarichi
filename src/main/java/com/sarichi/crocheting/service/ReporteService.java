@@ -55,6 +55,40 @@ public class ReporteService {
         }
     }
     
+    public byte[] generarReporteInventarioPDF() {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            PdfWriter writer = new PdfWriter(baos);
+            PdfDocument pdfDoc = new PdfDocument(writer);
+            Document document = new Document(pdfDoc);
+
+            document.add(new Paragraph("REPORTE DE INVENTARIO").setBold());
+            document.add(new Paragraph("Generado: " + LocalDateTime.now().format(FORMATTER)));
+
+            long totalProductos = productoRepository.count();
+            document.add(new Paragraph("Total de productos: " + totalProductos));
+
+            Table table = new Table(4);
+            table.addCell(new Cell().add(new Paragraph("Producto")));
+            table.addCell(new Cell().add(new Paragraph("Stock")));
+            table.addCell(new Cell().add(new Paragraph("Precio")));
+            table.addCell(new Cell().add(new Paragraph("Estado")));
+
+            var productos = productoRepository.findByEstado("ACTIVO");
+            for (var p : productos) {
+                table.addCell(new Cell().add(new Paragraph(p.getNombre())));
+                table.addCell(new Cell().add(new Paragraph(p.getStock() != null ? p.getStock().toString() : "0")));
+                table.addCell(new Cell().add(new Paragraph(p.getPrecioBase() != null ? "$" + p.getPrecioBase() : "$0")));
+                table.addCell(new Cell().add(new Paragraph(p.getStock() != null && p.getStock() <= 2 ? "CRITICO" : "OK")));
+            }
+
+            document.add(table);
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new ReporteException("Error generando PDF inventario: " + e.getMessage(), e);
+        }
+    }
+
     public byte[] generarReporteInventarioExcel() {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             Workbook workbook = new XSSFWorkbook();
