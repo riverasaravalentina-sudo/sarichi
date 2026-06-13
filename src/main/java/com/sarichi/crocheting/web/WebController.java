@@ -29,6 +29,7 @@ import com.sarichi.crocheting.service.DespachoService;
 import com.sarichi.crocheting.service.PedidoService;
 import com.sarichi.crocheting.service.PersonalizadorService;
 import com.sarichi.crocheting.service.ProductoService;
+import com.sarichi.crocheting.service.ResenaService;
 import com.sarichi.crocheting.service.WishlistService;
 
 import jakarta.servlet.http.HttpSession;
@@ -42,6 +43,7 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/api/web")
 public class WebController {
 
+    @Autowired private ResenaService     resenaService;
     @Autowired private ProductoService   productoService;
     @Autowired private BlogService       blogService;
     @Autowired private ColorHiloService  colorHiloService;
@@ -81,12 +83,39 @@ public class WebController {
     public String tiendaDetalle(@PathVariable String id, Model model, HttpSession session) {
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
+        model.addAttribute("usuarioWebId", session.getAttribute("usuarioWebId"));
         try {
             model.addAttribute("producto", productoService.obtenerPorId(id));
         } catch (Exception e) {
             return "redirect:/api/web/tienda";
         }
+        try {
+            model.addAttribute("resenas", resenaService.listarPorProducto(id));
+            model.addAttribute("promedioCalificacion", resenaService.obtenerPromedioCalificacion(id));
+            model.addAttribute("totalResenas", resenaService.obtenerTotalResenas(id));
+        } catch (Exception e) {
+            model.addAttribute("resenas", List.of());
+            model.addAttribute("promedioCalificacion", 0.0);
+            model.addAttribute("totalResenas", 0L);
+        }
         return "web/tienda-detalle";
+    }
+
+    @PostMapping("/tienda/{id}/resena")
+    public String crearResena(@PathVariable String id,
+                              @RequestParam int calificacion,
+                              @RequestParam(required = false) String comentario,
+                              HttpSession session,
+                              RedirectAttributes ra) {
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        String usuarioWebId = (String) session.getAttribute("usuarioWebId");
+        try {
+            resenaService.crearResenaWeb(id, usuarioWebId, calificacion, comentario);
+            ra.addFlashAttribute("success", "Reseña creada correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al crear reseña: " + e.getMessage());
+        }
+        return "redirect:/api/web/tienda/" + id;
     }
 
     @GetMapping("/tienda")

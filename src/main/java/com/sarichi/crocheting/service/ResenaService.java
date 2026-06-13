@@ -82,6 +82,20 @@ public class ResenaService {
         return (long) resenaRepository.findByProductoId(productoId).size();
     }
 
+    public ResenaDTO crearResenaWeb(String productoId, String usuarioId, Integer calificacion, String comentario) {
+        if (calificacion == null || calificacion < 1 || calificacion > 5) {
+            throw new IllegalArgumentException("La calificación debe estar entre 1 y 5");
+        }
+        Resena resena = Resena.builder()
+                .productoId(productoId)
+                .usuarioId(usuarioId)
+                .calificacion(calificacion)
+                .comentario(comentario)
+                .build();
+        Resena resenaGuardada = resenaRepository.save(resena);
+        return entityToDto(resenaGuardada);
+    }
+
     private ResenaDTO entityToDto(Resena resena) {
         Usuario usuario = usuarioRepository.findById(resena.getUsuarioId()).orElse(null);
         String usuarioNombre = usuario != null ? usuario.getNombre() : "Desconocido";
