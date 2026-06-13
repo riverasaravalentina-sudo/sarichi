@@ -44,27 +44,27 @@
 <!-- ── NAVBAR ─────────────────────────────────────────────────────── -->
 <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
   <div class="container">
-    <a class="navbar-brand" href="/web/">🐱 Crocheting Sarichi</a>
+    <a class="navbar-brand" href="/api/web/">🐱 Crocheting Sarichi</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navMain">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="/web/tienda"><i class="bi bi-shop"></i> Tienda</a></li>
-        <li class="nav-item"><a class="nav-link" href="/web/blog"><i class="bi bi-journal-richtext"></i> Blog</a></li>
-        <li class="nav-item"><a class="nav-link" href="/web/galeria"><i class="bi bi-images"></i> Galería</a></li>
+        <li class="nav-item"><a class="nav-link" href="/api/web/tienda"><i class="bi bi-shop"></i> Tienda</a></li>
+        <li class="nav-item"><a class="nav-link" href="/api/web/blog"><i class="bi bi-journal-richtext"></i> Blog</a></li>
+        <li class="nav-item"><a class="nav-link" href="/api/web/galeria"><i class="bi bi-images"></i> Galería</a></li>
       </ul>
       <div class="d-flex gap-2 align-items-center">
         <!-- Si hay sesión activa -->
         <th:block th:if="${usuarioWeb != null}">
           <span class="user-badge">👋 <span th:text="${usuarioWeb}">Usuario</span></span>
           <a th:href="@{/api/web/dashboard}" class="btn btn-sarichi btn-sm">Mi Panel</a>
-          <a href="/web/logout" class="btn btn-outline-secondary btn-sm">Salir</a>
+          <a href="/api/web/logout" class="btn btn-outline-secondary btn-sm">Salir</a>
         </th:block>
         <!-- Si no hay sesión -->
         <th:block th:if="${usuarioWeb == null}">
-          <a href="/web/login"    class="btn btn-outline-sarichi btn-sm">Iniciar sesión</a>
-          <a href="/web/registro" class="btn btn-sarichi btn-sm">Registrarse</a>
+          <a href="/api/web/login"    class="btn btn-outline-sarichi btn-sm">Iniciar sesión</a>
+          <a href="/api/web/registro" class="btn btn-sarichi btn-sm">Registrarse</a>
         </th:block>
       </div>
     </div>
@@ -79,14 +79,14 @@
     <p class="lead text-muted mb-1">Amigurumis · Accesorios · Detalles Personalizados</p>
     <p class="text-muted mb-4" style="font-size:.95rem;">🩷 Creaciones tejidas a mano con mucho amor 🎀</p>
     <div class="d-flex gap-3 justify-content-center flex-wrap">
-      <a href="/web/tienda" class="btn btn-sarichi btn-lg px-4">
+      <a href="/api/web/tienda" class="btn btn-sarichi btn-lg px-4">
         <i class="bi bi-shop me-2"></i>Ver Catálogo
       </a>
-      <a href="/web/tienda?categoria=Amigurumis" class="btn btn-teal btn-lg px-4">
+      <a href="/api/web/tienda?categoria=Amigurumis" class="btn btn-teal btn-lg px-4">
         <i class="bi bi-stars me-2"></i>Ver Amigurumis 🧸
       </a>
       <th:block th:if="${usuarioWeb == null}">
-        <a href="/web/registro" class="btn btn-outline-sarichi btn-lg px-4">
+        <a href="/api/web/registro" class="btn btn-outline-sarichi btn-lg px-4">
           <i class="bi bi-person-plus me-2"></i>Únete
         </a>
       </th:block>
@@ -122,7 +122,7 @@
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="section-title mb-0">✨ Productos Destacados</h2>
-      <a href="/web/tienda" class="btn btn-outline-sarichi btn-sm">Ver todo <i class="bi bi-arrow-right"></i></a>
+      <a href="/api/web/tienda" class="btn btn-outline-sarichi btn-sm">Ver todo <i class="bi bi-arrow-right"></i></a>
     </div>
 
     <!-- Si hay productos -->
@@ -140,7 +140,7 @@
             </div>
           </div>
           <div class="card-footer p-0 pt-3 border-0 bg-transparent">
-            <a href="/web/tienda" class="btn btn-sarichi btn-sm w-100">Ver en tienda</a>
+            <a href="/api/web/tienda" class="btn btn-sarichi btn-sm w-100">Ver en tienda</a>
           </div>
         </div>
       </div>
@@ -150,7 +150,7 @@
     <div class="text-center py-5" th:if="${productosDestacados == null or productosDestacados.empty}">
       <div style="font-size:4rem;">🐱</div>
       <p class="text-muted">Próximamente nuevos productos disponibles</p>
-      <a href="/web/tienda" class="btn btn-sarichi">Explorar catálogo</a>
+      <a href="/api/web/tienda" class="btn btn-sarichi">Explorar catálogo</a>
     </div>
   </div>
 </section>
@@ -161,7 +161,7 @@
     <h2 class="section-title text-center mb-4">Explora por categoría</h2>
     <div class="row g-3 text-center">
       <div class="col-6 col-md-3">
-        <a href="/web/tienda?categoria=Amigurumis" class="text-decoration-none">
+        <a href="/api/web/tienda?categoria=Amigurumis" class="text-decoration-none">
           <div class="card border-0 shadow-sm p-4 h-100" style="border-radius:16px; transition:.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
             <div style="font-size:2.5rem;">🧸</div>
             <h6 class="mt-2 fw-bold" style="color:var(--sarichi-pink)">Amigurumis</h6>
@@ -170,7 +170,7 @@
         </a>
       </div>
       <div class="col-6 col-md-3">
-        <a href="/web/tienda?categoria=Accesorios" class="text-decoration-none">
+        <a href="/api/web/tienda?categoria=Accesorios" class="text-decoration-none">
           <div class="card border-0 shadow-sm p-4 h-100" style="border-radius:16px; transition:.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
             <div style="font-size:2.5rem;">👜</div>
             <h6 class="mt-2 fw-bold" style="color:var(--sarichi-teal)">Accesorios</h6>
@@ -179,7 +179,7 @@
         </a>
       </div>
       <div class="col-6 col-md-3">
-        <a href="/web/tienda?categoria=Ropa" class="text-decoration-none">
+        <a href="/api/web/tienda?categoria=Ropa" class="text-decoration-none">
           <div class="card border-0 shadow-sm p-4 h-100" style="border-radius:16px; transition:.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
             <div style="font-size:2.5rem;">🧣</div>
             <h6 class="mt-2 fw-bold" style="color:var(--sarichi-pink)">Ropa</h6>
@@ -188,7 +188,7 @@
         </a>
       </div>
       <div class="col-6 col-md-3">
-        <a href="/web/tienda?categoria=Hogar" class="text-decoration-none">
+        <a href="/api/web/tienda?categoria=Hogar" class="text-decoration-none">
           <div class="card border-0 shadow-sm p-4 h-100" style="border-radius:16px; transition:.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
             <div style="font-size:2.5rem;">🏠</div>
             <h6 class="mt-2 fw-bold" style="color:var(--sarichi-teal)">Hogar</h6>
@@ -205,7 +205,7 @@
   <div class="container">
     <h2 class="text-white fw-bold mb-2" style="font-family:'Playfair Display',serif;">¿Quieres un amigurumi personalizado? 🐱</h2>
     <p class="text-white opacity-75 mb-4">Regístrate gratis y chatea directamente con la artesana para crear tu pieza única.</p>
-    <a href="/web/registro" class="btn btn-light btn-lg px-5 fw-bold" style="color:var(--sarichi-pink)">
+    <a href="/api/web/registro" class="btn btn-light btn-lg px-5 fw-bold" style="color:var(--sarichi-pink)">
       <i class="bi bi-person-heart me-2"></i>Crear cuenta gratis
     </a>
   </div>
@@ -222,16 +222,16 @@
       <div class="col-md-4 mb-4">
         <h6 style="color:#fff;">Explora</h6>
         <ul class="list-unstyled small">
-          <li><a href="/web/tienda">Tienda</a></li>
-          <li><a href="/web/blog">Blog</a></li>
-          <li><a href="/web/galeria">Galería</a></li>
+          <li><a href="/api/web/tienda">Tienda</a></li>
+          <li><a href="/api/web/blog">Blog</a></li>
+          <li><a href="/api/web/galeria">Galería</a></li>
         </ul>
       </div>
       <div class="col-md-4 mb-4">
         <h6 style="color:#fff;">Mi cuenta</h6>
         <ul class="list-unstyled small">
-          <li><a href="/web/login">Iniciar sesión</a></li>
-          <li><a href="/web/registro">Registrarse</a></li>
+          <li><a href="/api/web/login">Iniciar sesión</a></li>
+          <li><a href="/api/web/registro">Registrarse</a></li>
         </ul>
       </div>
     </div>
