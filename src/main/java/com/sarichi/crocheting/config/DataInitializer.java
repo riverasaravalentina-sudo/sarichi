@@ -24,7 +24,7 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private PedidoRepository pedidoRepository;
     @Autowired private DespachoRepository despachoRepository;
     @Autowired private ActividadProduccionRepository actividadRepository;
-    @Autowired(required = false) private EventoTraficoRepository eventoTraficoRepository;
+    @Autowired private EventoTraficoRepository eventoTraficoRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
     @Override
@@ -136,53 +136,49 @@ public class DataInitializer implements CommandLineRunner {
         actividadRepository.save(ActividadProduccion.builder().id("act-010").pedidoId("pedido-114").productoId(pUnicornio.getId()).artesanaId(uArtesana.getId()).cantidad(1).fechaInicio(ahora.minusDays(24)).fechaFinalizacion(ahora.minusDays(19)).estado("COMPLETADO").notas("Unicornio mágico terminado").build());
 
         // ── Eventos de tráfico (MongoDB, batch insert) ─────────────────
-        if (eventoTraficoRepository != null) {
-            try {
-                var rng = ThreadLocalRandom.current();
-                String[] fuentes = {"INSTAGRAM", "GOOGLE", "DIRECTO", "WHATSAPP", "FACEBOOK"};
-                double[] pesosFuente = {0.30, 0.25, 0.25, 0.12, 0.08};
-                String[] paginas = {"/", "/productos", "/blog", "/galeria", "/personalizador", "/blog/amigurumi-conejo", "/blog/bufandas-tendencia", "/retos"};
-                double[] pesosPagina = {0.20, 0.25, 0.15, 0.10, 0.10, 0.07, 0.08, 0.05};
-                String[] tipos = {"VISITA", "CLICK", "CONVERSION"};
-                double[] pesoTipo = {0.70, 0.20, 0.10};
+        try {
+            var rng = ThreadLocalRandom.current();
+            String[] fuentes = {"INSTAGRAM", "GOOGLE", "DIRECTO", "WHATSAPP", "FACEBOOK"};
+            double[] pesosFuente = {0.30, 0.25, 0.25, 0.12, 0.08};
+            String[] paginas = {"/", "/productos", "/blog", "/galeria", "/personalizador", "/blog/amigurumi-conejo", "/blog/bufandas-tendencia", "/retos"};
+            double[] pesosPagina = {0.20, 0.25, 0.15, 0.10, 0.10, 0.07, 0.08, 0.05};
+            String[] tipos = {"VISITA", "CLICK", "CONVERSION"};
+            double[] pesoTipo = {0.70, 0.20, 0.10};
 
-                var eventos = new java.util.ArrayList<EventoTrafico>();
-                for (int dia = 0; dia < 30; dia++) {
-                    int eventosHoy = dia < 2 ? rng.nextInt(10, 16) : rng.nextInt(2, 6);
-                    for (int e = 0; e < eventosHoy; e++) {
-                        var fecha = ahora.minusDays(dia).withHour(rng.nextInt(8, 22)).withMinute(rng.nextInt(0, 59)).withSecond(rng.nextInt(0, 59)).withNano(0);
+            var eventos = new java.util.ArrayList<EventoTrafico>();
+            for (int dia = 0; dia < 30; dia++) {
+                int eventosHoy = dia < 2 ? rng.nextInt(10, 16) : rng.nextInt(2, 6);
+                for (int e = 0; e < eventosHoy; e++) {
+                    var fecha = ahora.minusDays(dia).withHour(rng.nextInt(8, 22)).withMinute(rng.nextInt(0, 59)).withSecond(rng.nextInt(0, 59)).withNano(0);
 
-                        double rnd = rng.nextDouble();
-                        String fuente = fuentes[0]; double acum = pesosFuente[0];
-                        for (int i = 1; i < fuentes.length; i++) { if (rnd <= acum) { fuente = fuentes[i-1]; break; } acum += pesosFuente[i]; }
+                    double rnd = rng.nextDouble();
+                    String fuente = fuentes[0]; double acum = pesosFuente[0];
+                    for (int i = 1; i < fuentes.length; i++) { if (rnd <= acum) { fuente = fuentes[i-1]; break; } acum += pesosFuente[i]; }
 
-                        String url = paginas[0]; acum = pesosPagina[0];
-                        for (int i = 1; i < paginas.length; i++) { if (rnd <= acum) { url = paginas[i-1]; break; } acum += pesosPagina[i]; }
+                    String url = paginas[0]; acum = pesosPagina[0];
+                    for (int i = 1; i < paginas.length; i++) { if (rnd <= acum) { url = paginas[i-1]; break; } acum += pesosPagina[i]; }
 
-                        String tipo = tipos[0]; acum = pesoTipo[0];
-                        for (int i = 1; i < tipos.length; i++) { if (rnd <= acum) { tipo = tipos[i-1]; break; } acum += pesoTipo[i]; }
+                    String tipo = tipos[0]; acum = pesoTipo[0];
+                    for (int i = 1; i < tipos.length; i++) { if (rnd <= acum) { tipo = tipos[i-1]; break; } acum += pesoTipo[i]; }
 
-                        var ev = EventoTrafico.builder()
-                                .fecha(fecha).tipo(tipo).fuente(fuente).url(url)
-                                .sessionId("seed-session-" + (dia * 10 + e))
-                                .userAgent("Mozilla/5.0")
-                                .ipAddress("192.168.1." + rng.nextInt(1, 255))
-                                .build();
+                    var ev = EventoTrafico.builder()
+                            .fecha(fecha).tipo(tipo).fuente(fuente).url(url)
+                            .sessionId("seed-session-" + (dia * 10 + e))
+                            .userAgent("Mozilla/5.0")
+                            .ipAddress("192.168.1." + rng.nextInt(1, 255))
+                            .build();
 
-                        if ("CONVERSION".equals(tipo)) {
-                            ev.setPedidoId("pedido-" + (100 + rng.nextInt(0, 15)));
-                            ev.setValorConversion(15000.0 + rng.nextDouble() * 70000);
-                        }
-                        eventos.add(ev);
+                    if ("CONVERSION".equals(tipo)) {
+                        ev.setPedidoId("pedido-" + (100 + rng.nextInt(0, 15)));
+                        ev.setValorConversion(15000.0 + rng.nextDouble() * 70000);
                     }
+                    eventos.add(ev);
                 }
-                eventoTraficoRepository.saveAll(eventos);
-                log.info("  Traffic events: {}", eventos.size());
-            } catch (Exception e) {
-                log.warn("Could not seed traffic events: {}", e.getMessage());
             }
-        } else {
-            log.info("  Traffic events: skipped (MongoDB not available)");
+            eventoTraficoRepository.saveAll(eventos);
+            log.info("  Traffic events: {}", eventos.size());
+        } catch (Exception e) {
+            log.warn("Could not seed traffic events (MongoDB): {}", e.getMessage());
         }
 
         log.info("=== Seed data created ===");
