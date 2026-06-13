@@ -24,8 +24,19 @@
     </div>
   </nav>
   <main class="container py-5">
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+      <span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Gestión de Usuarios</h2>
+      <h2>Gestión de Usuarios (excluye CLIENTES)</h2>
+      <a th:href="@{/api/web/usuarios/nuevo}" class="btn" style="background:#E8527A;color:#fff;">
+        <i class="bi bi-person-plus"></i> Nuevo usuario
+      </a>
     </div>
     <div class="card shadow-sm">
       <div class="card-body">
@@ -39,8 +50,18 @@
                 <td><span class="badge bg-info" th:text="${u.rol}">ROL</span></td>
                 <td><span class="badge" th:classappend="${u.estado == 'ACTIVO' ? 'bg-success' : 'bg-danger'}" th:text="${u.estado}">Estado</span></td>
                 <td>
-                  <button class="btn btn-sm btn-outline-primary">Editar</button>
-                  <button class="btn btn-sm btn-outline-danger">Desactivar</button>
+                  <a th:href="@{/api/web/usuarios/editar/{id}(id=${u.id})}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil"></i> Editar
+                  </a>
+                  <a th:href="@{/api/web/usuarios/estado/{id}(id=${u.id})}" class="btn btn-sm"
+                     th:classappend="${u.estado == 'ACTIVO' ? 'btn-outline-warning' : 'btn-outline-success'}">
+                    <i class="bi" th:classappend="${u.estado == 'ACTIVO' ? 'bi-pause-circle' : 'bi-check-circle'}"></i>
+                    <span th:text="${u.estado == 'ACTIVO' ? 'Desactivar' : 'Activar'}">Estado</span>
+                  </a>
+                  <a th:href="@{/api/web/usuarios/eliminar/{id}(id=${u.id})}" class="btn btn-sm btn-outline-danger"
+                     onclick="return confirm('¿Eliminar este usuario?')">
+                    <i class="bi bi-trash"></i> Eliminar
+                  </a>
                 </td>
               </tr>
             </tbody>
@@ -48,7 +69,7 @@
         </div>
         <div th:if="${usuarios == null or usuarios.isEmpty()}" class="text-center py-5">
           <div style="font-size:3rem">🐱</div>
-          <p class="text-muted">No hay usuarios registrados</p>
+          <p class="text-muted">No hay usuarios de staff registrados</p>
         </div>
       </div>
     </div>

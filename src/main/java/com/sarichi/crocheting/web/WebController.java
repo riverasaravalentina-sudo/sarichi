@@ -587,6 +587,130 @@ public class WebController {
         return "redirect:/api/web/wishlist";
     }
 
+    // ── Gesti�n de Usuarios (solo ADMIN) ───────────────────────────────
+
+    @GetMapping("/usuarios")
+    public String listarUsuarios(Model model, HttpSession session) {
+        if (!tieneRol(session, "ADMIN")) return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        List<Usuario> todos = usuarioRepository.findAll();
+        List<Usuario> noClientes = todos.stream()
+                .filter(u -> u.getRol() != UserRole.CLIENTE)
+                .toList();
+        model.addAttribute("usuarios", noClientes);
+        return "web/admin/usuarios";
+    }
+
+    @GetMapping("/usuarios/nuevo")
+    public String nuevoUsuarioForm(Model model, HttpSession session) {
+        if (!tieneRol(session, "ADMIN")) return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("usuario", new Usuario());
+        model.addAttribute("roles", List.of(UserRole.ADMIN, UserRole.ARTESANA, UserRole.LOGISTICA, UserRole.BODEGA, UserRole.MERCADEO));
+        model.addAttribute("accion", "Crear");
+        return "web/admin/usuarios-form";
+    }
+
+    @PostMapping("/usuarios/guardar")
+    public String guardarUsuario(@RequestParam(required = false) String id,
+                                 @RequestParam String nombre,
+                                 @RequestParam String correo,
+                                 @RequestParam(required = false) String telefono,
+                                 @RequestParam String rol,
+                                 @RequestParam(required = false) String contrasena,
+                                 RedirectAttributes ra,
+                                 HttpSession session) {
+        if (!tieneRol(session, "ADMIN")) return redirigirSegunSesion(session);
+        try {
+            if (id != null && !id.isBlank()) {
+                Usuario existente = usuarioRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                if (existente.getRol() == UserRole.CLIENTE) {
+                    throw new RuntimeException("No puedes modificar usuarios CLIENTE");
+                }
+                existente.setNombre(nombre);
+                existente.setCorreo(correo);
+                existente.setTelefono(telefono);
+                existente.setRol(UserRole.valueOf(rol));
+                if (contrasena != null && !contrasena.isBlank()) {
+                    existente.setPasswordHash(passwordEncoder.encode(contrasena));
+                }
+                usuarioRepository.save(existente);
+                ra.addFlashAttribute("success", "Usuario actualizado correctamente.");
+            } else {
+                if (usuarioRepository.existsByCorreo(correo)) {
+                    throw new RuntimeException("El correo ya est� registrado");
+                }
+                Usuario nuevo = Usuario.builder()
+                        .nombre(nombre)
+                        .correo(correo)
+                        .telefono(telefono)
+                        .rol(UserRole.valueOf(rol))
+                        .passwordHash(passwordEncoder.encode(contrasena != null && !contrasena.isBlank() ? contrasena : "Sarichi123*"))
+                        .build();
+                usuarioRepository.save(nuevo);
+                ra.addFlashAttribute("success", "Usuario creado correctamente.");
+            }
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error: " + e.getMessage());
+        }
+        return "redirect:/api/web/usuarios";
+    }
+
+    @GetMapping("/usuarios/editar/{id}")
+    public String editarUsuarioForm(@PathVariable String id, Model model, HttpSession session) {
+        if (!tieneRol(session, "ADMIN")) return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            if (usuario.getRol() == UserRole.CLIENTE) {
+                throw new RuntimeException("No puedes editar usuarios CLIENTE");
+            }
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("roles", List.of(UserRole.ADMIN, UserRole.ARTESANA, UserRole.LOGISTICA, UserRole.BODEGA, UserRole.MERCADEO));
+            model.addAttribute("accion", "Editar");
+            return "web/admin/usuarios-form";
+        } catch (Exception e) {
+            return "redirect:/api/web/usuarios";
+        }
+    }
+
+    @GetMapping("/usuarios/estado/{id}")
+    public String toggleEstadoUsuario(@PathVariable String id, RedirectAttributes ra, HttpSession session) {
+        if (!tieneRol(session, "ADMIN")) return redirigirSegunSesion(session);
+        try {
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            if (usuario.getRol() == UserRole.CLIENTE) {
+                throw new RuntimeException("No puedes modificar usuarios CLIENTE");
+            }
+            usuario.setEstado("ACTIVO".equals(usuario.getEstado()) ? "INACTIVO" : "ACTIVO");
+            usuarioRepository.save(usuario);
+            ra.addFlashAttribute("success", "Estado cambiado a " + usuario.getEstado());
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error: " + e.getMessage());
+        }
+        return "redirect:/api/web/usuarios";
+    }
+
+    @GetMapping("/usuarios/eliminar/{id}")
+    public String eliminarUsuario(@PathVariable String id, RedirectAttributes ra, HttpSession session) {
+        if (!tieneRol(session, "ADMIN")) return redirigirSegunSesion(session);
+        try {
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            if (usuario.getRol() == UserRole.CLIENTE) {
+                throw new RuntimeException("No puedes eliminar usuarios CLIENTE");
+            }
+            usuarioRepository.deleteById(id);
+            ra.addFlashAttribute("success", "Usuario eliminado correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error: " + e.getMessage());
+        }
+        return "redirect:/api/web/usuarios";
+    }
+
     // ── Personalizador ──────────────────────────────────────────────────
 
     @GetMapping("/personalizador")
