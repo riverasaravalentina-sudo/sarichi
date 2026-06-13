@@ -1033,6 +1033,7 @@ public class WebController {
             LocalDateTime ahora = LocalDateTime.now();
             MetricasTraficoDTO metricas = analiticaService.obtenerMetricasTrafico(
                 ahora.minusDays(30), ahora);
+            model.addAttribute("metricas", metricas);
             model.addAttribute("visitas", metricas.getVisitasHoy());
             model.addAttribute("tasaConversion", String.format("%.1f", metricas.getTasaConversion() != null ? metricas.getTasaConversion() : 0.0));
 
@@ -1048,6 +1049,7 @@ public class WebController {
             long pedidosMes = metricas.getConversionesSemana() != null ? metricas.getConversionesSemana() : 0;
             model.addAttribute("pedidosMes", pedidosMes);
         } catch (Exception e) {
+            model.addAttribute("metricas", null);
             model.addAttribute("visitas", 0);
             model.addAttribute("seguidores", 0);
             model.addAttribute("tasaConversion", "0.0");
