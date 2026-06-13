@@ -137,6 +137,18 @@ public class WebController {
         model.addAttribute("categoria",  categoria);
         model.addAttribute("busqueda",   busqueda);
         model.addAttribute("categorias", List.of("Amigurumis", "Accesorios", "Ropa", "Hogar"));
+        String usuarioWebId = (String) session.getAttribute("usuarioWebId");
+        if (usuarioWebId != null) {
+            try {
+                var wishlistItems = wishlistService.listarPorUsuario(usuarioWebId);
+                java.util.Set<String> wishlistIds = wishlistItems.stream()
+                        .map(item -> item.getProductoId())
+                        .collect(java.util.stream.Collectors.toSet());
+                model.addAttribute("wishlistIds", wishlistIds);
+            } catch (Exception e) {
+                model.addAttribute("wishlistIds", java.util.Set.of());
+            }
+        }
         return "web/tienda";
     }
 

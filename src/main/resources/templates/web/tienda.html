@@ -270,14 +270,31 @@
                                 </span>
                             </div>
                             <th:block th:if="${usuarioWeb != null}">
-                                <form method="post" th:action="@{/api/web/carrito/agregar}">
-                                    <input type="hidden" name="productoId" th:value="${producto.id}">
-                                    <input type="hidden" name="cantidad" value="1">
-                                    <button type="submit" class="btn-sarichi w-100 justify-content-center"
-                                            th:disabled="${producto.stock <= 0}">
-                                        <i class="bi bi-cart-plus"></i> Agregar
-                                    </button>
-                                </form>
+                                <div class="d-flex gap-2">
+                                    <form method="post" th:action="@{/api/web/carrito/agregar}" class="flex-grow-1">
+                                        <input type="hidden" name="productoId" th:value="${producto.id}">
+                                        <input type="hidden" name="cantidad" value="1">
+                                        <button type="submit" class="btn-sarichi w-100 justify-content-center"
+                                                th:disabled="${producto.stock <= 0}">
+                                            <i class="bi bi-cart-plus"></i> Agregar
+                                        </button>
+                                    </form>
+                                    <th:block th:if="${wishlistIds != null and wishlistIds.contains(producto.id)}">
+                                        <a th:href="@{/api/web/wishlist/eliminar/{id}(id=${producto.id})}"
+                                           class="btn btn-outline-danger" style="border-radius:10px;"
+                                           title="Quitar de wishlist">
+                                            <i class="bi bi-heart-fill"></i>
+                                        </a>
+                                    </th:block>
+                                    <th:block th:unless="${wishlistIds != null and wishlistIds.contains(producto.id)}">
+                                        <form method="post" th:action="@{/api/web/wishlist/agregar/{id}(id=${producto.id})}">
+                                            <button type="submit" class="btn btn-outline-danger" style="border-radius:10px;"
+                                                    title="Agregar a wishlist">
+                                                <i class="bi bi-heart"></i>
+                                            </button>
+                                        </form>
+                                    </th:block>
+                                </div>
                             </th:block>
                             <th:block th:unless="${usuarioWeb != null}">
                                 <a href="/api/web/login" class="btn btn-outline-secondary w-100 justify-content-center">
