@@ -84,7 +84,7 @@ public class WebController {
         try {
             model.addAttribute("producto", productoService.obtenerPorId(id));
         } catch (Exception e) {
-            return "redirect:/web/tienda";
+            return "redirect:/api/web/tienda";
         }
         return "web/tienda-detalle";
     }
@@ -118,7 +118,7 @@ public class WebController {
             var articulo = blogService.obtenerPorSlug(slug);
             model.addAttribute("articulo", articulo);
         } catch (Exception e) {
-            return "redirect:/web/blog";
+            return "redirect:/api/web/blog";
         }
         return "web/blog-articulo";
     }
@@ -186,22 +186,22 @@ public class WebController {
 
     /** Mapea cada rol a su ruta de dashboard correspondiente */
     private String redirigirPorRol(String rol) {
-        if (rol == null) return "redirect:/web/login";
+        if (rol == null) return "redirect:/api/web/login";
         return switch (rol) {
-            case "ADMIN"     -> "redirect:/web/dashboard/admin";
-            case "ARTESANA"  -> "redirect:/web/dashboard/artesana";
-            case "LOGISTICA" -> "redirect:/web/dashboard/logistica";
-            case "BODEGA"    -> "redirect:/web/dashboard/bodega";
-            case "MERCADEO"  -> "redirect:/web/dashboard/mercadeo";
-            case "CLIENTE"   -> "redirect:/web/dashboard/cliente";
-            default          -> "redirect:/web/";
+            case "ADMIN"     -> "redirect:/api/web/dashboard/admin";
+            case "ARTESANA"  -> "redirect:/api/web/dashboard/artesana";
+            case "LOGISTICA" -> "redirect:/api/web/dashboard/logistica";
+            case "BODEGA"    -> "redirect:/api/web/dashboard/bodega";
+            case "MERCADEO"  -> "redirect:/api/web/dashboard/mercadeo";
+            case "CLIENTE"   -> "redirect:/api/web/dashboard/cliente";
+            default          -> "redirect:/api/web/";
         };
     }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/web/login";
+        return "redirect:/api/web/login";
     }
 
     // ── Registro público ───────────────────────────────────────────────
@@ -230,10 +230,10 @@ public class WebController {
                     .build();
             autenticacionService.registrar(dto);
             ra.addFlashAttribute("success", "Cuenta creada correctamente. Ya puedes iniciar sesión.");
-            return "redirect:/web/login";
+            return "redirect:/api/web/login";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/web/registro";
+            return "redirect:/api/web/registro";
         }
     }
 
@@ -328,7 +328,7 @@ public class WebController {
     @GetMapping("/dashboard")
     public String dashboardGeneral(HttpSession session) {
         String rol = (String) session.getAttribute("usuarioWebRol");
-        if (rol == null) return "redirect:/web/login";
+        if (rol == null) return "redirect:/api/web/login";
         return redirigirPorRol(rol);
     }
 
@@ -338,7 +338,7 @@ public class WebController {
     public String listarProductos(@RequestParam(required = false) String categoria,
                                   @RequestParam(required = false) String busqueda,
                                   Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb",     session.getAttribute("usuarioWebRol"));
         ProductoFiltroDTO filtro = new ProductoFiltroDTO();
@@ -377,7 +377,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al guardar el producto: " + e.getMessage());
         }
-        return "redirect:/web/productos";
+        return "redirect:/api/web/productos";
     }
 
     @GetMapping("/productos/editar/{id}")
@@ -391,7 +391,7 @@ public class WebController {
             model.addAttribute("accion",     "Editar");
             return "web/productos/form";
         } catch (Exception e) {
-            return "redirect:/web/productos";
+            return "redirect:/api/web/productos";
         }
     }
 
@@ -405,14 +405,14 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al eliminar: " + e.getMessage());
         }
-        return "redirect:/web/productos";
+        return "redirect:/api/web/productos";
     }
 
     // ── Colores de Hilo ────────────────────────────────────────────────
 
     @GetMapping("/colores")
     public String listarColores(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb",     session.getAttribute("usuarioWebRol"));
         List<ColorHiloDTO> colores = colorHiloService.listarTodos();
@@ -444,7 +444,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al guardar el color: " + e.getMessage());
         }
-        return "redirect:/web/colores";
+        return "redirect:/api/web/colores";
     }
 
     @GetMapping("/colores/editar/{id}")
@@ -457,7 +457,7 @@ public class WebController {
             model.addAttribute("accion", "Editar");
             return "web/colores/form";
         } catch (Exception e) {
-            return "redirect:/web/colores";
+            return "redirect:/api/web/colores";
         }
     }
 
@@ -471,14 +471,14 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al eliminar: " + e.getMessage());
         }
-        return "redirect:/web/colores";
+        return "redirect:/api/web/colores";
     }
 
     // ── Pedidos ────────────────────────────────────────────────────────
 
     @GetMapping("/pedidos")
     public String listarPedidos(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb",     session.getAttribute("usuarioWebRol"));
         try {
@@ -511,7 +511,7 @@ public class WebController {
 
     @GetMapping("/wishlist")
     public String verWishlist(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         String usuarioWebId = (String) session.getAttribute("usuarioWebId");
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
@@ -526,23 +526,23 @@ public class WebController {
     @PostMapping("/wishlist/agregar/{productoId}")
     public String agregarWishlist(@PathVariable String productoId,
                                    RedirectAttributes ra, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         try {
             wishlistService.agregar((String) session.getAttribute("usuarioWebId"), productoId);
             ra.addFlashAttribute("success", "Producto agregado a tu lista de deseos");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/web/wishlist";
+        return "redirect:/api/web/wishlist";
     }
 
     @GetMapping("/wishlist/eliminar/{productoId}")
     public String eliminarWishlist(@PathVariable String productoId,
                                     RedirectAttributes ra, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         wishlistService.eliminar((String) session.getAttribute("usuarioWebId"), productoId);
         ra.addFlashAttribute("success", "Producto eliminado de tu lista de deseos");
-        return "redirect:/web/wishlist";
+        return "redirect:/api/web/wishlist";
     }
 
     // ── Personalizador ──────────────────────────────────────────────────
@@ -561,7 +561,7 @@ public class WebController {
 
     @GetMapping("/pedido-personalizado")
     public String pedidoPersonalizadoForm(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("usuarioWebId", session.getAttribute("usuarioWebId"));
         try {
@@ -576,7 +576,7 @@ public class WebController {
 
     @GetMapping("/chat/{pedidoId}")
     public String chatPedido(@PathVariable String pedidoId, Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         String usuarioWebId = (String) session.getAttribute("usuarioWebId");
         String usuarioWeb = (String) session.getAttribute("usuarioWeb");
         String rolWeb = (String) session.getAttribute("usuarioWebRol");
@@ -628,7 +628,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No se pudo agregar el producto: " + e.getMessage());
         }
-        return "redirect:/web/carrito";
+        return "redirect:/api/web/carrito";
     }
 
     @PostMapping("/carrito/eliminar/{id}")
@@ -637,21 +637,21 @@ public class WebController {
         carrito.removeIf(item -> item.getProductoId().equals(id));
         session.setAttribute("carrito", carrito);
         ra.addFlashAttribute("success", "Producto eliminado del carrito.");
-        return "redirect:/web/carrito";
+        return "redirect:/api/web/carrito";
     }
 
     @GetMapping("/carrito/vaciar")
     public String vaciarCarrito(RedirectAttributes ra, HttpSession session) {
         session.setAttribute("carrito", new ArrayList<CarritoItem>());
         ra.addFlashAttribute("success", "Carrito vaciado correctamente.");
-        return "redirect:/web/carrito";
+        return "redirect:/api/web/carrito";
     }
 
     @GetMapping("/checkout")
     public String checkout(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         List<CarritoItem> carrito = obtenerCarrito(session);
-        if (carrito.isEmpty()) return "redirect:/web/carrito";
+        if (carrito.isEmpty()) return "redirect:/api/web/carrito";
         agregarModeloCarrito(model, session);
         return "web/checkout";
     }
@@ -662,11 +662,11 @@ public class WebController {
                                     @RequestParam(required = false) String departamento,
                                     RedirectAttributes ra,
                                     HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         List<CarritoItem> carrito = obtenerCarrito(session);
         if (carrito.isEmpty()) {
             ra.addFlashAttribute("error", "Tu carrito está vacío.");
-            return "redirect:/web/carrito";
+            return "redirect:/api/web/carrito";
         }
         try {
             List<ItemPedidoRequest> items = carrito.stream()
@@ -685,16 +685,16 @@ public class WebController {
             pedidoService.crearPedido((String) session.getAttribute("usuarioWebId"), dto);
             session.setAttribute("carrito", new ArrayList<CarritoItem>());
             ra.addFlashAttribute("success", "Pedido creado correctamente.");
-            return "redirect:/web/mis-pedidos";
+            return "redirect:/api/web/mis-pedidos";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No se pudo confirmar el pedido: " + e.getMessage());
-            return "redirect:/web/checkout";
+            return "redirect:/api/web/checkout";
         }
     }
 
     @GetMapping("/mis-pedidos")
     public String misPedidos(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/web/login";
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
         try {
@@ -757,7 +757,7 @@ public class WebController {
      */
     private String redirigirSegunSesion(HttpSession session) {
         String rol = (String) session.getAttribute("usuarioWebRol");
-        if (rol == null) return "redirect:/web/login";
+        if (rol == null) return "redirect:/api/web/login";
         return redirigirPorRol(rol);
     }
 }
