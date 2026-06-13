@@ -25,7 +25,7 @@ public class EmailService {
     @Value("${sarichi.mail.from:noreply@sarichi.com}")
     private String remitente;
 
-    @Value("${sarichi.app.base-url:http://localhost:8080/api}")
+    @Value("${sarichi.app.base-url:http://localhost:8080}")
     private String baseUrl;
 
     public EmailService(ObjectProvider<JavaMailSender> mailSenderProvider) {
@@ -33,8 +33,14 @@ public class EmailService {
     }
 
     public void enviarCorreoRecuperacion(String correo, String nombre, String token) {
-        String enlace = baseUrl + "/web/restablecer?token=" + token;
-        String mensaje = "Hola " + nombre + ", usa este enlace para restablecer tu contraseña: " + enlace;
+        String enlace = baseUrl + "/restablecer.html?token=" + token;
+        String mensaje = "Hola " + nombre + ",\n\n"
+                + "Recibimos una solicitud para restablecer tu contraseña.\n\n"
+                + "Haz clic en el siguiente enlace para crear una nueva contraseña:\n"
+                + enlace + "\n\n"
+                + "Este enlace expira en 15 minutos.\n\n"
+                + "Si no solicitaste este cambio, ignora este correo.\n\n"
+                + "— Crocheting Sarichi 🧵 UTS 2026";
         enviarSimple(correo, "Recuperación de contraseña - Sarichi", mensaje);
     }
 
