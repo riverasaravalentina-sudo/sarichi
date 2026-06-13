@@ -593,11 +593,16 @@ public class WebController {
     public String listarUsuarios(Model model, HttpSession session) {
         if (!tieneRol(session, "ADMIN")) return redirigirSegunSesion(session);
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
-        List<Usuario> todos = usuarioRepository.findAll();
-        List<Usuario> noClientes = todos.stream()
-                .filter(u -> u.getRol() != UserRole.CLIENTE)
-                .toList();
-        model.addAttribute("usuarios", noClientes);
+        try {
+            List<Usuario> todos = usuarioRepository.findAll();
+            List<Usuario> noClientes = todos.stream()
+                    .filter(u -> u.getRol() != UserRole.CLIENTE)
+                    .toList();
+            model.addAttribute("usuarios", noClientes);
+        } catch (Exception e) {
+            model.addAttribute("usuarios", List.of());
+            model.addAttribute("error", "Error al cargar usuarios: " + e.getMessage());
+        }
         return "web/admin/usuarios";
     }
 
