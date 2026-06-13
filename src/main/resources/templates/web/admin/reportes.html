@@ -54,8 +54,8 @@
           <div class="card-header bg-light"><h5>Exportar Reportes</h5></div>
           <div class="card-body">
             <div class="d-grid gap-2">
-              <button class="btn btn-outline-primary"><i class="bi bi-file-earmark-pdf"></i> Exportar PDF</button>
-              <button class="btn btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</button>
+              <a th:href="@{/api/web/admin/reportes/exportar/pdf}" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf"></i> Exportar PDF</a>
+              <a th:href="@{/api/web/admin/reportes/exportar/excel}" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</a>
             </div>
           </div>
         </div>

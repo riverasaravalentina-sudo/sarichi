@@ -1,7 +1,10 @@
 package com.sarichi.crocheting.web;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,33 +13,45 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.sarichi.crocheting.dto.ActualizarDespachoDTO;
+import com.sarichi.crocheting.dto.ArticuloBlogDTO;
 import com.sarichi.crocheting.dto.ColorHiloDTO;
+import com.sarichi.crocheting.dto.CrearDespachoDTO;
 import com.sarichi.crocheting.dto.CrearPedidoDTO;
 import com.sarichi.crocheting.dto.DashboardKpisDTO;
+import com.sarichi.crocheting.dto.DespachoDTO;
+import com.sarichi.crocheting.dto.FotoGaleriaDTO;
 import com.sarichi.crocheting.dto.ItemPedidoRequest;
+import com.sarichi.crocheting.dto.MetricasTraficoDTO;
 import com.sarichi.crocheting.dto.PersonalizacionDTO;
 import com.sarichi.crocheting.dto.ProductoDTO;
 import com.sarichi.crocheting.dto.ProductoFiltroDTO;
 import com.sarichi.crocheting.dto.RegistroDTO;
+import com.sarichi.crocheting.dto.RetoMensualDTO;
 import com.sarichi.crocheting.entity.Usuario;
 import com.sarichi.crocheting.entity.UserRole;
 import com.sarichi.crocheting.repository.UsuarioRepository;
+import com.sarichi.crocheting.service.AnaliticaService;
 import com.sarichi.crocheting.service.AutenticacionService;
 import com.sarichi.crocheting.service.BlogService;
 import com.sarichi.crocheting.service.ChatService;
+import com.sarichi.crocheting.service.CloudinaryService;
 import com.sarichi.crocheting.service.ColorHiloService;
 import com.sarichi.crocheting.service.DashboardService;
 import com.sarichi.crocheting.service.DespachoService;
+import com.sarichi.crocheting.service.GaleriaService;
 import com.sarichi.crocheting.service.PedidoService;
 import com.sarichi.crocheting.service.MovimientoBodegaService;
 import com.sarichi.crocheting.service.PersonalizadorService;
 import com.sarichi.crocheting.service.ReporteService;
+import com.sarichi.crocheting.service.RetoService;
 import com.sarichi.crocheting.service.ProductoService;
 import com.sarichi.crocheting.service.ResenaService;
 import com.sarichi.crocheting.service.WishlistService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 /**
@@ -55,6 +70,10 @@ public class WebController {
     @Autowired private DashboardService  dashboardService;
     @Autowired private PedidoService     pedidoService;
     @Autowired private DespachoService   despachoService;
+    @Autowired private GaleriaService    galeriaService;
+    @Autowired private RetoService       retoService;
+    @Autowired private AnaliticaService  analiticaService;
+    @Autowired private CloudinaryService cloudinaryService;
     @Autowired private AutenticacionService autenticacionService;
     @Autowired private ChatService       chatService;
     @Autowired private WishlistService   wishlistService;
@@ -63,6 +82,23 @@ public class WebController {
     @Autowired private ReporteService reporteService;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PasswordEncoder   passwordEncoder;
+
+    // ── Transiciones de estado para pedidos ─────────────────────────────
+
+    private static final Map<String, String> SIGUIENTE_ESTADO = Map.of(
+        "PENDIENTE",     "EN_PRODUCCION",
+        "SOLICITADO",   "EN_PRODUCCION",
+        "EN_PRODUCCION", "LISTO",
+        "LISTO",         "DESPACHADO",
+        "DESPACHADO",    "ENTREGADO"
+    );
+
+    private static final Map<String, String> ETIQUETA_TRANSICION = Map.of(
+        "EN_PRODUCCION", "→ En producción",
+        "LISTO",         "→ Listo",
+        "DESPACHADO",    "→ Despachado",
+        "ENTREGADO",     "→ Entregado"
+    );
 
     // ── Inicio público ─────────────────────────────────────────────────
 
@@ -175,6 +211,11 @@ public class WebController {
     public String blog(Model model, HttpSession session) {
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
+        try {
+            model.addAttribute("articulos", blogService.listarPublicados());
+        } catch (Exception e) {
+            model.addAttribute("articulos", List.of());
+        }
         return "web/blog";
     }
 
@@ -302,11 +343,62 @@ public class WebController {
         return "web/dashboard/admin";
     }
 
+    /** ADMIN: reportes y estadísticas */
+    @GetMapping("/admin/reportes")
+    public String adminReportes(Model model, HttpSession session) {
+        if (!tieneRol(session, "ADMIN")) return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            DashboardKpisDTO kpis = dashboardService.obtenerKpis();
+            model.addAttribute("totalVentas", kpis.getVentasHoy() != null ? kpis.getVentasHoy() : 0.0);
+            model.addAttribute("totalPedidos", kpis.getPedidosPendientes() != null ? kpis.getPedidosPendientes() : 0);
+            model.addAttribute("totalProductos", kpis.getTotalProductos());
+            model.addAttribute("totalClientes", kpis.getTotalClientes());
+        } catch (Exception e) {
+            model.addAttribute("totalVentas", 0.0);
+            model.addAttribute("totalPedidos", 0L);
+            model.addAttribute("totalProductos", 0L);
+            model.addAttribute("totalClientes", 0L);
+        }
+        return "web/admin/reportes";
+    }
+
+    @GetMapping("/admin/reportes/exportar/pdf")
+    public void adminExportarPDF(HttpSession session,
+                                  HttpServletResponse response) throws IOException {
+        if (!tieneRol(session, "ADMIN")) return;
+        try {
+            LocalDateTime ahora = LocalDateTime.now();
+            byte[] pdf = reporteService.generarReporteVentasPDF(ahora.minusDays(30), ahora);
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=reporte-admin.pdf");
+            response.getOutputStream().write(pdf);
+        } catch (Exception e) {
+            response.sendRedirect("/api/web/admin/reportes");
+        }
+    }
+
+    @GetMapping("/admin/reportes/exportar/excel")
+    public void adminExportarExcel(HttpSession session,
+                                    HttpServletResponse response) throws IOException {
+        if (!tieneRol(session, "ADMIN")) return;
+        try {
+            byte[] excel = reporteService.generarReporteInventarioExcel();
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=reporte-admin.xlsx");
+            response.getOutputStream().write(excel);
+        } catch (Exception e) {
+            response.sendRedirect("/api/web/admin/reportes");
+        }
+    }
+
     /** ARTESANA: pedidos activos + acceso a producción */
     @GetMapping("/dashboard/artesana")
     public String dashboardArtesana(Model model, HttpSession session) {
         if (!tieneRol(session, "ARTESANA")) return redirigirSegunSesion(session);
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("sigEstado", SIGUIENTE_ESTADO);
+        model.addAttribute("etiqTransicion", ETIQUETA_TRANSICION);
         try {
             model.addAttribute("pedidos", pedidoService.listarTodos());
         } catch (Exception e) {
@@ -323,6 +415,7 @@ public class WebController {
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         try {
             model.addAttribute("despachos", despachoService.listarDespachosPendientes());
+            model.addAttribute("estadisticas", despachoService.obtenerEstadisticas());
         } catch (Exception e) {
             model.addAttribute("despachos", List.of());
             model.addAttribute("errorDespachos", "No se pudieron cargar los despachos");
@@ -493,6 +586,14 @@ public class WebController {
     public String dashboardMercadeo(Model model, HttpSession session) {
         if (!tieneRol(session, "MERCADEO")) return redirigirSegunSesion(session);
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            LocalDateTime ahora = LocalDateTime.now();
+            MetricasTraficoDTO metricas = analiticaService.obtenerMetricasTrafico(
+                ahora.minusDays(30), ahora);
+            model.addAttribute("metricas", metricas);
+        } catch (Exception e) {
+            model.addAttribute("errorMetricas", "No se pudieron cargar las métricas");
+        }
         return "web/dashboard/mercadeo";
     }
 
@@ -695,6 +796,294 @@ public class WebController {
             model.addAttribute("despachos", List.of());
         }
         return "web/despachos/listar";
+    }
+
+    // ── Logistica subpages ──────────────────────────────────────────────
+
+    @GetMapping("/logistica/despachos")
+    public String logisticaDespachos(Model model, HttpSession session) {
+        if (!tieneRol(session, "LOGISTICA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("despachos", despachoService.listarDespachosPendientes());
+        } catch (Exception e) {
+            model.addAttribute("despachos", List.of());
+            model.addAttribute("error", "Error al cargar despachos: " + e.getMessage());
+        }
+        return "web/logistica/despachos";
+    }
+
+    @PostMapping("/logistica/despachos/generar-guia/{pedidoId}")
+    public String generarGuia(@PathVariable String pedidoId,
+                               @RequestParam String transportadora,
+                               @RequestParam(required = false) String observaciones,
+                               HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "LOGISTICA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            CrearDespachoDTO dto = CrearDespachoDTO.builder()
+                .pedidoId(pedidoId)
+                .transportadora(transportadora)
+                .observaciones(observaciones)
+                .build();
+            despachoService.crearDespacho(dto);
+            ra.addFlashAttribute("success", "Guía generada y despacho creado correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al generar guía: " + e.getMessage());
+        }
+        return "redirect:/api/web/logistica/despachos";
+    }
+
+    @PostMapping("/logistica/despachos/{id}/estado")
+    public String actualizarEstadoDespacho(@PathVariable String id,
+                                            @RequestParam String estado,
+                                            @RequestParam(required = false) String observaciones,
+                                            HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "LOGISTICA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            ActualizarDespachoDTO dto = ActualizarDespachoDTO.builder()
+                .estado(estado)
+                .observaciones(observaciones)
+                .build();
+            despachoService.actualizarEstadoDespacho(id, dto);
+            ra.addFlashAttribute("success", "Estado de despacho actualizado a: " + estado);
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al actualizar estado: " + e.getMessage());
+        }
+        return "redirect:/api/web/logistica/despachos";
+    }
+
+    @GetMapping("/logistica/guias")
+    public String logisticaGuias(Model model, HttpSession session) {
+        if (!tieneRol(session, "LOGISTICA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            List<DespachoDTO> todos = despachoService.listarTodos();
+            List<DespachoDTO> conGuia = todos.stream()
+                .filter(d -> d.getNumeroGuia() != null && !d.getNumeroGuia().isBlank())
+                .collect(Collectors.toList());
+            model.addAttribute("guias", conGuia);
+        } catch (Exception e) {
+            model.addAttribute("guias", List.of());
+            model.addAttribute("error", "Error al cargar guías: " + e.getMessage());
+        }
+        return "web/logistica/guias";
+    }
+
+    @GetMapping("/logistica/seguimiento/{guia}")
+    public String seguimientoGuia(@PathVariable String guia, Model model, HttpSession session) {
+        if (!tieneRol(session, "LOGISTICA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            Map<String, Object> info = despachoService.consultarSeguimiento(guia);
+            model.addAttribute("seguimiento", info);
+            model.addAttribute("numeroGuia", guia);
+        } catch (Exception e) {
+            model.addAttribute("error", "No se pudo consultar seguimiento: " + e.getMessage());
+        }
+        return "web/logistica/seguimiento";
+    }
+
+    // ── Mercadeo subpages ───────────────────────────────────────────────
+
+    @GetMapping("/mercadeo/blog")
+    public String mercadeoBlog(Model model, HttpSession session) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("articulos", blogService.listarTodos());
+        } catch (Exception e) {
+            model.addAttribute("articulos", List.of());
+            model.addAttribute("error", "Error al cargar artículos: " + e.getMessage());
+        }
+        return "web/mercadeo/blog";
+    }
+
+    @PostMapping("/mercadeo/blog/publicar/{id}")
+    public String mercadeoPublicarArticulo(@PathVariable String id,
+                                            HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            blogService.publicarArticulo(id);
+            ra.addFlashAttribute("success", "Artículo publicado correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al publicar: " + e.getMessage());
+        }
+        return "redirect:/api/web/mercadeo/blog";
+    }
+
+    @GetMapping("/mercadeo/galeria")
+    public String mercadeoGaleria(Model model, HttpSession session) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("imagenes", galeriaService.listarFotosRecientes(50));
+            model.addAttribute("colecciones", galeriaService.listarColeccionesActivas());
+        } catch (Exception e) {
+            model.addAttribute("imagenes", List.of());
+            model.addAttribute("colecciones", List.of());
+            model.addAttribute("error", "Error al cargar galería: " + e.getMessage());
+        }
+        return "web/mercadeo/galeria";
+    }
+
+    @PostMapping("/mercadeo/galeria/subir")
+    public String mercadeoSubirImagen(@RequestParam("imagen") MultipartFile imagen,
+                                       @RequestParam(required = false) String coleccionId,
+                                       @RequestParam(required = false) String titulo,
+                                       @RequestParam(required = false) String descripcion,
+                                       HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            Map<String, Object> resultado = cloudinaryService.subirImagen(imagen, "galeria");
+            String url = (String) resultado.get("url");
+            galeriaService.agregarFotoAColeccion(
+                coleccionId != null && !coleccionId.isBlank() ? coleccionId : "sin-coleccion",
+                url, titulo, descripcion, null, null);
+            ra.addFlashAttribute("success", "Imagen subida correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al subir imagen: " + e.getMessage());
+        }
+        return "redirect:/api/web/mercadeo/galeria";
+    }
+
+    @GetMapping("/mercadeo/galeria/eliminar/{id}")
+    public String mercadeoEliminarImagen(@PathVariable String id,
+                                          HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            galeriaService.eliminarFoto(id);
+            ra.addFlashAttribute("success", "Imagen eliminada correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al eliminar imagen: " + e.getMessage());
+        }
+        return "redirect:/api/web/mercadeo/galeria";
+    }
+
+    @GetMapping("/mercadeo/retos")
+    public String mercadeoRetos(Model model, HttpSession session) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("retos", retoService.listarRetosTodos());
+        } catch (Exception e) {
+            model.addAttribute("retos", List.of());
+            model.addAttribute("error", "Error al cargar retos: " + e.getMessage());
+        }
+        return "web/mercadeo/retos";
+    }
+
+    @PostMapping("/mercadeo/retos/crear")
+    public String mercadeoCrearReto(@RequestParam String nombre,
+                                     @RequestParam String descripcion,
+                                     @RequestParam(required = false) String patronUrl,
+                                     @RequestParam String fechaInicio,
+                                     @RequestParam String fechaFin,
+                                     @RequestParam(required = false) String premioDescripcion,
+                                     HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            RetoMensualDTO dto = RetoMensualDTO.builder()
+                .nombre(nombre)
+                .descripcion(descripcion)
+                .patronUrl(patronUrl)
+                .fechaInicio(LocalDateTime.parse(fechaInicio + "T00:00:00"))
+                .fechaFin(LocalDateTime.parse(fechaFin + "T00:00:00"))
+                .premioDescripcion(premioDescripcion)
+                .build();
+            retoService.crearReto(dto);
+            ra.addFlashAttribute("success", "Reto creado correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al crear reto: " + e.getMessage());
+        }
+        return "redirect:/api/web/mercadeo/retos";
+    }
+
+    @PostMapping("/mercadeo/retos/{id}/finalizar")
+    public String mercadeoFinalizarReto(@PathVariable String id,
+                                         HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            retoService.finalizarReto(id, null);
+            ra.addFlashAttribute("success", "Reto finalizado correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al finalizar reto: " + e.getMessage());
+        }
+        return "redirect:/api/web/mercadeo/retos";
+    }
+
+    @GetMapping("/mercadeo/analiticas")
+    public String mercadeoAnaliticas(Model model, HttpSession session) {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            LocalDateTime ahora = LocalDateTime.now();
+            MetricasTraficoDTO metricas = analiticaService.obtenerMetricasTrafico(
+                ahora.minusDays(30), ahora);
+            model.addAttribute("visitas", metricas.getVisitasHoy());
+            model.addAttribute("tasaConversion", String.format("%.1f", metricas.getTasaConversion() != null ? metricas.getTasaConversion() : 0.0));
+
+            long seguidores = 0;
+            if (metricas.getVisitasPorFuente() != null) {
+                seguidores = metricas.getVisitasPorFuente().entrySet().stream()
+                    .filter(e -> "INSTAGRAM".equals(e.getKey()) || "FACEBOOK".equals(e.getKey()))
+                    .mapToLong(Map.Entry::getValue)
+                    .sum();
+            }
+            model.addAttribute("seguidores", seguidores);
+
+            long pedidosMes = metricas.getConversionesSemana() != null ? metricas.getConversionesSemana() : 0;
+            model.addAttribute("pedidosMes", pedidosMes);
+        } catch (Exception e) {
+            model.addAttribute("visitas", 0);
+            model.addAttribute("seguidores", 0);
+            model.addAttribute("tasaConversion", "0.0");
+            model.addAttribute("pedidosMes", 0);
+            model.addAttribute("error", "Error al cargar analíticas: " + e.getMessage());
+        }
+        return "web/mercadeo/analiticas";
+    }
+
+    @GetMapping("/mercadeo/reportes/exportar/pdf")
+    public void exportarMercadeoPDF(HttpSession session,
+                                     HttpServletResponse response) throws IOException {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN")) return;
+        try {
+            LocalDateTime ahora = LocalDateTime.now();
+            byte[] pdf = reporteService.generarReporteVentasPDF(ahora.minusDays(30), ahora);
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=reporte-mercadeo.pdf");
+            response.getOutputStream().write(pdf);
+        } catch (Exception e) {
+            response.sendRedirect("/api/web/dashboard/mercadeo");
+        }
+    }
+
+    @GetMapping("/mercadeo/reportes/exportar/excel")
+    public void exportarMercadeoExcel(HttpSession session,
+                                       HttpServletResponse response) throws IOException {
+        if (!tieneRol(session, "MERCADEO") && !tieneRol(session, "ADMIN")) return;
+        try {
+            byte[] excel = reporteService.generarReporteInventarioExcel();
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=reporte-mercadeo.xlsx");
+            response.getOutputStream().write(excel);
+        } catch (Exception e) {
+            response.sendRedirect("/api/web/dashboard/mercadeo");
+        }
     }
 
     // ── Wishlist ────────────────────────────────────────────────────────
@@ -1084,6 +1473,8 @@ public class WebController {
         if (!tieneRol(session, "ARTESANA") && !tieneRol(session, "ADMIN"))
             return redirigirSegunSesion(session);
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("sigEstado", SIGUIENTE_ESTADO);
+        model.addAttribute("etiqTransicion", ETIQUETA_TRANSICION);
         try {
             model.addAttribute("pedidos", pedidoService.listarTodos());
         } catch (Exception e) {

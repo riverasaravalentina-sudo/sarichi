@@ -69,91 +69,32 @@
 
     <!-- Main Content -->
     <div class="container">
-        <div class="row g-4 mb-5">
-            <!-- Artículo Destacado (Placeholder) -->
-            <div class="col-md-12">
-                <div class="article-card" style="border-color: var(--rosa); border-width: 2px;">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            <div class="article-thumb" style="height: 250px;">📌</div>
+        <div class="row g-4 mb-5" th:if="${articulos != null and !articulos.isEmpty()}">
+            <div th:each="a : ${articulos}" class="col-md-6">
+                <div class="article-card">
+                    <div class="article-thumb">
+                        <img th:if="${a.imagenPrincipalUrl}" th:src="${a.imagenPrincipalUrl}" alt="Imagen" style="width:100%;height:100%;object-fit:cover;">
+                        <span th:unless="${a.imagenPrincipalUrl}">📖</span>
+                    </div>
+                    <div class="article-body">
+                        <h5 class="article-title" th:text="${a.titulo}">Título</h5>
+                        <div class="article-meta">
+                            <i class="bi bi-calendar"></i>
+                            <span th:text="${a.fechaPublicacion != null ? #temporals.format(a.fechaPublicacion, 'dd/MM/yyyy') : '—'}">Fecha</span>
+                            <span th:if="${a.visitas}" class="ms-2"><i class="bi bi-eye"></i> <span th:text="${a.visitas}">0</span></span>
                         </div>
-                        <div class="col-md-8 d-flex flex-column justify-content-center">
-                            <div class="article-body">
-                                <span class="badge bg-danger mb-2">Destacado</span>
-                                <h3 class="article-title">Guía: Cómo Hacer tu Primer Amigurumi</h3>
-                                <div class="article-meta"><i class="bi bi-calendar"></i> Publicado hace 2 semanas</div>
-                                <p class="article-excerpt">Aprende paso a paso cómo crear tu primer amigurumi. Incluye materials, técnicas básicas y errores comunes...</p>
-                                <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Otros Artículos -->
-            <div class="col-md-6">
-                <div class="article-card">
-                    <div class="article-thumb">🎨</div>
-                    <div class="article-body">
-                        <h5 class="article-title">Combinaciones de Colores Perfectas</h5>
-                        <div class="article-meta"><i class="bi bi-calendar"></i> Hace 1 semana</div>
-                        <p class="article-excerpt">Descubre cómo combinar colores de hilo para crear amigurumis visualmente atractivos...</p>
-                        <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="article-card">
-                    <div class="article-thumb">✨</div>
-                    <div class="article-body">
-                        <h5 class="article-title">Personalizaciones Especiales</h5>
-                        <div class="article-meta"><i class="bi bi-calendar"></i> Hace 3 días</div>
-                        <p class="article-excerpt">Explora diferentes formas de personalizar tus amigurumis con bordar y detalles únicos...</p>
-                        <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="article-card">
-                    <div class="article-thumb">🧵</div>
-                    <div class="article-body">
-                        <h5 class="article-title">Cuidado de Amigurumis: Limpieza y Conservación</h5>
-                        <div class="article-meta"><i class="bi bi-calendar"></i> Hace 5 días</div>
-                        <p class="article-excerpt">Tips para mantener tus amigurumis en perfectas condiciones durante años...</p>
-                        <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="article-card">
-                    <div class="article-thumb">🎁</div>
-                    <div class="article-body">
-                        <h5 class="article-title">Amigurumis como Regalos Personalizados</h5>
-                        <div class="article-meta"><i class="bi bi-calendar"></i> Hace 1 mes</div>
-                        <p class="article-excerpt">Por qué los amigurumis son el regalo perfecto y cómo personalizarlos para tus seres queridos...</p>
-                        <a href="#" class="article-link"><i class="bi bi-arrow-right"></i> Leer más</a>
+                        <p class="article-excerpt" th:text="${a.resumen}">Resumen...</p>
+                        <a class="article-link" th:href="@{/api/web/blog/{slug}(slug=${a.slug})}"><i class="bi bi-arrow-right"></i> Leer más</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pagination -->
-        <nav aria-label="Paginación" class="mb-5">
-            <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#"><i class="bi bi-chevron-left"></i> Anterior</a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Siguiente <i class="bi bi-chevron-right"></i></a>
-                </li>
-            </ul>
-        </nav>
+        <div th:if="${articulos == null or articulos.isEmpty()}" class="text-center py-5">
+            <div style="font-size:3rem">📝</div>
+            <h3>Blog</h3>
+            <p class="text-muted">Aún no hay artículos publicados. Vuelve pronto.</p>
+        </div>
     </div>
 
     <!-- Footer -->

@@ -23,19 +23,57 @@
   <main class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>Galería de Productos</h2>
-      <button class="btn btn-brand" style="background:#E8527A;color:#fff">+ Subir imagen</button>
+      <button class="btn btn-brand" style="background:#E8527A;color:#fff" data-bs-toggle="modal" data-bs-target="#subirModal">+ Subir imagen</button>
     </div>
     <div class="row g-3" th:if="${imagenes != null and !imagenes.isEmpty()}">
       <div th:each="img : ${imagenes}" class="col-md-4">
         <div class="card shadow-sm">
-          <img th:src="${img.url}" class="card-img-top" alt="Imagen galería">
+          <img th:src="${img.urlFoto}" class="card-img-top" alt="Imagen galería" style="height:200px;object-fit:cover;">
           <div class="card-body">
             <p class="card-text small text-muted" th:text="${img.descripcion}">Descripción</p>
             <div class="d-flex justify-content-between align-items-center">
-              <small th:text="${img.estado}">PUBLICADA</small>
-              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              <small class="text-muted"><i class="bi bi-heart"></i> <span th:text="${img.likes}">0</span></small>
+              <a class="btn btn-sm btn-outline-danger" th:href="@{/api/web/mercadeo/galeria/eliminar/{id}(id=${img.id})}"
+                 onclick="return confirm('¿Eliminar esta imagen?')"><i class="bi bi-trash"></i></a>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal subir imagen -->
+    <div class="modal fade" id="subirModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form th:action="@{/api/web/mercadeo/galeria/subir}" method="post" enctype="multipart/form-data">
+            <div class="modal-header"><h5 class="modal-title">Subir imagen</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Imagen</label>
+                <input type="file" name="imagen" class="form-control" accept="image/*" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Colección</label>
+                <select name="coleccionId" class="form-select">
+                  <option value="">Sin colección</option>
+                  <option th:each="c : ${colecciones}" th:value="${c.id}" th:text="${c.nombre}">Colección</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Título</label>
+                <input type="text" name="titulo" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea name="descripcion" class="form-control" rows="2"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Subir</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

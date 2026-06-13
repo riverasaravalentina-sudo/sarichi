@@ -13,7 +13,10 @@
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
       <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/logistica}">🐱 LOGÍSTICA</a>
-      <div class="collapse navbar-collapse">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLog">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarLog">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
         </ul>
@@ -22,31 +25,70 @@
   </nav>
   <main class="container py-5">
     <h2 class="mb-4">Gestión de Despachos</h2>
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <div th:if="${despachos != null and !despachos.isEmpty()}">
+
+    <!-- Alerta si no hay -->
+    <div th:if="${despachos == null or despachos.isEmpty()}" class="text-center py-5">
+      <div style="font-size:3rem">📦</div>
+      <p class="text-muted">No hay pedidos pendientes por despachar</p>
+      <a th:href="@{/api/web/dashboard/logistica}" class="btn btn-outline-secondary">&larr; Volver al dashboard</a>
+    </div>
+
+    <div th:if="${despachos != null and !despachos.isEmpty()}">
+      <div class="card shadow-sm">
+        <div class="card-body">
           <table class="table table-hover">
             <thead><tr><th>Pedido</th><th>Cliente</th><th>Ciudad</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
               <tr th:each="d : ${despachos}">
                 <td th:text="${d.pedidoId}">id</td>
                 <td th:text="${d.clienteNombre}">Cliente</td>
-                <td th:text="${d.ciudad}">Ciudad</td>
-                <td><span class="badge bg-warning" th:text="${d.estado}">Estado</span></td>
+                <td th:text="${d.ciudadDestino}">Ciudad</td>
+                <td><span class="badge bg-warning" th:text="${d.estado}">PENDIENTE</span></td>
                 <td>
-                  <button class="btn btn-sm btn-primary">Generar guía</button>
-                  <button class="btn btn-sm btn-success">Despachar</button>
+                  <!-- Botón generar guía abre modal -->
+                  <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                          th:attr="data-bs-target='#guiaModal-' + ${d.pedidoId}">Generar guía</button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div th:if="${despachos == null or despachos.isEmpty()}" class="text-center py-5">
-          <div style="font-size:3rem">📦</div>
-          <p class="text-muted">No hay despachos pendientes</p>
+      </div>
+    </div>
+
+    <!-- Modales para generar guía (uno por pedido) -->
+    <div th:each="d : ${despachos}">
+      <div class="modal fade" th:id="'guiaModal-' + ${d.pedidoId}" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form th:action="@{/api/web/logistica/despachos/generar-guia/{id}(id=${d.pedidoId})}" method="post">
+              <div class="modal-header"><h5 class="modal-title">Generar guía - Pedido <span th:text="${d.pedidoId}">id</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Transportadora</label>
+                  <select name="transportadora" class="form-select" required>
+                    <option value="Coordinadora">Coordinadora</option>
+                    <option value="Interrapidísimo">Interrapidísimo</option>
+                    <option value="Servientrega">Servientrega</option>
+                    <option value="Envía">Envía</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Observaciones</label>
+                  <textarea name="observaciones" class="form-control" rows="2"></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Generar guía y despachar</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
+
     <a th:href="@{/api/web/dashboard/logistica}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

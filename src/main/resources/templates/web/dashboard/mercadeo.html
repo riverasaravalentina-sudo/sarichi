@@ -37,11 +37,15 @@
       <div class="col-md-6">
         <div class="card shadow-sm">
           <div class="card-header bg-light"><h5>Analíticas</h5></div>
-          <div class="card-body">
-            <p><strong>Visitas:</strong> <span class="badge bg-info">0</span></p>
-            <p><strong>Conversión:</strong> <span class="badge bg-success">0%</span></p>
-            <p><strong>Tráfico directo:</strong> <span class="badge bg-secondary">0</span></p>
+          <div class="card-body" th:if="${metricas != null}">
+            <p><strong>Visitas hoy:</strong> <span class="badge bg-info" th:text="${metricas.visitasHoy}">0</span></p>
+            <p><strong>Conversión:</strong> <span class="badge bg-success" th:text="${#numbers.formatDecimal(metricas.tasaConversion, 1, 1)} + '%'">0%</span></p>
+            <p><strong>Conversiones hoy:</strong> <span class="badge bg-secondary" th:text="${metricas.conversionesHoy}">0</span></p>
             <a th:href="@{/api/web/mercadeo/analiticas}" class="btn btn-outline-secondary btn-sm mt-2">Ver detalle</a>
+          </div>
+          <div class="card-body" th:unless="${metricas != null}">
+            <p class="text-muted">No hay métricas disponibles</p>
+            <a th:href="@{/api/web/mercadeo/analiticas}" class="btn btn-outline-secondary btn-sm mt-2">Ir a analíticas</a>
           </div>
         </div>
       </div>

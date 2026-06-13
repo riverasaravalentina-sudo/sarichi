@@ -74,11 +74,21 @@ public class DespachoService {
         return pedidoRepository.findByEstado("LISTO")
             .stream()
             .filter(p -> despachoRepository.findByPedidoId(p.getId()).isEmpty())
-            .map(p -> DespachoDTO.builder()
-                .pedidoId(p.getId())
-                .clienteNombre(usuarioRepository.findById(p.getUsuarioId()).map(Usuario::getNombre).orElse("N/A"))
-                .estado("PENDIENTE")
-                .build())
+            .map(p -> {
+                String ciudad = "N/A";
+                if (p.getDireccionEnvio() != null) {
+                    String[] partes = p.getDireccionEnvio().split(",");
+                    if (partes.length >= 2) {
+                        ciudad = partes[1].trim();
+                    }
+                }
+                return DespachoDTO.builder()
+                    .pedidoId(p.getId())
+                    .clienteNombre(usuarioRepository.findById(p.getUsuarioId()).map(Usuario::getNombre).orElse("N/A"))
+                    .ciudadDestino(ciudad)
+                    .estado("PENDIENTE")
+                    .build();
+            })
             .collect(Collectors.toList());
     }
     
@@ -111,6 +121,23 @@ public class DespachoService {
     
     public Map<String, Object> consultarSeguimiento(String numeroGuia) throws DespachoException {
         return transportadoraService.consultarEstado(numeroGuia);
+    }
+    
+    public List<DespachoDTO> listarTodos() {
+        return despachoRepository.findAll()
+            .stream()
+            .map(d -> {
+                Pedido p = pedidoRepository.findById(d.getPedidoId()).orElse(null);
+                return entityToDto(d, p);
+            })
+            .collect(Collectors.toList());
+    }
+    
+    public DespachoDTO buscarPorId(String id) {
+        Despacho despacho = despachoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Despacho no encontrado"));
+        Pedido pedido = pedidoRepository.findById(despacho.getPedidoId()).orElse(null);
+        return entityToDto(despacho, pedido);
     }
     
     public Map<String, Object> obtenerEstadisticas() {

@@ -12,7 +12,10 @@
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
       <a class="navbar-brand brand fw-bold" th:href="@{/api/web/}">🐱 LOGÍSTICA</a>
-      <div class="collapse navbar-collapse">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLog">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarLog">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
         </ul>
@@ -22,25 +25,88 @@
 
   <main class="container py-5">
     <h2 class="mb-4">Panel de Despachos</h2>
-    
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-4" th:if="${estadisticas != null}">
+      <div class="col-md-3">
+        <div class="card shadow-sm text-center p-3">
+          <div style="font-size:2rem">📦</div>
+          <h5 class="mt-2" th:text="${estadisticas.get('despachosHoy')}">0</h5>
+          <small class="text-muted">Despachos hoy</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm text-center p-3">
+          <div style="font-size:2rem">📋</div>
+          <h5 class="mt-2" th:text="${estadisticas.get('pedidosPendientesDespacho')}">0</h5>
+          <small class="text-muted">Pendientes por despachar</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm text-center p-3">
+          <div style="font-size:2rem">🚚</div>
+          <h5 class="mt-2" th:text="${estadisticas.get('despachosSemana')}">0</h5>
+          <small class="text-muted">Despachos esta semana</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm text-center p-3">
+          <div style="font-size:2rem">⏱</div>
+          <h5 class="mt-2" th:text="${estadisticas.get('promedioEntregaDias')}">3</h5>
+          <small class="text-muted">Promedio entrega (días)</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <a th:href="@{/api/web/logistica/despachos}" class="card shadow-sm text-decoration-none text-dark p-3 d-block">
+          <h5>📋 Despachos pendientes</h5>
+          <small class="text-muted">Pedidos listos para generar guía</small>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a th:href="@{/api/web/logistica/guias}" class="card shadow-sm text-decoration-none text-dark p-3 d-block">
+          <h5>🚚 Guías de envío</h5>
+          <small class="text-muted">Historial de guías generadas</small>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a th:href="@{/api/web/pedidos}" class="card shadow-sm text-decoration-none text-dark p-3 d-block">
+          <h5>📦 Todos los pedidos</h5>
+          <small class="text-muted">Ver estado general de pedidos</small>
+        </a>
+      </div>
+    </div>
+
     <div class="row g-3">
       <div class="col-md-12">
         <div class="card shadow-sm">
-          <div class="card-header bg-light"><h5>Despachos pendientes</h5></div>
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Despachos pendientes</h5>
+            <a th:href="@{/api/web/logistica/despachos}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+          </div>
           <div class="table-responsive">
             <table class="table table-hover mb-0">
               <thead>
-                <tr><th>Pedido</th><th>Cliente</th><th>Estado</th><th>Acciones</th></tr>
+                <tr><th>Pedido</th><th>Cliente</th><th>Ciudad</th><th>Estado</th><th>Acciones</th></tr>
               </thead>
               <tbody>
                 <tr th:each="d : ${despachos}">
                   <td th:text="${d.pedidoId}">id</td>
                   <td th:text="${d.clienteNombre}">Cliente</td>
+                  <td th:text="${d.ciudadDestino}">Ciudad</td>
                   <td><span class="badge bg-warning" th:text="${d.estado}">estado</span></td>
-                  <td><button class="btn btn-sm btn-outline-primary">Generar guía</button></td>
+                  <td>
+                    <a th:href="@{/api/web/logistica/despachos}" class="btn btn-sm btn-outline-primary">Generar guía</a>
+                  </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div th:if="${despachos == null or despachos.isEmpty()}" class="text-center py-4">
+            <p class="text-muted">No hay pedidos pendientes por despachar</p>
           </div>
         </div>
       </div>

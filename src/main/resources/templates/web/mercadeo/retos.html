@@ -23,7 +23,7 @@
   <main class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>Retos y Dinámicas</h2>
-      <button class="btn btn-brand" style="background:#E8527A;color:#fff">+ Nuevo reto</button>
+      <button class="btn btn-brand" style="background:#E8527A;color:#fff" data-bs-toggle="modal" data-bs-target="#nuevoRetoModal">+ Nuevo reto</button>
     </div>
     <div class="card shadow-sm">
       <div class="card-body">
@@ -32,13 +32,16 @@
             <thead><tr><th>Reto</th><th>Descripción</th><th>Participantes</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
               <tr th:each="r : ${retos}">
-                <td th:text="${r.titulo}">Nombre del reto</td>
+                <td th:text="${r.nombre}">Nombre del reto</td>
                 <td th:text="${r.descripcion}">Descripción</td>
-                <td th:text="${r.participantes}">0</td>
-                <td><span class="badge bg-success" th:text="${r.estado}">ACTIVO</span></td>
+                <td th:text="${r.participacionesCount}">0</td>
+                <td><span class="badge" th:classappend="${r.estado == 'ACTIVO'} ? 'bg-success' : (${r.estado == 'FINALIZADO'} ? 'bg-secondary' : 'bg-danger')" th:text="${r.estado}">ACTIVO</span></td>
                 <td>
-                  <button class="btn btn-sm btn-outline-primary">Editar</button>
-                  <button class="btn btn-sm btn-outline-info">Gestionar</button>
+                  <form th:action="@{/api/web/mercadeo/retos/{id}/finalizar(id=${r.id})}" method="post" style="display:inline"
+                        th:if="${r.estado == 'ACTIVO'}"
+                        onsubmit="return confirm('¿Finalizar este reto?')">
+                    <button type="submit" class="btn btn-sm btn-outline-warning">Finalizar</button>
+                  </form>
                 </td>
               </tr>
             </tbody>
@@ -51,6 +54,51 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal crear reto -->
+    <div class="modal fade" id="nuevoRetoModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form th:action="@{/api/web/mercadeo/retos/crear}" method="post">
+            <div class="modal-header"><h5 class="modal-title">Nuevo reto mensual</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Nombre del reto</label>
+                <input type="text" name="nombre" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea name="descripcion" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">URL del patrón (PDF/imagen)</label>
+                <input type="text" name="patronUrl" class="form-control">
+              </div>
+              <div class="row mb-3">
+                <div class="col">
+                  <label class="form-label">Fecha inicio</label>
+                  <input type="date" name="fechaInicio" class="form-control" required>
+                </div>
+                <div class="col">
+                  <label class="form-label">Fecha fin</label>
+                  <input type="date" name="fechaFin" class="form-control" required>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Premio</label>
+                <input type="text" name="premioDescripcion" class="form-control">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Crear reto</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <a th:href="@{/api/web/dashboard/mercadeo}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -38,10 +38,9 @@
                   <form th:action="@{/api/web/pedidos/{id}/estado(id=${p.id})}" method="post" style="display:inline">
                     <select name="estado" class="form-select form-select-sm d-inline w-auto" required>
                       <option value="">Cambiar...</option>
-                      <option th:if="${p.estado == 'SOLICITADO'}" value="EN_PRODUCCION">→ En producción</option>
-                      <option th:if="${p.estado == 'EN_PRODUCCION'}" value="LISTO">→ Listo</option>
-                      <option th:if="${p.estado == 'LISTO'}" value="DESPACHADO">→ Despachado</option>
-                      <option th:if="${p.estado == 'DESPACHADO'}" value="ENTREGADO">→ Entregado</option>
+                      <option th:if="${sigEstado.get(p.estado) != null}"
+                              th:value="${sigEstado.get(p.estado)}"
+                              th:text="${etiqTransicion.get(sigEstado.get(p.estado))}"></option>
                       <option th:if="${p.estado != 'ENTREGADO' and p.estado != 'CANCELADO'}" value="CANCELADO">✕ Cancelar</option>
                     </select>
                     <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-right"></i></button>

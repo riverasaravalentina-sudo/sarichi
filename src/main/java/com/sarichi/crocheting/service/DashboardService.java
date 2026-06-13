@@ -71,8 +71,9 @@ public class DashboardService {
         // Hilos con stock crítico
         long hilosCriticos = colorHiloRepository.findCriticos().size();
 
-        // Pedidos por estado
-        long pedidosPendientes = pedidoRepository.countByEstado("PENDIENTE");
+        // Pedidos por estado (PENDIENTE es alias legacy de SOLICITADO)
+        long pedidosPendientes = pedidoRepository.countByEstado("PENDIENTE")
+                              + pedidoRepository.countByEstado("SOLICITADO");
         long pedidosEnProduccion = pedidoRepository.countByEstado("EN_PRODUCCION");
         long productosParaDespachar = pedidoRepository.countByEstado("LISTO");
 

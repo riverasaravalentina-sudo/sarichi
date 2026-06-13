@@ -23,7 +23,7 @@
   <main class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>Gestión del Blog</h2>
-      <button class="btn btn-brand" style="background:#E8527A;color:#fff">+ Nuevo artículo</button>
+      <a th:href="@{/blog-admin.html}" class="btn btn-brand" style="background:#E8527A;color:#fff" target="_blank">+ Nuevo artículo</a>
     </div>
     <div class="row g-3" th:if="${articulos != null and !articulos.isEmpty()}">
       <div th:each="a : ${articulos}" class="col-md-6">
@@ -31,10 +31,19 @@
           <div class="card-body">
             <h5 class="card-title" th:text="${a.titulo}">Título</h5>
             <p class="card-text small text-muted" th:text="${a.resumen}">Resumen del artículo...</p>
-            <p class="small text-muted">Publicado: <span th:text="${a.fechaPublicacion}">Fecha</span></p>
-            <div>
-              <span class="badge bg-info" th:text="${a.estado}">BORRADOR</span>
-              <button class="btn btn-sm btn-outline-primary float-end">Editar</button>
+            <p class="small text-muted">
+              <span th:if="${a.fechaPublicacion}"><i class="bi bi-calendar"></i> <span th:text="${#temporals.format(a.fechaPublicacion, 'dd/MM/yyyy')}">Fecha</span></span>
+              <span th:if="${a.visitas}" class="ms-2"><i class="bi bi-eye"></i> <span th:text="${a.visitas}">0</span></span>
+            </p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge" th:classappend="${a.estado == 'PUBLICADO'} ? 'bg-success' : (${a.estado == 'BORRADOR'} ? 'bg-warning' : 'bg-secondary')" th:text="${a.estado}">BORRADOR</span>
+              <div>
+                <a th:href="@{/blog-admin.html}" target="_blank" class="btn btn-sm btn-outline-primary">Editar</a>
+                <form th:action="@{/api/web/mercadeo/blog/publicar/{id}(id=${a.id})}" method="post" style="display:inline"
+                      th:if="${a.estado == 'BORRADOR'}">
+                  <button type="submit" class="btn btn-sm btn-outline-success">Publicar</button>
+                </form>
+              </div>
             </div>
           </div>
         </div>

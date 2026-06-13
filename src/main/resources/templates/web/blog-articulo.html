@@ -32,10 +32,10 @@
       <h1 class="text-center" th:text="${articulo.titulo}">Titulo</h1>
       <p class="text-muted text-center small">
         <span th:text="${articulo.fechaPublicacion}">fecha</span>
-        <span th:if="${articulo.autor}"> · Por <span th:text="${articulo.autor}">autor</span></span>
+        <span th:if="${articulo.autorNombre}"> · Por <span th:text="${articulo.autorNombre}">autor</span></span>
       </p>
       <hr>
-      <div class="content" th:text="${articulo.contenido}">Contenido del articulo...</div>
+      <div class="content" th:utext="${articulo.contenidoHtml}">Contenido del articulo...</div>
     </div>
   </div>
 
