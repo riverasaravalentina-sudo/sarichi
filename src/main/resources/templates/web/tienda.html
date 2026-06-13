@@ -269,14 +269,21 @@
                                     Agotado
                                 </span>
                             </div>
-                            <form method="post" th:action="@{/api/web/carrito/agregar}">
-                                <input type="hidden" name="productoId" th:value="${producto.id}">
-                                <input type="hidden" name="cantidad" value="1">
-                                <button type="submit" class="btn-sarichi w-100 justify-content-center"
-                                        th:disabled="${producto.stock <= 0}">
-                                    <i class="bi bi-cart-plus"></i> Agregar
-                                </button>
-                            </form>
+                            <th:block th:if="${usuarioWeb != null}">
+                                <form method="post" th:action="@{/api/web/carrito/agregar}">
+                                    <input type="hidden" name="productoId" th:value="${producto.id}">
+                                    <input type="hidden" name="cantidad" value="1">
+                                    <button type="submit" class="btn-sarichi w-100 justify-content-center"
+                                            th:disabled="${producto.stock <= 0}">
+                                        <i class="bi bi-cart-plus"></i> Agregar
+                                    </button>
+                                </form>
+                            </th:block>
+                            <th:block th:unless="${usuarioWeb != null}">
+                                <a href="/api/web/login" class="btn btn-outline-secondary w-100 justify-content-center">
+                                    <i class="bi bi-box-arrow-in-right"></i> Inicia sesión para comprar
+                                </a>
+                            </th:block>
                         </div>
                     </div>
                 </div>

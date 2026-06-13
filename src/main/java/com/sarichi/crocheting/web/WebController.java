@@ -605,6 +605,10 @@ public class WebController {
                                    @RequestParam(defaultValue = "1") int cantidad,
                                    RedirectAttributes ra,
                                    HttpSession session) {
+        if (!estaAutenticado(session)) {
+            ra.addFlashAttribute("warning", "Debes iniciar sesión o registrarte para agregar productos al carrito.");
+            return "redirect:/api/web/login";
+        }
         try {
             ProductoDTO producto = productoService.obtenerPorId(productoId);
             List<CarritoItem> carrito = obtenerCarrito(session);
