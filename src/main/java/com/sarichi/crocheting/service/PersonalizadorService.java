@@ -22,18 +22,19 @@ public class PersonalizadorService {
     }
 
     public PersonalizacionDTO guardar(PersonalizacionDTO dto, String usuarioId) {
-        var producto = productoService.obtenerPorId(dto.getProductoId());
-        double precioBase = producto.getPrecioBase() != null ? producto.getPrecioBase() : 0;
+        var producto = dto.getProductoId() != null ? productoService.obtenerPorId(dto.getProductoId()) : null;
+        double precioBase = producto != null && producto.getPrecioBase() != null ? producto.getPrecioBase() : 0;
         double precioCalculado = calcularPrecio(precioBase, dto.getTalla(), dto.getMensajeBordado());
 
         DisenioGuardado disenio = DisenioGuardado.builder()
                 .usuarioId(usuarioId)
                 .productoId(dto.getProductoId())
-                .productoNombre(producto.getNombre())
+                .productoNombre(producto != null ? producto.getNombre() : null)
+                .descripcion(dto.getDescripcion())
                 .coloresSeleccionados(dto.getColoresSeleccionados())
                 .talla(dto.getTalla())
                 .mensajeBordado(dto.getMensajeBordado())
-                .precioCalculado(precioCalculado)
+                .precioCalculado(dto.getProductoId() != null ? precioCalculado : null)
                 .fechaCreacion(LocalDateTime.now())
                 .build();
 
@@ -66,6 +67,7 @@ public class PersonalizadorService {
                 .id(d.getId())
                 .productoId(d.getProductoId())
                 .productoNombre(d.getProductoNombre())
+                .descripcion(d.getDescripcion())
                 .coloresSeleccionados(d.getColoresSeleccionados())
                 .talla(d.getTalla())
                 .mensajeBordado(d.getMensajeBordado())

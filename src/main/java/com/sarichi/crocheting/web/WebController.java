@@ -10,10 +10,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.sarichi.crocheting.dto.CrearPedidoDTO;
 import com.sarichi.crocheting.dto.ColorHiloDTO;
+import com.sarichi.crocheting.dto.CrearPedidoDTO;
 import com.sarichi.crocheting.dto.DashboardKpisDTO;
 import com.sarichi.crocheting.dto.ItemPedidoRequest;
+import com.sarichi.crocheting.dto.PersonalizacionDTO;
 import com.sarichi.crocheting.dto.ProductoDTO;
 import com.sarichi.crocheting.dto.ProductoFiltroDTO;
 import com.sarichi.crocheting.dto.RegistroDTO;
@@ -599,6 +600,37 @@ public class WebController {
             model.addAttribute("productos", List.of());
         }
         return "web/cliente/pedido-personalizado";
+    }
+
+    @PostMapping("/pedido-personalizado")
+    public String procesarPedidoPersonalizado(@RequestParam(required = false) String productoId,
+                                              @RequestParam String descripcion,
+                                              @RequestParam(required = false) String colores,
+                                              @RequestParam(defaultValue = "Mediano") String talla,
+                                              @RequestParam(required = false) String mensajeBordado,
+                                              RedirectAttributes ra,
+                                              HttpSession session) {
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        String usuarioWebId = (String) session.getAttribute("usuarioWebId");
+        try {
+            java.util.Map<String, String> coloresMap = new java.util.HashMap<>();
+            if (colores != null && !colores.isBlank()) {
+                coloresMap.put("descripcion", colores);
+            }
+            PersonalizacionDTO dto = PersonalizacionDTO.builder()
+                    .productoId(productoId != null && !productoId.isBlank() ? productoId : null)
+                    .descripcion(descripcion)
+                    .coloresSeleccionados(coloresMap)
+                    .talla(talla)
+                    .mensajeBordado(mensajeBordado)
+                    .build();
+            personalizadorService.guardar(dto, usuarioWebId);
+            ra.addFlashAttribute("success", "Solicitud enviada correctamente. La artesana te cotizará pronto.");
+            return "redirect:/api/web/dashboard/cliente";
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al enviar solicitud: " + e.getMessage());
+            return "redirect:/api/web/pedido-personalizado";
+        }
     }
 
     // ── Chat de pedidos ─────────────────────────────────────────────────

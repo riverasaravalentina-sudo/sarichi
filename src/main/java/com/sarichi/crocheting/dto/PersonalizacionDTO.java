@@ -17,6 +17,7 @@ public class PersonalizacionDTO {
     private String id;
     private String productoId;
     private String productoNombre;
+    private String descripcion;
     private Map<String, String> coloresSeleccionados;
     private String talla;
     private String mensajeBordado;
