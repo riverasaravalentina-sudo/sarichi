@@ -84,7 +84,7 @@
     var chatMessages = document.getElementById('chatMessages');
 
     function conectarWebSocket() {
-      var socket = new SockJS('/api/ws-chat');
+      var socket = new SockJS('/ws-chat');
       stompClient = Stomp.over(socket);
       stompClient.connect({}, function(frame) {
         stompClient.subscribe('/topic/chat/' + pedidoId, function(mensaje) {

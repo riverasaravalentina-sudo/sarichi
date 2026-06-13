@@ -98,7 +98,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/health/**", "/api/actuator/**").permitAll()
 
                 // ── WebSocket endpoint ─────────────────────────────────────────────
-                .requestMatchers("/api/ws-chat/**").permitAll()
+                .requestMatchers("/ws-chat/**").permitAll()
 
                 // ── API personalizador ───────────────────────────────────────────────
                 .requestMatchers("/api/personalizador/**").permitAll()
