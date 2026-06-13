@@ -913,6 +913,22 @@ public class WebController {
         return "web/pedidos/listar";
     }
 
+    @PostMapping("/pedidos/{id}/estado")
+    public String cambiarEstadoPedido(@PathVariable String id,
+                                      @RequestParam String estado,
+                                      RedirectAttributes ra,
+                                      HttpSession session) {
+        if (!tieneRol(session, "ARTESANA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            pedidoService.actualizarEstado(id, estado);
+            ra.addFlashAttribute("success", "Estado actualizado a: " + estado);
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al cambiar estado: " + e.getMessage());
+        }
+        return "redirect:/api/web/dashboard/artesana";
+    }
+
     // ── Helpers de seguridad ───────────────────────────────────────────
 
     @SuppressWarnings("unchecked")
