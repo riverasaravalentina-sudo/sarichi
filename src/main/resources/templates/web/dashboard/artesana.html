@@ -57,9 +57,7 @@
           <div class="d-flex align-items-center gap-3">
             <div class="kpi-icon" style="background:#e0f2f1;color:#2DB5C8"><i class="bi bi-gear"></i></div>
             <div>
-              <h3 class="mb-0 fw-bold">
-                <span th:text="${#lists.size(pedidos.stream().filter(p -> p.estado == 'EN_PRODUCCION' || p.estado == 'SOLICITADO').toList())}">0</span>
-              </h3>
+              <h3 class="mb-0 fw-bold">0</h3>
               <small class="text-muted">En producción</small>
             </div>
           </div>
@@ -70,9 +68,7 @@
           <div class="d-flex align-items-center gap-3">
             <div class="kpi-icon" style="background:#e8f5e9;color:#43a047"><i class="bi bi-check-circle"></i></div>
             <div>
-              <h3 class="mb-0 fw-bold">
-                <span th:text="${#lists.size(pedidos.stream().filter(p -> p.estado == 'LISTO').toList())}">0</span>
-              </h3>
+              <h3 class="mb-0 fw-bold">0</h3>
               <small class="text-muted">Listos</small>
             </div>
           </div>
@@ -83,9 +79,7 @@
           <div class="d-flex align-items-center gap-3">
             <div class="kpi-icon" style="background:#ede7f6;color:#7c4dff"><i class="bi bi-chat-dots"></i></div>
             <div>
-              <h3 class="mb-0 fw-bold">
-                <span th:text="${#lists.size(pedidos.stream().filter(p -> p.estado == 'COTIZACION').toList())}">0</span>
-              </h3>
+              <h3 class="mb-0 fw-bold">0</h3>
               <small class="text-muted">Cotizaciones</small>
             </div>
           </div>
