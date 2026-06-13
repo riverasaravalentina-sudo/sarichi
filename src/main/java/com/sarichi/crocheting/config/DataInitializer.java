@@ -135,64 +135,50 @@ public class DataInitializer implements CommandLineRunner {
         actividadRepository.save(ActividadProduccion.builder().id("act-009").pedidoId("pedido-112").productoId(pSueter.getId()).artesanaId(uArtesana.getId()).cantidad(1).fechaInicio(ahora.minusDays(20)).fechaFinalizacion(ahora.minusDays(13)).estado("COMPLETADO").notas("Suéter con trenzas completado").build());
         actividadRepository.save(ActividadProduccion.builder().id("act-010").pedidoId("pedido-114").productoId(pUnicornio.getId()).artesanaId(uArtesana.getId()).cantidad(1).fechaInicio(ahora.minusDays(24)).fechaFinalizacion(ahora.minusDays(19)).estado("COMPLETADO").notas("Unicornio mágico terminado").build());
 
-        // ── Eventos de tráfico (MongoDB ~250 registros) ────────────────
-        var rng = ThreadLocalRandom.current();
-        String[] fuentes = {"INSTAGRAM", "GOOGLE", "DIRECTO", "WHATSAPP", "FACEBOOK"};
-        double[] pesosFuente = {0.30, 0.25, 0.25, 0.12, 0.08};
-        String[] paginas = {"/", "/productos", "/blog", "/galeria", "/personalizador", "/blog/amigurumi-conejo", "/blog/bufandas-tendencia", "/retos"};
-        double[] pesosPagina = {0.20, 0.25, 0.15, 0.10, 0.10, 0.07, 0.08, 0.05};
-        String[] tipos = {"VISITA", "CLICK", "CONVERSION"};
-        double[] pesoTipo = {0.70, 0.20, 0.10};
+        // ── Eventos de tráfico (MongoDB, batch insert) ─────────────────
+        try {
+            var rng = ThreadLocalRandom.current();
+            String[] fuentes = {"INSTAGRAM", "GOOGLE", "DIRECTO", "WHATSAPP", "FACEBOOK"};
+            double[] pesosFuente = {0.30, 0.25, 0.25, 0.12, 0.08};
+            String[] paginas = {"/", "/productos", "/blog", "/galeria", "/personalizador", "/blog/amigurumi-conejo", "/blog/bufandas-tendencia", "/retos"};
+            double[] pesosPagina = {0.20, 0.25, 0.15, 0.10, 0.10, 0.07, 0.08, 0.05};
+            String[] tipos = {"VISITA", "CLICK", "CONVERSION"};
+            double[] pesoTipo = {0.70, 0.20, 0.10};
 
-        int totalEventos = 0;
-        for (int dia = 0; dia < 30; dia++) {
-            int eventosHoy = dia < 2 ? rng.nextInt(18, 30) : rng.nextInt(3, 10);
-            for (int e = 0; e < eventosHoy; e++) {
-                var fecha = ahora.minusDays(dia).withHour(rng.nextInt(8, 22)).withMinute(rng.nextInt(0, 59)).withSecond(rng.nextInt(0, 59)).withNano(0);
+            var eventos = new java.util.ArrayList<EventoTrafico>();
+            for (int dia = 0; dia < 30; dia++) {
+                int eventosHoy = dia < 2 ? rng.nextInt(10, 16) : rng.nextInt(2, 6);
+                for (int e = 0; e < eventosHoy; e++) {
+                    var fecha = ahora.minusDays(dia).withHour(rng.nextInt(8, 22)).withMinute(rng.nextInt(0, 59)).withSecond(rng.nextInt(0, 59)).withNano(0);
 
-                double rndFuente = rng.nextDouble();
-                String fuente = fuentes[0];
-                double acum = 0;
-                for (int i = 0; i < fuentes.length; i++) {
-                    acum += pesosFuente[i];
-                    if (rndFuente <= acum) { fuente = fuentes[i]; break; }
+                    double rnd = rng.nextDouble();
+                    String fuente = fuentes[0]; double acum = pesosFuente[0];
+                    for (int i = 1; i < fuentes.length; i++) { if (rnd <= acum) { fuente = fuentes[i-1]; break; } acum += pesosFuente[i]; }
+
+                    String url = paginas[0]; acum = pesosPagina[0];
+                    for (int i = 1; i < paginas.length; i++) { if (rnd <= acum) { url = paginas[i-1]; break; } acum += pesosPagina[i]; }
+
+                    String tipo = tipos[0]; acum = pesoTipo[0];
+                    for (int i = 1; i < tipos.length; i++) { if (rnd <= acum) { tipo = tipos[i-1]; break; } acum += pesoTipo[i]; }
+
+                    var ev = EventoTrafico.builder()
+                            .fecha(fecha).tipo(tipo).fuente(fuente).url(url)
+                            .sessionId("seed-session-" + (dia * 10 + e))
+                            .userAgent("Mozilla/5.0")
+                            .ipAddress("192.168.1." + rng.nextInt(1, 255))
+                            .build();
+
+                    if ("CONVERSION".equals(tipo)) {
+                        ev.setPedidoId("pedido-" + (100 + rng.nextInt(0, 15)));
+                        ev.setValorConversion(15000.0 + rng.nextDouble() * 70000);
+                    }
+                    eventos.add(ev);
                 }
-
-                double rndPag = rng.nextDouble();
-                String url = paginas[0];
-                acum = 0;
-                for (int i = 0; i < paginas.length; i++) {
-                    acum += pesosPagina[i];
-                    if (rndPag <= acum) { url = paginas[i]; break; }
-                }
-
-                double rndTipo = rng.nextDouble();
-                String tipo = tipos[0];
-                acum = 0;
-                for (int i = 0; i < tipos.length; i++) {
-                    acum += pesoTipo[i];
-                    if (rndTipo <= acum) { tipo = tipos[i]; break; }
-                }
-
-                var evento = EventoTrafico.builder()
-                        .fecha(fecha)
-                        .tipo(tipo)
-                        .fuente(fuente)
-                        .url(url)
-                        .sessionId("seed-session-" + (dia * 10 + e))
-                        .userAgent("Mozilla/5.0 (compatible; SeedBot)")
-                        .ipAddress("192.168.1." + rng.nextInt(1, 255))
-                        .build();
-
-                if ("CONVERSION".equals(tipo)) {
-                    int idxPedido = rng.nextInt(0, 15);
-                    evento.setPedidoId("pedido-" + (100 + idxPedido));
-                    evento.setValorConversion(15000.0 + rng.nextDouble() * 70000);
-                }
-
-                eventoTraficoRepository.save(evento);
-                totalEventos++;
             }
+            eventoTraficoRepository.saveAll(eventos);
+            log.info("  Traffic events: {}", eventos.size());
+        } catch (Exception e) {
+            log.warn("Could not seed traffic events (MongoDB): {}", e.getMessage());
         }
 
         log.info("=== Seed data created ===");
@@ -202,7 +188,6 @@ public class DataInitializer implements CommandLineRunner {
         log.info("  Orders: 15");
         log.info("  Dispatches: 8");
         log.info("  Activities: 10");
-        log.info("  Traffic events: {}", totalEventos);
         log.info("Roles: LOGISTICA, ARTESANA, ADMIN, MERCADEO, BODEGA, CLIENTE (5)");
     }
 }
