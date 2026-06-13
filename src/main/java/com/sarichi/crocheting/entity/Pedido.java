@@ -33,7 +33,7 @@ public class Pedido {
     private Double total;
 
     @Builder.Default
-    private String estado = "PENDIENTE"; // PENDIENTE, EN_PRODUCCION, LISTO, DESPACHADO, ENTREGADO, CANCELADO
+    private String estado = "SOLICITADO"; // SOLICITADO, EN_PRODUCCION, LISTO, DESPACHADO, ENTREGADO, CANCELADO
 
     private String direccionEnvio;
 

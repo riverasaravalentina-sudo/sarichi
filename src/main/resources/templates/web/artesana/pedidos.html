@@ -31,14 +31,14 @@
               <tr th:each="p : ${pedidos}">
                 <td th:text="${p.id}">id</td>
                 <td th:text="${p.usuarioNombre}">Cliente</td>
-                <td><span class="badge" th:classappend="${p.estado == 'PENDIENTE' ? 'bg-warning' : p.estado == 'EN_PRODUCCION' ? 'bg-info' : p.estado == 'LISTO' ? 'bg-success' : p.estado == 'DESPACHADO' ? 'bg-primary' : p.estado == 'ENTREGADO' ? 'bg-secondary' : 'bg-dark'}" th:text="${p.estado}">Estado</span></td>
+                <td><span class="badge" th:classappend="${p.estado == 'SOLICITADO' ? 'bg-warning' : p.estado == 'EN_PRODUCCION' ? 'bg-info' : p.estado == 'LISTO' ? 'bg-success' : p.estado == 'DESPACHADO' ? 'bg-primary' : p.estado == 'ENTREGADO' ? 'bg-secondary' : 'bg-dark'}" th:text="${p.estado}">Estado</span></td>
                 <td>$<span th:text="${p.total}">0</span></td>
                 <td>
                   <a class="btn btn-sm btn-outline-info" th:href="@{/api/web/chat/{id}(id=${p.id})}"><i class="bi bi-chat-dots"></i> Chat</a>
                   <form th:action="@{/api/web/pedidos/{id}/estado(id=${p.id})}" method="post" style="display:inline">
                     <select name="estado" class="form-select form-select-sm d-inline w-auto" required>
                       <option value="">Cambiar...</option>
-                      <option th:if="${p.estado == 'PENDIENTE'}" value="EN_PRODUCCION">→ En producción</option>
+                      <option th:if="${p.estado == 'SOLICITADO'}" value="EN_PRODUCCION">→ En producción</option>
                       <option th:if="${p.estado == 'EN_PRODUCCION'}" value="LISTO">→ Listo</option>
                       <option th:if="${p.estado == 'LISTO'}" value="DESPACHADO">→ Despachado</option>
                       <option th:if="${p.estado == 'DESPACHADO'}" value="ENTREGADO">→ Entregado</option>

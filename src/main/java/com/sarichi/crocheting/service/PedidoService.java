@@ -79,7 +79,7 @@ public class PedidoService {
                 .usuarioId(usuarioId)
                 .items(items)
                 .total(total)
-                .estado("PENDIENTE")
+                .estado("SOLICITADO")
                 .direccionEnvio(dto.getDireccionEnvio())
                 .build();
 
