@@ -21,6 +21,9 @@ public class ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
+    @Autowired
+    private MovimientoBodegaService movimientoBodegaService;
+
     // ── CREAR ─────────────────────────────────────────────────────────────
 
     public ProductoDTO crear(ProductoDTO dto) {
@@ -135,6 +138,33 @@ public class ProductoService {
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + id));
         producto.setEstado("INACTIVO");
         productoRepository.save(producto);
+    }
+
+    // ── ENTRADA / SALIDA ──────────────────────────────────────────────────
+
+    public ProductoDTO registrarEntrada(String id, int cantidad, String responsable, String observacion) {
+        Producto p = productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + id));
+        int anterior = p.getStock();
+        p.setStock(anterior + cantidad);
+        Producto actualizado = productoRepository.save(p);
+        movimientoBodegaService.registrar("ENTRADA", id, p.getNombre(), "PRODUCTO",
+                (double) cantidad, (double) anterior, (double) p.getStock(), responsable, observacion);
+        return mapearADTO(actualizado);
+    }
+
+    public ProductoDTO registrarSalida(String id, int cantidad, String responsable, String observacion) {
+        Producto p = productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + id));
+        int anterior = p.getStock();
+        if (anterior < cantidad) {
+            throw new RuntimeException("Stock insuficiente. Disponible: " + anterior + ", solicitado: " + cantidad);
+        }
+        p.setStock(anterior - cantidad);
+        Producto actualizado = productoRepository.save(p);
+        movimientoBodegaService.registrar("SALIDA", id, p.getNombre(), "PRODUCTO",
+                (double) cantidad, (double) anterior, (double) p.getStock(), responsable, observacion);
+        return mapearADTO(actualizado);
     }
 
     // ── STOCK CRÍTICO ─────────────────────────────────────────────────────

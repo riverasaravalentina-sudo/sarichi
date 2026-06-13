@@ -11,9 +11,15 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/}">🐱 BODEGA</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
+      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/bodega}">📦 BODEGA</a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/inventario}">Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/hilos}">Hilos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/movimientos}">Bitácora</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/colores/nuevo}">Nuevo color</a></li>
+        </ul>
+        <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
         </ul>
       </div>
@@ -22,11 +28,24 @@
 
   <main class="container py-5">
     <h2 class="mb-4">Control de Inventario</h2>
-    
+
+    <div th:if="${criticos != null and !criticos.isEmpty()}">
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+        <div>
+          <strong>⚠️ Alerta de stock crítico:</strong> Hay <span th:text="${criticos.size()}">0</span> hilo(s) con stock por debajo del mínimo.
+          <a th:href="@{/api/web/bodega/hilos}" class="alert-link ms-2">Ver hilos críticos</a>
+        </div>
+      </div>
+    </div>
+
     <div class="row g-3 mb-4">
       <div class="col-md-6">
         <div class="card shadow-sm">
-          <div class="card-header bg-light"><h5>Colores de hilo</h5></div>
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Colores de hilo</h5>
+            <a th:href="@{/api/web/bodega/hilos}" class="btn btn-sm btn-outline-primary">Gestionar</a>
+          </div>
           <div class="table-responsive">
             <table class="table table-sm mb-0">
               <thead>
@@ -35,8 +54,8 @@
               <tbody>
                 <tr th:each="c : ${colores}" th:classappend="${c.stockMetros <= c.stockMinimo ? 'critical' : ''}">
                   <td th:text="${c.nombre}">Color</td>
-                  <td th:text="${c.stockMetros}">0</td>
-                  <td th:text="${c.stockMinimo}">0</td>
+                  <td th:text="${#numbers.formatDecimal(c.stockMetros, 0, 'COMMA', 1, 'POINT')}">0</td>
+                  <td th:text="${#numbers.formatDecimal(c.stockMinimo, 0, 'COMMA', 1, 'POINT')}">0</td>
                   <td>
                     <span th:if="${c.stockMetros <= c.stockMinimo}" class="badge bg-danger">Crítico</span>
                     <span th:unless="${c.stockMetros <= c.stockMinimo}" class="badge bg-success">OK</span>
@@ -49,17 +68,23 @@
       </div>
       <div class="col-md-6">
         <div class="card shadow-sm">
-          <div class="card-header bg-light"><h5>Productos en stock</h5></div>
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Productos en stock</h5>
+            <a th:href="@{/api/web/bodega/inventario}" class="btn btn-sm btn-outline-primary">Gestionar</a>
+          </div>
           <div class="table-responsive">
             <table class="table table-sm mb-0">
               <thead>
                 <tr><th>Producto</th><th>Stock</th><th>Estado</th></tr>
               </thead>
               <tbody>
-                <tr th:each="p : ${productos}">
+                <tr th:each="p : ${productos}" th:classappend="${p.stock <= 2 ? 'critical' : ''}">
                   <td th:text="${p.nombre}">Producto</td>
-                  <td th:text="${p.stock}">0</td>
-                  <td><span class="badge bg-info" th:text="${p.estado}">ACTIVO</span></td>
+                  <td><span th:classappend="${p.stock <= 2 ? 'text-danger fw-bold' : ''}" th:text="${p.stock}">0</span></td>
+                  <td>
+                    <span th:if="${p.stock <= 2}" class="badge bg-danger">Crítico</span>
+                    <span th:unless="${p.stock <= 2}" class="badge bg-success">OK</span>
+                  </td>
                 </tr>
               </tbody>
             </table>

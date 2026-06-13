@@ -12,9 +12,14 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/bodega}">🐱 BODEGA</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
+      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/bodega}">📦 BODEGA</a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/inventario}">Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/hilos}">Hilos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/movimientos}">Bitácora</a></li>
+        </ul>
+        <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
         </ul>
       </div>
@@ -26,21 +31,25 @@
       <div class="card-body">
         <div th:if="${movimientos != null and !movimientos.isEmpty()}">
           <table class="table table-hover">
-            <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto/Material</th><th>Cantidad</th><th>Responsable</th></tr></thead>
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Item</th><th>Tipo item</th><th>Cantidad</th><th>Stock anterior</th><th>Stock posterior</th><th>Responsable</th><th>Observación</th></tr></thead>
             <tbody>
               <tr th:each="m : ${movimientos}">
-                <td th:text="${m.fecha}">2026-01-01</td>
+                <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}">2026-01-01</td>
                 <td><span class="badge" th:classappend="${m.tipo == 'ENTRADA' ? 'bg-success' : 'bg-danger'}" th:text="${m.tipo}">ENTRADA</span></td>
                 <td th:text="${m.itemNombre}">Producto</td>
-                <td th:text="${m.cantidad}">0</td>
+                <td><span class="badge bg-secondary" th:text="${m.itemTipo}">HILO</span></td>
+                <td th:text="${#numbers.formatDecimal(m.cantidad, 0, 'COMMA', 1, 'POINT')}">0</td>
+                <td th:text="${#numbers.formatDecimal(m.stockAnterior, 0, 'COMMA', 1, 'POINT')}">0</td>
+                <td th:text="${#numbers.formatDecimal(m.stockPosterior, 0, 'COMMA', 1, 'POINT')}">0</td>
                 <td th:text="${m.responsable}">Usuario</td>
+                <td th:text="${m.observacion ?: '-'}">Obs</td>
               </tr>
             </tbody>
           </table>
         </div>
         <div th:if="${movimientos == null or movimientos.isEmpty()}" class="text-center py-5">
           <div style="font-size:3rem">📋</div>
-          <p class="text-muted">No hay movimientos registrados</p>
+          <p class="text-muted">No hay movimientos registrados. Realiza entradas o salidas para ver el historial.</p>
         </div>
       </div>
     </div>

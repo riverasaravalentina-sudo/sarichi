@@ -24,6 +24,9 @@ public class ColorHiloService {
     @Autowired
     private ColorHiloRepository colorHiloRepository;
 
+    @Autowired
+    private MovimientoBodegaService movimientoBodegaService;
+
     // Listar todos los colores (público)
     public List<ColorHiloDTO> listarTodos() {
         log.info("Listando todos los colores de hilo");
@@ -89,6 +92,31 @@ public class ColorHiloService {
                 .orElseThrow(() -> new RuntimeException("Color no encontrado: " + id));
         existente.setNombre("[ELIMINADO] " + existente.getNombre());
         colorHiloRepository.save(existente);
+    }
+
+    public ColorHiloDTO registrarEntrada(String id, Double cantidad, String responsable, String observacion) {
+        ColorHilo ch = colorHiloRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Color no encontrado: " + id));
+        Double anterior = ch.getStockMetros();
+        ch.setStockMetros(anterior + cantidad);
+        ColorHilo actualizado = colorHiloRepository.save(ch);
+        movimientoBodegaService.registrar("ENTRADA", id, ch.getNombre(), "HILO",
+                cantidad, anterior, ch.getStockMetros(), responsable, observacion);
+        return toDto(actualizado);
+    }
+
+    public ColorHiloDTO registrarSalida(String id, Double cantidad, String responsable, String observacion) {
+        ColorHilo ch = colorHiloRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Color no encontrado: " + id));
+        Double anterior = ch.getStockMetros();
+        if (anterior < cantidad) {
+            throw new RuntimeException("Stock insuficiente. Disponible: " + anterior + "m, solicitado: " + cantidad + "m");
+        }
+        ch.setStockMetros(anterior - cantidad);
+        ColorHilo actualizado = colorHiloRepository.save(ch);
+        movimientoBodegaService.registrar("SALIDA", id, ch.getNombre(), "HILO",
+                cantidad, anterior, ch.getStockMetros(), responsable, observacion);
+        return toDto(actualizado);
     }
 
     // Mapper entidad -> DTO

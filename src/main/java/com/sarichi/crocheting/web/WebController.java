@@ -28,6 +28,7 @@ import com.sarichi.crocheting.service.ColorHiloService;
 import com.sarichi.crocheting.service.DashboardService;
 import com.sarichi.crocheting.service.DespachoService;
 import com.sarichi.crocheting.service.PedidoService;
+import com.sarichi.crocheting.service.MovimientoBodegaService;
 import com.sarichi.crocheting.service.PersonalizadorService;
 import com.sarichi.crocheting.service.ProductoService;
 import com.sarichi.crocheting.service.ResenaService;
@@ -55,6 +56,7 @@ public class WebController {
     @Autowired private ChatService       chatService;
     @Autowired private WishlistService   wishlistService;
     @Autowired private PersonalizadorService personalizadorService;
+    @Autowired private MovimientoBodegaService movimientoBodegaService;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PasswordEncoder   passwordEncoder;
 
@@ -331,13 +333,127 @@ public class WebController {
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         try {
             model.addAttribute("colores",    colorHiloService.listarTodos());
-            DashboardKpisDTO kpis = dashboardService.obtenerKpis();
-            model.addAttribute("stockCritico", kpis.getStockCritico());
+            model.addAttribute("productos",  productoService.listarConFiltros(new ProductoFiltroDTO()));
+            try {
+                model.addAttribute("criticos", colorHiloService.obtenerCriticos());
+            } catch (Exception e2) {
+                model.addAttribute("criticos", List.of());
+            }
         } catch (Exception e) {
             model.addAttribute("colores", List.of());
+            model.addAttribute("productos", List.of());
             model.addAttribute("errorInventario", "No se pudo cargar el inventario");
         }
         return "web/dashboard/bodega";
+    }
+
+    // ── Bodega subpages ────────────────────────────────────────────────
+
+    @GetMapping("/bodega/hilos")
+    public String bodegaHilos(Model model, HttpSession session) {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("hilos", colorHiloService.listarTodos());
+        } catch (Exception e) {
+            model.addAttribute("hilos", List.of());
+        }
+        return "web/bodega/hilos";
+    }
+
+    @PostMapping("/bodega/hilos/entrada/{id}")
+    public String bodegaHiloEntrada(@PathVariable String id,
+                                     @RequestParam Double cantidad,
+                                     @RequestParam(required = false) String observacion,
+                                     HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            colorHiloService.registrarEntrada(id, cantidad,
+                    (String) session.getAttribute("usuarioWeb"), observacion);
+            ra.addFlashAttribute("success", "Entrada registrada correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/api/web/bodega/hilos";
+    }
+
+    @PostMapping("/bodega/hilos/salida/{id}")
+    public String bodegaHiloSalida(@PathVariable String id,
+                                    @RequestParam Double cantidad,
+                                    @RequestParam(required = false) String observacion,
+                                    HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            colorHiloService.registrarSalida(id, cantidad,
+                    (String) session.getAttribute("usuarioWeb"), observacion);
+            ra.addFlashAttribute("success", "Salida registrada correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/api/web/bodega/hilos";
+    }
+
+    @GetMapping("/bodega/inventario")
+    public String bodegaInventario(Model model, HttpSession session) {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("productos", productoService.listarConFiltros(new ProductoFiltroDTO()));
+        } catch (Exception e) {
+            model.addAttribute("productos", List.of());
+        }
+        return "web/bodega/inventario";
+    }
+
+    @PostMapping("/bodega/productos/entrada/{id}")
+    public String bodegaProductoEntrada(@PathVariable String id,
+                                         @RequestParam int cantidad,
+                                         @RequestParam(required = false) String observacion,
+                                         HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            productoService.registrarEntrada(id, cantidad,
+                    (String) session.getAttribute("usuarioWeb"), observacion);
+            ra.addFlashAttribute("success", "Entrada registrada correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/api/web/bodega/inventario";
+    }
+
+    @PostMapping("/bodega/productos/salida/{id}")
+    public String bodegaProductoSalida(@PathVariable String id,
+                                        @RequestParam int cantidad,
+                                        @RequestParam(required = false) String observacion,
+                                        HttpSession session, RedirectAttributes ra) {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            productoService.registrarSalida(id, cantidad,
+                    (String) session.getAttribute("usuarioWeb"), observacion);
+            ra.addFlashAttribute("success", "Salida registrada correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/api/web/bodega/inventario";
+    }
+
+    @GetMapping("/bodega/movimientos")
+    public String bodegaMovimientos(Model model, HttpSession session) {
+        if (!tieneRol(session, "BODEGA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("movimientos", movimientoBodegaService.listarTodos());
+        } catch (Exception e) {
+            model.addAttribute("movimientos", List.of());
+        }
+        return "web/bodega/movimientos";
     }
 
     /** MERCADEO: analíticas + blog + galería */
