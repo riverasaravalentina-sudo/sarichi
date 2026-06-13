@@ -122,6 +122,10 @@ async function apiDelete(url) {
   return apiRequest('DELETE', url);
 }
 
+async function apiFetch(url, method, body) {
+  return apiRequest(method, url, body);
+}
+
 async function fetchAutenticado(url, options = {}) {
   options.headers = authHeaders(options.headers || {});
   return fetch(apiUrl(url), options);
