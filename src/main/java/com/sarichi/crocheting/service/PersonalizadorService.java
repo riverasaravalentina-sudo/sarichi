@@ -36,6 +36,7 @@ public class PersonalizadorService {
                 .mensajeBordado(dto.getMensajeBordado())
                 .precioCalculado(dto.getProductoId() != null ? precioCalculado : null)
                 .fechaCreacion(LocalDateTime.now())
+                .estado("PENDIENTE")
                 .build();
 
         return toDTO(disenioGuardadoRepository.save(disenio));
@@ -48,10 +49,33 @@ public class PersonalizadorService {
                 .toList();
     }
 
+    public List<PersonalizacionDTO> listarPendientes() {
+        return disenioGuardadoRepository.findByEstadoOrderByFechaCreacionDesc("PENDIENTE")
+                .stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    public List<PersonalizacionDTO> listarCotizaciones() {
+        return disenioGuardadoRepository.findByEstadoNotOrderByFechaCreacionDesc("PENDIENTE")
+                .stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
     public PersonalizacionDTO obtenerPorId(String id) {
         return disenioGuardadoRepository.findById(id)
                 .map(this::toDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Diseño no encontrado"));
+    }
+
+    public PersonalizacionDTO cotizar(String id, Double precioCotizacion, String tiempoEstimado) {
+        DisenioGuardado disenio = disenioGuardadoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Diseño no encontrado"));
+        disenio.setPrecioCotizacion(precioCotizacion);
+        disenio.setTiempoEstimado(tiempoEstimado);
+        disenio.setEstado("COTIZADO");
+        return toDTO(disenioGuardadoRepository.save(disenio));
     }
 
     private double calcularPrecio(double precioBase, String talla, String mensaje) {
@@ -73,6 +97,9 @@ public class PersonalizadorService {
                 .mensajeBordado(d.getMensajeBordado())
                 .precioCalculado(d.getPrecioCalculado())
                 .fechaCreacion(d.getFechaCreacion())
+                .estado(d.getEstado())
+                .precioCotizacion(d.getPrecioCotizacion())
+                .tiempoEstimado(d.getTiempoEstimado())
                 .build();
     }
 }

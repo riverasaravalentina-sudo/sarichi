@@ -12,8 +12,14 @@
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
       <a class="navbar-brand brand fw-bold" th:href="@{/api/web/}">🐱 ARTESANA</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/dashboard/artesana}">Pedidos activos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/artesana/pedidos}">Todos los pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/artesana/cotizaciones}">Cotizaciones</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/artesana/proceso}">Galería</a></li>
+        </ul>
+        <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
         </ul>
       </div>
@@ -26,7 +32,10 @@
     <div class="row g-3">
       <div class="col-md-12">
         <div class="card shadow-sm">
-          <div class="card-header bg-light"><h5>Pedidos activos</h5></div>
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Pedidos activos</h5>
+            <a th:href="@{/api/web/artesana/cotizaciones}" class="btn btn-sm btn-success">Cotizaciones pendientes</a>
+          </div>
           <table class="table table-hover mb-0">
             <thead>
               <tr><th>ID</th><th>Cliente</th><th>Estado</th><th>Acciones</th></tr>

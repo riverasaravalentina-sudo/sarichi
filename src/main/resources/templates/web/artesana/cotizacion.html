@@ -22,19 +22,27 @@
   </nav>
   <main class="container py-5">
     <h2 class="mb-4">Pedidos Personalizados - Pendientes de Cotización</h2>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
     <div class="card shadow-sm">
       <div class="card-body">
         <div th:if="${personalizados != null and !personalizados.isEmpty()}">
           <table class="table table-hover">
-            <thead><tr><th>Cliente</th><th>Descripción</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Cliente</th><th>Descripción</th><th>Producto</th><th>Talla</th><th>Fecha</th><th>Acción</th></tr></thead>
             <tbody>
               <tr th:each="pp : ${personalizados}">
-                <td th:text="${pp.usuarioNombre}">Cliente</td>
+                <td th:text="${pp.usuarioNombre ?: 'Cliente'}">Cliente</td>
                 <td th:text="${pp.descripcion}">Descripción</td>
-                <td th:text="${pp.fechaSolicitud}">Fecha</td>
+                <td th:text="${pp.productoNombre ?: '-'}">Producto</td>
+                <td th:text="${pp.talla ?: '-'}">Talla</td>
+                <td th:text="${#temporals.format(pp.fechaCreacion, 'dd/MM/yyyy')}">Fecha</td>
                 <td>
-                  <button class="btn btn-sm btn-success">Cotizar</button>
-                  <a class="btn btn-sm btn-outline-info" th:href="@{/api/web/chat/{id}(id=${pp.id})}">Chat</a>
+                  <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#cotizarModal"
+                          th:attr="data-id=${pp.id}, data-desc=${pp.descripcion}">
+                    <i class="bi bi-currency-dollar"></i> Cotizar
+                  </button>
+                  <a class="btn btn-sm btn-outline-info" th:href="@{/api/web/chat/{id}(id=${pp.id})}"><i class="bi bi-chat-dots"></i></a>
                 </td>
               </tr>
             </tbody>
@@ -42,12 +50,57 @@
         </div>
         <div th:if="${personalizados == null or personalizados.isEmpty()}" class="text-center py-5">
           <div style="font-size:3rem">📋</div>
-          <p class="text-muted">No hay pedidos personalizados pendientes</p>
+          <p class="text-muted">No hay pedidos personalizados pendientes de cotización</p>
         </div>
       </div>
     </div>
     <a th:href="@{/api/web/dashboard/artesana}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
   </main>
+
+  <div class="modal fade" id="cotizarModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="post" th:action="@{/api/web/artesana/cotizar/__${id}__}" id="cotizarForm">
+          <div class="modal-header">
+            <h5 class="modal-title">Generar Cotización</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted" id="descripcionPreview"></p>
+            <div class="mb-3">
+              <label class="fw-medium">Precio ($)</label>
+              <input type="number" name="precioCotizacion" class="form-control" step="1000" min="0" required>
+            </div>
+            <div class="mb-3">
+              <label class="fw-medium">Tiempo estimado</label>
+              <select name="tiempoEstimado" class="form-select" required>
+                <option value="">Seleccionar...</option>
+                <option value="3 días">3 días</option>
+                <option value="5 días">5 días</option>
+                <option value="1 semana">1 semana</option>
+                <option value="2 semanas">2 semanas</option>
+                <option value="3 semanas">3 semanas</option>
+                <option value="1 mes">1 mes</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Enviar cotización</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('cotizarModal').addEventListener('show.bs.modal', function (e) {
+      var btn = e.relatedTarget;
+      var id = btn.getAttribute('data-id');
+      var desc = btn.getAttribute('data-desc');
+      document.getElementById('descripcionPreview').textContent = desc;
+      document.getElementById('cotizarForm').action = '/api/web/artesana/cotizar/' + id;
+    });
+  </script>
 </body>
 </html>

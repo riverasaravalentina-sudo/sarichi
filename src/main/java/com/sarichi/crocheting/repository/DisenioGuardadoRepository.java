@@ -11,4 +11,6 @@ import com.sarichi.crocheting.entity.DisenioGuardado;
 public interface DisenioGuardadoRepository extends MongoRepository<DisenioGuardado, String> {
 
     List<DisenioGuardado> findByUsuarioIdOrderByFechaCreacionDesc(String usuarioId);
+    List<DisenioGuardado> findByEstadoOrderByFechaCreacionDesc(String estado);
+    List<DisenioGuardado> findByEstadoNotOrderByFechaCreacionDesc(String estado);
 }

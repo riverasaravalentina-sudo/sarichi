@@ -929,6 +929,79 @@ public class WebController {
         return "redirect:/api/web/dashboard/artesana";
     }
 
+    // ── Artesana subpages ──────────────────────────────────────────────
+
+    @GetMapping("/artesana/pedidos")
+    public String artesanaPedidos(Model model, HttpSession session) {
+        if (!tieneRol(session, "ARTESANA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("pedidos", pedidoService.listarTodos());
+        } catch (Exception e) {
+            model.addAttribute("pedidos", List.of());
+        }
+        return "web/artesana/pedidos";
+    }
+
+    @GetMapping("/artesana/proceso")
+    public String artesanaProceso(Model model, HttpSession session) {
+        if (!tieneRol(session, "ARTESANA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("fotos", List.of());
+        return "web/artesana/proceso";
+    }
+
+    // ── Cotizaciones (artesana) ─────────────────────────────────────────
+
+    @GetMapping("/artesana/cotizaciones")
+    public String listarCotizaciones(Model model, HttpSession session) {
+        if (!tieneRol(session, "ARTESANA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        try {
+            model.addAttribute("personalizados", personalizadorService.listarPendientes());
+        } catch (Exception e) {
+            model.addAttribute("personalizados", List.of());
+            model.addAttribute("error", "Error al cargar solicitudes: " + e.getMessage());
+        }
+        return "web/artesana/cotizacion";
+    }
+
+    @PostMapping("/artesana/cotizar/{id}")
+    public String cotizar(@PathVariable String id,
+                          @RequestParam Double precioCotizacion,
+                          @RequestParam String tiempoEstimado,
+                          RedirectAttributes ra,
+                          HttpSession session) {
+        if (!tieneRol(session, "ARTESANA") && !tieneRol(session, "ADMIN"))
+            return redirigirSegunSesion(session);
+        try {
+            personalizadorService.cotizar(id, precioCotizacion, tiempoEstimado);
+            ra.addFlashAttribute("success", "Cotización enviada correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al cotizar: " + e.getMessage());
+        }
+        return "redirect:/api/web/artesana/cotizaciones";
+    }
+
+    // ── Cotizaciones (cliente) ──────────────────────────────────────────
+
+    @GetMapping("/mis-cotizaciones")
+    public String misCotizaciones(Model model, HttpSession session) {
+        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        String usuarioWebId = (String) session.getAttribute("usuarioWebId");
+        model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
+        model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
+        try {
+            model.addAttribute("cotizaciones", personalizadorService.listarPorUsuario(usuarioWebId));
+        } catch (Exception e) {
+            model.addAttribute("cotizaciones", List.of());
+        }
+        return "web/cliente/mis-cotizaciones";
+    }
+
     // ── Helpers de seguridad ───────────────────────────────────────────
 
     @SuppressWarnings("unchecked")

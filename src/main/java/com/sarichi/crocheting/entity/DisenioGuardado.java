@@ -29,4 +29,7 @@ public class DisenioGuardado {
     private String mensajeBordado;
     private Double precioCalculado;
     private LocalDateTime fechaCreacion;
+    private String estado;
+    private Double precioCotizacion;
+    private String tiempoEstimado;
 }
