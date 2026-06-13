@@ -6,25 +6,30 @@
   <title>Panel Logística - Sarichi</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <style>body{background:#FDFAF6;font-family:'Inter',system-ui,Arial}.brand{color:#E8527A}.navbar{background:#fff;border-bottom:1px solid #e9ecef}</style>
+  <style>body{background:#FDFAF6;font-family:'Inter',system-ui,Arial}.brand{color:#E8527A}.accent{color:#2DB5C8}.navbar{background:#fff;border-bottom:1px solid #e9ecef;box-shadow:0 2px 8px rgba(0,0,0,.04)}.kpi-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}.card{border-radius:12px;border:none;transition:transform .15s}.card:hover{transform:translateY(-2px)}.card-header{background:transparent;border-bottom:1px solid #f0ece6;font-weight:600}.badge{font-weight:500;padding:.4em .7em}.btn{border-radius:8px}.table>:not(caption)>*>*{border-bottom-color:#f0ece6}</style>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/}">🐱 LOGÍSTICA</a>
+      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/api/web/}"><i class="bi bi-truck"></i> LOGÍSTICA</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLog">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarLog">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logistica/despachos}"><i class="bi bi-clipboard-check"></i> Despachos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logistica/guias}"><i class="bi bi-receipt"></i> Guías</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/pedidos}"><i class="bi bi-box-seam"></i> Pedidos</a></li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <main class="container py-5">
-    <h2 class="mb-4">Panel de Despachos</h2>
+  <main class="container py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-geo-alt brand me-2"></i>Panel de Despachos</h2>
 
     <div th:if="${success}" class="alert alert-success alert-dismissible fade show">✅ <span th:text="${success}"></span>
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -32,57 +37,90 @@
     <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">❌ <span th:text="${error}"></span>
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+    <div th:if="${errorDespachos}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorDespachos}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
-    <!-- KPIs -->
     <div class="row g-3 mb-4" th:if="${estadisticas != null}">
       <div class="col-md-3">
-        <div class="card shadow-sm text-center p-3">
-          <div style="font-size:2rem">📦</div>
-          <h5 class="mt-2" th:text="${estadisticas.get('despachosHoy')}">0</h5>
-          <small class="text-muted">Despachos hoy</small>
+        <div class="card shadow-sm p-3 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="kpi-icon" style="background:#e0f2f1;color:#2DB5C8"><i class="bi bi-check2-square"></i></div>
+            <div>
+              <h3 class="mb-0 fw-bold" th:text="${estadisticas.get('despachosHoy')}">0</h3>
+              <small class="text-muted">Despachos hoy</small>
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-md-3">
-        <div class="card shadow-sm text-center p-3">
-          <div style="font-size:2rem">📋</div>
-          <h5 class="mt-2" th:text="${estadisticas.get('pedidosPendientesDespacho')}">0</h5>
-          <small class="text-muted">Pendientes por despachar</small>
+        <div class="card shadow-sm p-3 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="kpi-icon" style="background:#fff3e0;color:#ff9800"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+              <h3 class="mb-0 fw-bold" th:text="${estadisticas.get('pedidosPendientesDespacho')}">0</h3>
+              <small class="text-muted">Pendientes por despachar</small>
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-md-3">
-        <div class="card shadow-sm text-center p-3">
-          <div style="font-size:2rem">🚚</div>
-          <h5 class="mt-2" th:text="${estadisticas.get('despachosSemana')}">0</h5>
-          <small class="text-muted">Despachos esta semana</small>
+        <div class="card shadow-sm p-3 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="kpi-icon" style="background:#fce4ec;color:#E8527A"><i class="bi bi-calendar-week"></i></div>
+            <div>
+              <h3 class="mb-0 fw-bold" th:text="${estadisticas.get('despachosSemana')}">0</h3>
+              <small class="text-muted">Despachos esta semana</small>
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-md-3">
-        <div class="card shadow-sm text-center p-3">
-          <div style="font-size:2rem">⏱</div>
-          <h5 class="mt-2" th:text="${estadisticas.get('promedioEntregaDias')}">3</h5>
-          <small class="text-muted">Promedio entrega (días)</small>
+        <div class="card shadow-sm p-3 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="kpi-icon" style="background:#ede7f6;color:#7c4dff"><i class="bi bi-clock"></i></div>
+            <div>
+              <h3 class="mb-0 fw-bold" th:text="${estadisticas.get('promedioEntregaDias')}">3</h3>
+              <small class="text-muted">Promedio entrega (días)</small>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Navegación -->
     <div class="row g-3 mb-4">
       <div class="col-md-4">
-        <a th:href="@{/api/web/logistica/despachos}" class="card shadow-sm text-decoration-none text-dark p-3 d-block">
-          <h5>📋 Despachos pendientes</h5>
-          <small class="text-muted">Pedidos listos para generar guía</small>
+        <a th:href="@{/api/web/logistica/despachos}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div style="width:48px;height:48px;border-radius:12px;background:#e0f2f1;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#2DB5C8"><i class="bi bi-clipboard-check"></i></div>
+            <div>
+              <h5 class="fw-bold mb-0">Despachos pendientes</h5>
+              <small class="text-muted">Pedidos listos para generar guía</small>
+            </div>
+          </div>
         </a>
       </div>
       <div class="col-md-4">
-        <a th:href="@{/api/web/logistica/guias}" class="card shadow-sm text-decoration-none text-dark p-3 d-block">
-          <h5>🚚 Guías de envío</h5>
-          <small class="text-muted">Historial de guías generadas</small>
+        <a th:href="@{/api/web/logistica/guias}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div style="width:48px;height:48px;border-radius:12px;background:#fff3e0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#ff9800"><i class="bi bi-receipt"></i></div>
+            <div>
+              <h5 class="fw-bold mb-0">Guías de envío</h5>
+              <small class="text-muted">Historial de guías generadas</small>
+            </div>
+          </div>
         </a>
       </div>
       <div class="col-md-4">
-        <a th:href="@{/api/web/pedidos}" class="card shadow-sm text-decoration-none text-dark p-3 d-block">
-          <h5>📦 Todos los pedidos</h5>
-          <small class="text-muted">Ver estado general de pedidos</small>
+        <a th:href="@{/api/web/pedidos}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div style="width:48px;height:48px;border-radius:12px;background:#fce4ec;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#E8527A"><i class="bi bi-box-seam"></i></div>
+            <div>
+              <h5 class="fw-bold mb-0">Todos los pedidos</h5>
+              <small class="text-muted">Ver estado general de pedidos</small>
+            </div>
+          </div>
         </a>
       </div>
     </div>
@@ -90,30 +128,31 @@
     <div class="row g-3">
       <div class="col-md-12">
         <div class="card shadow-sm">
-          <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Despachos pendientes</h5>
+          <div class="card-header d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0"><i class="bi bi-clock me-2 brand"></i>Despachos pendientes</h5>
             <a th:href="@{/api/web/logistica/despachos}" class="btn btn-sm btn-outline-primary">Ver todos</a>
           </div>
           <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr><th>Pedido</th><th>Cliente</th><th>Ciudad</th><th>Estado</th><th>Acciones</th></tr>
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr><th class="ps-3">Pedido</th><th>Cliente</th><th>Ciudad</th><th>Estado</th><th class="pe-3">Acciones</th></tr>
               </thead>
               <tbody>
                 <tr th:each="d : ${despachos}">
-                  <td th:text="${d.pedidoId}">id</td>
+                  <td class="ps-3 fw-medium" th:text="${d.pedidoId}">id</td>
                   <td th:text="${d.clienteNombre}">Cliente</td>
                   <td th:text="${d.ciudadDestino}">Ciudad</td>
-                  <td><span class="badge bg-warning" th:text="${d.estado}">estado</span></td>
-                  <td>
-                    <a th:href="@{/api/web/logistica/despachos}" class="btn btn-sm btn-outline-primary">Generar guía</a>
+                  <td><span class="badge bg-warning text-dark" th:text="${d.estado}">estado</span></td>
+                  <td class="pe-3">
+                    <a th:href="@{/api/web/logistica/despachos}" class="btn btn-sm btn-outline-primary"><i class="bi bi-truck"></i> Generar guía</a>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div th:if="${despachos == null or despachos.isEmpty()}" class="text-center py-4">
-            <p class="text-muted">No hay pedidos pendientes por despachar</p>
+          <div th:if="${despachos == null or despachos.isEmpty()}" class="text-center py-5">
+            <i class="bi bi-check2-all brand" style="font-size:2.5rem"></i>
+            <p class="text-muted mt-2 mb-0">No hay pedidos pendientes por despachar</p>
           </div>
         </div>
       </div>
