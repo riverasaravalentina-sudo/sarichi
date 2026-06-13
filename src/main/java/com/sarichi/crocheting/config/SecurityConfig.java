@@ -77,7 +77,7 @@ public class SecurityConfig {
                     "/", "/*.html", "/*.css", "/*.js",
                     "/sarichi.css", "/sarichi.js", "/sarichi-ext.js",
                     "/css/**", "/js/**", "/images/**", "/fonts/**",
-                    "/favicon.ico"
+                    "/favicon.ico", "/error"
                 ).permitAll()
 
                 // ── API Auth pública ───────────────────────────────────────────────
