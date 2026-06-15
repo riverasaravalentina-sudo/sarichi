@@ -4,6 +4,7 @@ services:
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
+    startTimeout: 300
     healthCheckPath: /api/actuator/health
     envVars:
       - key: PORT
