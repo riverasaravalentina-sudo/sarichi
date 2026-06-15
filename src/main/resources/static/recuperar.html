@@ -27,6 +27,20 @@
       </button>
     </form>
 
+    <form id="restablecerForm" style="display:none">
+      <div class="form-group">
+        <label>Nueva contraseña</label>
+        <input type="password" id="nuevaContrasena" placeholder="Mínimo 8 caracteres" required>
+      </div>
+      <div class="form-group">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="confirmarContrasena" placeholder="Repite la contraseña" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="btnRest">
+        Cambiar contraseña
+      </button>
+    </form>
+
     <div class="auth-footer">
       <a href="login.html">← Volver al login</a>
     </div>
@@ -47,18 +61,62 @@
     try {
       const data = await apiPost('/auth/recuperar', { correo: document.getElementById('correo').value });
       if (data.enlace) {
-        ok.innerHTML = '⚠ El correo no pudo enviarse, pero puedes usar este enlace directo:<br><a href="' + data.enlace + '" style="word-break:break-all">' + data.enlace + '</a>';
+        const token = new URLSearchParams(data.enlace.split('?')[1]).get('token');
+        document.getElementById('recuperarForm').style.display = 'none';
+        document.getElementById('restablecerForm').style.display = 'block';
+        document.getElementById('restablecerForm').dataset.token = token;
+        ok.textContent = 'Correo no disponible. Ingresa tu nueva contraseña directamente.';
+        ok.style.display = 'block';
+        btn.innerHTML = 'Enviar enlace';
+        btn.disabled = false;
       } else {
         ok.textContent = 'Si el correo está registrado, recibirás el enlace en unos minutos. Revisa tu bandeja de entrada.';
+        ok.style.display = 'block';
+        btn.innerHTML = '¡Enviado!';
       }
-      ok.style.display = 'block';
-      btn.innerHTML = '¡Enviado!';
     } catch(ex) {
       ok.textContent = 'Si el correo está registrado, recibirás el enlace en unos minutos.';
       ok.style.display = 'block';
       btn.innerHTML = 'Enviar enlace';
       btn.disabled = false;
     }
+
+    document.getElementById('restablecerForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const token = e.target.dataset.token;
+      const btn  = document.getElementById('btnRest');
+      const err  = document.getElementById('error-msg');
+      const ok   = document.getElementById('success-msg');
+      err.style.display = 'none'; ok.style.display = 'none';
+
+      const nueva    = document.getElementById('nuevaContrasena').value;
+      const confirmar = document.getElementById('confirmarContrasena').value;
+
+      if (nueva !== confirmar) {
+        err.textContent = 'Las contraseñas no coinciden.';
+        err.style.display = 'block'; return;
+      }
+      if (nueva.length < 8) {
+        err.textContent = 'La contraseña debe tener mínimo 8 caracteres.';
+        err.style.display = 'block'; return;
+      }
+
+      btn.innerHTML = '<span class="spinner"></span> Cambiando...';
+      btn.disabled = true;
+
+      try {
+        await apiPost('/auth/restablecer', { token, nuevaContrasena: nueva, confirmarContrasena: confirmar });
+        ok.textContent = '✅ ¡Contraseña cambiada exitosamente! Redirigiendo al login...';
+        ok.style.display = 'block';
+        document.getElementById('restablecerForm').style.display = 'none';
+        setTimeout(() => window.location.href = 'login.html', 2500);
+      } catch(ex) {
+        err.textContent = ex.message;
+        err.style.display = 'block';
+        btn.innerHTML = 'Cambiar contraseña';
+        btn.disabled = false;
+      }
+    });
   });
 </script>
 </body>
