@@ -45,8 +45,12 @@
     btn.disabled = true;
 
     try {
-      await apiPost('/auth/recuperar', { correo: document.getElementById('correo').value });
-      ok.textContent = 'Si el correo está registrado, recibirás el enlace en unos minutos. Revisa tu bandeja de entrada.';
+      const data = await apiPost('/auth/recuperar', { correo: document.getElementById('correo').value });
+      if (data.enlace) {
+        ok.innerHTML = '⚠ El correo no pudo enviarse, pero puedes usar este enlace directo:<br><a href="' + data.enlace + '" style="word-break:break-all">' + data.enlace + '</a>';
+      } else {
+        ok.textContent = 'Si el correo está registrado, recibirás el enlace en unos minutos. Revisa tu bandeja de entrada.';
+      }
       ok.style.display = 'block';
       btn.innerHTML = '¡Enviado!';
     } catch(ex) {

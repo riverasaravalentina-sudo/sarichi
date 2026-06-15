@@ -29,6 +29,8 @@ public class EmailService {
     @Value("${sarichi.app.base-url:http://localhost:8080}")
     private String baseUrl;
 
+    public String getBaseUrl() { return baseUrl; }
+
     public EmailService(ObjectProvider<JavaMailSender> mailSenderProvider,
                         @Value("${spring.mail.username:}") String mailUsername) {
         this.mailSender = mailSenderProvider.getIfAvailable();
@@ -39,7 +41,7 @@ public class EmailService {
         }
     }
 
-    public void enviarCorreoRecuperacion(String correo, String nombre, String token) {
+    public boolean enviarCorreoRecuperacion(String correo, String nombre, String token) {
         String enlace = baseUrl + "/restablecer.html?token=" + token;
         String mensaje = "Hola " + nombre + ",\n\n"
                 + "Recibimos una solicitud para restablecer tu contraseña.\n\n"
@@ -49,7 +51,7 @@ public class EmailService {
                 + "Si no solicitaste este cambio, ignora este correo.\n\n"
                 + "— Crocheting Sarichi 🧵 UTS 2026";
         log.info("Enlace de recuperación para {}: {}", correo, enlace);
-        enviarSimple(correo, "Recuperación de contraseña - Sarichi", mensaje);
+        return enviarSimple(correo, "Recuperación de contraseña - Sarichi", mensaje);
     }
 
     public void enviarConfirmacionPedido(String correo, Object pedido) {
@@ -82,15 +84,15 @@ public class EmailService {
                 "Tu pedido ya tiene información de despacho. Revisa el detalle en tu panel.");
     }
 
-    private void enviarSimple(String para, String asunto, String contenido) {
+    private boolean enviarSimple(String para, String asunto, String contenido) {
         if (para == null || para.isBlank()) {
             log.warn("Correo omitido: destinatario vacío. Asunto: {}", asunto);
-            return;
+            return false;
         }
 
         if (!mailConfigurado) {
             log.info("Correo simulado para {} | {} | {}", para, asunto, contenido);
-            return;
+            return false;
         }
 
         try {
@@ -101,9 +103,11 @@ public class EmailService {
             message.setText(contenido);
             mailSender.send(message);
             log.info("Correo enviado a {} con asunto '{}'", para, asunto);
+            return true;
         } catch (Exception e) {
             log.warn("No se pudo enviar correo a {}. Se continúa sin bloquear. Causa: {}",
                     para, e.getMessage());
+            return false;
         }
     }
 }

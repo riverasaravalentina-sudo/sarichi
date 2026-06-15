@@ -143,15 +143,20 @@ public class AutenticacionService {
 
     // ── RECUPERAR CONTRASEÑA ──────────────────────────────────────────────
 
-    public void solicitarRecuperacion(RecuperarContrasenaDTO dto) {
-        usuarioRepository.findByCorreo(dto.getCorreo()).ifPresent(usuario -> {
-            String token = UUID.randomUUID().toString().replace("-", "");
-            usuario.setTokenRecuperacion(token);
-            usuario.setTokenRecuperacionExpira(LocalDateTime.now().plusMinutes(15));
-            usuarioRepository.save(usuario);
-            emailService.enviarCorreoRecuperacion(
-                    usuario.getCorreo(), usuario.getNombre(), token);
-        });
+    public String solicitarRecuperacion(RecuperarContrasenaDTO dto) {
+        var opt = usuarioRepository.findByCorreo(dto.getCorreo());
+        if (opt.isEmpty()) return null;
+        Usuario usuario = opt.get();
+        String token = UUID.randomUUID().toString().replace("-", "");
+        usuario.setTokenRecuperacion(token);
+        usuario.setTokenRecuperacionExpira(LocalDateTime.now().plusMinutes(15));
+        usuarioRepository.save(usuario);
+        boolean enviado = emailService.enviarCorreoRecuperacion(
+                usuario.getCorreo(), usuario.getNombre(), token);
+        if (!enviado) {
+            return emailService.getBaseUrl() + "/restablecer.html?token=" + token;
+        }
+        return null;
     }
 
     public void restablecerContrasena(RestablecerContrasenaDTO dto) {

@@ -1,7 +1,7 @@
 package com.sarichi.crocheting.controller;
 
+import java.util.HashMap;
 import java.util.Map;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -96,9 +96,13 @@ public class AutenticacionController {
                description = "Envía enlace temporal de 15 min al correo registrado.")
     public ResponseEntity<Map<String, String>> solicitarRecuperacion(
             @Valid @RequestBody RecuperarContrasenaDTO dto) {
-        autenticacionService.solicitarRecuperacion(dto);
-        return ResponseEntity.ok(Map.of("mensaje",
-                "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña."));
+        String enlace = autenticacionService.solicitarRecuperacion(dto);
+        Map<String, String> res = new HashMap<>();
+        res.put("mensaje", "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.");
+        if (enlace != null && !enlace.isBlank()) {
+            res.put("enlace", enlace);
+        }
+        return ResponseEntity.ok(res);
     }
 
     /**
