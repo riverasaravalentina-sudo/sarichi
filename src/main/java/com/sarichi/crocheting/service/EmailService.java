@@ -21,6 +21,7 @@ public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
+    private final boolean mailConfigurado;
 
     @Value("${sarichi.mail.from:noreply@sarichi.com}")
     private String remitente;
@@ -28,8 +29,14 @@ public class EmailService {
     @Value("${sarichi.app.base-url:http://localhost:8080}")
     private String baseUrl;
 
-    public EmailService(ObjectProvider<JavaMailSender> mailSenderProvider) {
+    public EmailService(ObjectProvider<JavaMailSender> mailSenderProvider,
+                        @Value("${spring.mail.username:}") String mailUsername) {
         this.mailSender = mailSenderProvider.getIfAvailable();
+        this.mailConfigurado = this.mailSender != null
+                && mailUsername != null && !mailUsername.isBlank();
+        if (!this.mailConfigurado) {
+            log.info("Correo SMTP no configurado. Los correos se mostrarán en logs.");
+        }
     }
 
     public void enviarCorreoRecuperacion(String correo, String nombre, String token) {
@@ -41,6 +48,7 @@ public class EmailService {
                 + "Este enlace expira en 15 minutos.\n\n"
                 + "Si no solicitaste este cambio, ignora este correo.\n\n"
                 + "— Crocheting Sarichi 🧵 UTS 2026";
+        log.info("Enlace de recuperación para {}: {}", correo, enlace);
         enviarSimple(correo, "Recuperación de contraseña - Sarichi", mensaje);
     }
 
@@ -80,7 +88,7 @@ public class EmailService {
             return;
         }
 
-        if (mailSender == null) {
+        if (!mailConfigurado) {
             log.info("Correo simulado para {} | {} | {}", para, asunto, contenido);
             return;
         }
