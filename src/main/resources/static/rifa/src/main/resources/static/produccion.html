@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producción - Sarichi Crocheting</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .produccion-container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .actividad-card { background: white; border: 1px solid #DDD; border-radius: 8px; padding: 20px; margin-bottom: 15px; }
+        .actividad-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #8B4513; padding-bottom: 10px; }
+        .actividad-header h3 { margin: 0; }
+        .estado-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .estado-pendiente { background: #FFF3CD; color: #856404; }
+        .estado-en_progreso { background: #D1ECF1; color: #0C5460; }
+        .estado-completado { background: #D4EDDA; color: #155724; }
+        .actividad-details { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .detail-item { }
+        .detail-label { font-weight: bold; color: #666; }
+        .detail-value { color: #333; }
+        .galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 15px 0; }
+        .foto-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 5px; cursor: pointer; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 10px; }
+        .btn-primary { background: #8B4513; color: white; }
+        .btn-success { background: #28A745; color: white; }
+        .btn-info { background: #17A2B8; color: white; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #DDD; border-radius: 5px; }
+        .capacidad-info { background: #E8F4F8; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🎨 Producción - Artesana</h1>
+        <div class="nav-right">
+            <span id="usuario-badge"></span>
+            <button onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <div class="produccion-container">
+        <!-- Información de Capacidad -->
+        <div class="capacidad-info">
+            <p><strong>Capacidad Actual:</strong> <span id="capacidadUsada">-</span> / 5 actividades</p>
+            <div style="background: white; height: 20px; border-radius: 10px; overflow: hidden; margin-top: 10px;">
+                <div id="capacidadBar" style="width: 0%; height: 100%; background: #8B4513; transition: width 0.3s;"></div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <button onclick="filtrarPor('PENDIENTE')" class="btn btn-primary" style="background: #FFC107;">📋 Pendientes</button>
+            <button onclick="filtrarPor('EN_PROGRESO')" class="btn btn-info">⏳ En Progreso</button>
+            <button onclick="filtrarPor('COMPLETADO')" class="btn btn-success">✓ Completados</button>
+            <button onclick="filtrarPor('TODO')" class="btn" style="background: #6C757D; color: white;">Todos</button>
+        </div>
+
+        <!-- Lista de Actividades -->
+        <div id="actividades-list">
+            <p style="text-align: center;">Cargando actividades...</p>
+        </div>
+    </div>
+
+    <!-- Modal Iniciar Actividad -->
+    <div id="modalIniciar" class="modal">
+        <div class="modal-content">
+            <span style="float: right; cursor: pointer; font-size: 24px;" onclick="cerrarModal('modalIniciar')">&times;</span>
+            <h3>Iniciar Producción</h3>
+            <p id="pedidoInfoIniciar"></p>
+            <button onclick="iniciarActividad()" class="btn btn-success" style="width: 100%;">▶️ Iniciar</button>
+        </div>
+    </div>
+
+    <!-- Modal Completar Actividad -->
+    <div id="modalCompletar" class="modal">
+        <div class="modal-content">
+            <span style="float: right; cursor: pointer; font-size: 24px;" onclick="cerrarModal('modalCompletar')">&times;</span>
+            <h3>Completar Producción</h3>
+            <p id="pedidoInfoCompletar"></p>
+            <div class="form-group">
+                <label>Subir Foto del Proceso</label>
+                <input type="file" id="fotoInput" accept="image/*">
+                <small>Se mostrará una URL simulada. En producción integraría con CloudStorage.</small>
+            </div>
+            <button onclick="subirFoto()" class="btn btn-info" style="width: 100%;">📸 Subir Foto</button>
+            <button onclick="completarActividad()" class="btn btn-success" style="width: 100%; margin-top: 10px;">✓ Completar Actividad</button>
+        </div>
+    </div>
+
+    <!-- Modal Galería -->
+    <div id="modalGaleria" class="modal">
+        <div class="modal-content">
+            <span style="float: right; cursor: pointer; font-size: 24px;" onclick="cerrarModal('modalGaleria')">&times;</span>
+            <h3>Galería del Proceso</h3>
+            <div class="galeria" id="galeriaFotos"></div>
+        </div>
+    </div>
+
+    <script src="sarichi.js"></script>
+    <script>
+        requireAuth('ARTESANA', 'ADMIN');
+        
+        let filtroActual = 'TODO';
+        let actividadEnProceso = null;
+
+        window.addEventListener('load', () => {
+            renderNav();
+            cargarActividades();
+            cargarCapacidad();
+        });
+
+        function cargarCapacidad() {
+            apiGet('/actividades/capacidad')
+                .then(data => {
+                    const usado = data.capacidadUsada || 0;
+                    const maximo = data.capacidadMaxima || 5;
+                    document.getElementById('capacidadUsada').textContent = `${usado}`;
+                    document.getElementById('capacidadBar').style.width = `${(usado / maximo) * 100}%`;
+                })
+                .catch(err => console.error('Error cargando capacidad:', err));
+        }
+
+        function cargarActividades() {
+            let endpoint = filtroActual === 'TODO' 
+                ? '/actividades/mis-actividades'
+                : `/actividades/estado/${filtroActual}`;
+
+            apiGet(endpoint)
+                .then(actividades => {
+                    const container = document.getElementById('actividades-list');
+                    container.innerHTML = '';
+
+                    if (!actividades || actividades.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #999;">No hay actividades</p>';
+                        return;
+                    }
+
+                    actividades.forEach(a => {
+                        const estadoClass = `estado-${a.estado?.toLowerCase() || 'pendiente'}`;
+                        const fotos = a.fotos || [];
+                        const fotosHtml = fotos.length > 0 
+                            ? `<button class="btn btn-info" onclick="abrirGaleria(${JSON.stringify(fotos).replace(/"/g, '&quot;')})">📸 Ver Galería (${fotos.length})</button>`
+                            : '';
+
+                        const html = `<div class="actividad-card">
+                            <div class="actividad-header">
+                                <div>
+                                    <h3>Pedido ${a.pedidoNumero}</h3>
+                                    <p style="margin: 5px 0; color: #666;">Producto: ${a.productoNombre}</p>
+                                </div>
+                                <span class="estado-badge ${estadoClass}">${a.estado}</span>
+                            </div>
+                            <div class="actividad-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Cantidad</div>
+                                    <div class="detail-value">${a.cantidad} unidades</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Inicio</div>
+                                    <div class="detail-value">${a.fechaInicio ? new Date(a.fechaInicio).toLocaleDateString('es-CO') : 'No iniciado'}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                ${a.estado === 'PENDIENTE' ? `<button class="btn btn-primary" onclick="abrirModalIniciar('${a.id}', '${a.pedidoNumero}')">▶️ Iniciar</button>` : ''}
+                                ${a.estado === 'EN_PROGRESO' ? `<button class="btn btn-success" onclick="abrirModalCompletar('${a.id}', '${a.pedidoNumero}')">✓ Completar</button>` : ''}
+                                ${fotosHtml}
+                            </div>
+                        </div>`;
+                        container.innerHTML += html;
+                    });
+                })
+                .catch(err => console.error('Error cargando actividades:', err));
+        }
+
+        function filtrarPor(estado) {
+            filtroActual = estado;
+            cargarActividades();
+        }
+
+        function abrirModalIniciar(actividadId, pedidoNum) {
+            actividadEnProceso = actividadId;
+            document.getElementById('pedidoInfoIniciar').textContent = `¿Iniciar producción del pedido ${pedidoNum}?`;
+            document.getElementById('modalIniciar').classList.add('active');
+        }
+
+        function abrirModalCompletar(actividadId, pedidoNum) {
+            actividadEnProceso = actividadId;
+            document.getElementById('pedidoInfoCompletar').textContent = `Completar producción del pedido ${pedidoNum}`;
+            document.getElementById('modalCompletar').classList.add('active');
+        }
+
+        function abrirGaleria(fotos) {
+            const container = document.getElementById('galeriaFotos');
+            container.innerHTML = '';
+            fotos.forEach(foto => {
+                const img = `<img src="${foto.urlFoto}" alt="${foto.descripcion}" class="foto-thumb" title="${foto.descripcion}">`;
+                container.innerHTML += img;
+            });
+            document.getElementById('modalGaleria').classList.add('active');
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function iniciarActividad() {
+            apiFetch(`/actividades/${actividadEnProceso}/iniciar`, 'PUT', {})
+                .then(() => {
+                    showToast('✓ Actividad iniciada');
+                    cerrarModal('modalIniciar');
+                    cargarActividades();
+                    cargarCapacidad();
+                })
+                .catch(err => showToast('Error: ' + (err.mensaje || err.message)));
+        }
+
+        function subirFoto() {
+            const fileInput = document.getElementById('fotoInput');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showToast('Selecciona una foto primero');
+                return;
+            }
+            // Simular URL de foto (en producción sería CloudStorage)
+            const fotoUrl = `https://via.placeholder.com/300?text=Foto+${Date.now()}`;
+            const fotoDTO = {
+                urlFoto: fotoUrl,
+                descripcion: 'Foto del proceso de tejido'
+            };
+            subirFotoProcesoReal(fotoDTO);
+        }
+
+        function subirFotoProcesoReal(fotoDTO) {
+            apiFetch(`/actividades/${actividadEnProceso}/fotos`, 'POST', fotoDTO)
+                .then(() => {
+                    showToast('✓ Foto subida');
+                    document.getElementById('fotoInput').value = '';
+                })
+                .catch(err => showToast('Error: ' + (err.mensaje || err.message)));
+        }
+
+        function completarActividad() {
+            apiFetch(`/actividades/${actividadEnProceso}/completar`, 'PUT', {})
+                .then(() => {
+                    showToast('✓ Actividad completada. Pedido cambió a LISTO.');
+                    cerrarModal('modalCompletar');
+                    cargarActividades();
+                    cargarCapacidad();
+                })
+                .catch(err => showToast('Error: ' + (err.mensaje || err.message)));
+        }
+
+        // Auto-refresh
+        setInterval(() => {
+            cargarActividades();
+            cargarCapacidad();
+        }, 30000);
+    </script>
+</body>
+</html>

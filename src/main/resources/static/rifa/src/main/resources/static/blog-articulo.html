@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Artículo - Sarichi</title>
+  <style>
+    body{font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;color:#333;margin:0}
+    .container{max-width:900px;margin:40px auto;padding:20px}
+    .meta{color:#777;font-size:0.9rem;margin-bottom:10px}
+    .titulo{font-size:2rem;margin-bottom:10px}
+    .imagen{width:100%;height:400px;object-fit:cover;border-radius:8px;margin-bottom:15px}
+    .contenido{line-height:1.7;color:#222}
+    .share{margin-top:20px;display:flex;gap:10px}
+    .btn{padding:10px 14px;border-radius:6px;border:none;cursor:pointer}
+    .btn-primary{background:#667eea;color:#fff}
+    #visitas{font-weight:bold}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loading">Cargando artículo...</div>
+    <div id="error" style="color:#d32f2f;display:none;"></div>
+    <article id="article" style="display:none;">
+      <img id="imagen" class="imagen" src="/placeholder.jpg" alt="Imagen principal">
+      <h1 id="titulo" class="titulo"></h1>
+      <div class="meta">Por <span id="autor"></span> • <span id="fecha"></span> • <span id="visitas"></span> visitas</div>
+      <div id="contenido" class="contenido"></div>
+      <div class="share">
+        <button class="btn btn-primary" id="shareWhatsapp">Compartir WhatsApp</button>
+        <button class="btn" id="shareInstagram">Compartir Instagram</button>
+      </div>
+    </article>
+  </div>
+
+  <script src="/sarichi.js"></script>
+  <script src="/sarichi-ext.js"></script>
+  <script>
+    function qs(name){
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    async function cargarArticulo(){
+      const slug = qs('slug');
+      if(!slug){ document.getElementById('error').textContent='Artículo no especificado'; document.getElementById('error').style.display='block'; return; }
+      try{
+        const art = await apiGet('/blog/' + slug);
+        document.getElementById('imagen').src = art.imagenPrincipalUrl || '/placeholder.jpg';
+        document.getElementById('titulo').textContent = art.titulo;
+        document.getElementById('autor').textContent = art.autorNombre || 'Sarichi';
+        document.getElementById('fecha').textContent = art.fechaPublicacion ? new Date(art.fechaPublicacion).toLocaleDateString() : '';
+        document.getElementById('visitas').textContent = art.visitas || 0;
+        const safe = (window.sarichiExt && window.sarichiExt.sanitizarHTML) ? window.sarichiExt.sanitizarHTML(art.contenidoHtml) : (art.contenidoHtml || '');
+        document.getElementById('contenido').innerHTML = safe;
+        document.getElementById('loading').style.display='none';
+        document.getElementById('article').style.display='block';
+
+        // Registrar visita (non-blocking)
+        if (window.sarichiExt && window.sarichiExt.registrarVisita) {
+          window.sarichiExt.registrarVisita(null, null, window.location.href, art.idAutor || null, navigator.userAgent, null);
+        }
+
+        document.getElementById('shareWhatsapp').addEventListener('click', ()=>{
+          const text = art.titulo + ' — ' + (art.resumen || '');
+          if (window.sarichiExt) window.sarichiExt.compartirWhatsApp(text, window.location.href);
+        });
+        document.getElementById('shareInstagram').addEventListener('click', ()=>{
+          if (window.sarichiExt) window.sarichiExt.compartirInstagram(window.location.href);
+        });
+
+      }catch(e){
+        document.getElementById('loading').style.display='none';
+        document.getElementById('error').textContent = e.message || 'Error al cargar';
+        document.getElementById('error').style.display='block';
+      }
+    }
+
+    cargarArticulo();
+  </script>
+</body>
+</html>

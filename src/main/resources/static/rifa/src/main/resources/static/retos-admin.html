@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gestión de Retos — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+  <style>
+    /* ── Reto card ── */
+    .reto-card {
+      background: var(--blanco); border-radius: var(--radio);
+      box-shadow: var(--sombra); padding: 20px;
+      border-left: 4px solid var(--rosa); margin-bottom: 16px;
+      transition: .2s;
+    }
+    .reto-card:hover { box-shadow: 0 6px 20px rgba(232,82,122,.14); }
+    .reto-card.ACTIVO    { border-left-color: var(--verde); }
+    .reto-card.FINALIZADO{ border-left-color: var(--gris); }
+    .reto-card.CANCELADO { border-left-color: #ef4444; }
+
+    .reto-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 12px; margin-bottom: 10px;
+    }
+    .reto-nombre {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; color: var(--negro); font-weight: 600;
+    }
+    .reto-meta {
+      font-size: .8rem; color: var(--gris); margin-bottom: 8px;
+    }
+    .reto-acciones { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* ── Participaciones ── */
+    .participacion-card {
+      background: var(--crema-d); border-radius: 10px;
+      padding: 14px; display: flex;
+      gap: 14px; align-items: flex-start;
+      margin-bottom: 10px; transition: .15s;
+    }
+    .participacion-card:hover { background: #f9f0f4; }
+    .part-img {
+      width: 80px; height: 80px; border-radius: 8px;
+      object-fit: cover; background: var(--crema);
+      flex-shrink: 0; font-size: 2rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .part-info { flex: 1; }
+    .part-usuario {
+      font-weight: 600; font-size: .9rem; margin-bottom: 3px;
+    }
+    .part-desc {
+      font-size: .82rem; color: var(--gris); margin-bottom: 6px;
+    }
+    .part-votos {
+      font-size: .82rem; color: var(--rosa); font-weight: 600;
+    }
+    .part-acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ── Estado badges ── */
+    .badge-ACTIVO     { background: #d1fae5; color: #065f46; }
+    .badge-FINALIZADO { background: #f3f4f6; color: #6b7280; }
+    .badge-CANCELADO  { background: #fee2e2; color: #991b1b; }
+    .badge-PENDIENTE  { background: #fef3c7; color: #92400e; }
+    .badge-APROBADA   { background: #d1fae5; color: #065f46; }
+    .badge-RECHAZADA  { background: #fee2e2; color: #991b1b; }
+    .badge-GANADORA   { background: #fef3c7; color: #92400e; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 1000;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--blanco); border-radius: 16px;
+      padding: 28px; width: 100%; max-width: 560px;
+      max-height: 90vh; overflow-y: auto;
+      border-top: 4px solid var(--rosa);
+    }
+    .modal-titulo {
+      font-family: 'Playfair Display', serif;
+      color: var(--rosa); font-size: 1.2rem; margin-bottom: 16px;
+    }
+
+    /* ── Panel participaciones ── */
+    .panel-participaciones {
+      background: var(--blanco); border-radius: var(--radio);
+      box-shadow: var(--sombra); padding: 20px;
+      margin-top: 20px; display: none;
+    }
+    .panel-participaciones.visible { display: block; }
+
+    /* ── Stats reto ── */
+    .reto-stats {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;
+    }
+    .stat-pill {
+      background: var(--crema-d); border-radius: 20px;
+      padding: 4px 12px; font-size: .78rem; font-weight: 600;
+    }
+
+    /* ── Countdown ── */
+    .countdown {
+      font-size: .82rem; color: var(--celeste); font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="dashboard.html"     class="sidebar-item">📊 Dashboard</a>
+      <a href="blog-admin.html"    class="sidebar-item">✍️ Blog</a>
+      <a href="galeria-admin.html" class="sidebar-item">🖼️ Galería</a>
+      <a href="retos.html"         class="sidebar-item">🏆 Ver Retos</a>
+      <a href="retos-admin.html"   class="sidebar-item active">⚙️ Gestión Retos</a>
+      <a href="analiticas-mercadeo.html" class="sidebar-item">📈 Analíticas</a>
+    </aside>
+
+    <main class="main-content">
+      <h2 class="section-title">🏆 Gestión de Retos Mensuales</h2>
+
+      <!-- Botón crear + stats globales -->
+      <div style="display:flex;justify-content:space-between;
+                  align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div class="reto-stats" id="stats-globales">
+          <span class="stat-pill">
+            🟢 Activos: <span id="stat-activos">—</span>
+          </span>
+          <span class="stat-pill">
+            🏁 Finalizados: <span id="stat-fin">—</span>
+          </span>
+          <span class="stat-pill">
+            👥 Total participaciones: <span id="stat-parts">—</span>
+          </span>
+        </div>
+        <button onclick="abrirModalReto()"
+                class="btn btn-primary">
+          ➕ Nuevo Reto Mensual
+        </button>
+      </div>
+
+      <!-- Lista de retos -->
+      <div id="lista-retos">
+        <div style="text-align:center;padding:40px">
+          <span class="spinner"></span> Cargando retos...
+        </div>
+      </div>
+
+      <!-- Panel participaciones (se muestra al seleccionar un reto) -->
+      <div class="panel-participaciones" id="panel-participaciones">
+        <div style="display:flex;justify-content:space-between;
+                    align-items:center;margin-bottom:16px">
+          <h3 class="section-title" style="margin-bottom:0">
+            👥 Participaciones — <span id="reto-seleccionado-nombre"></span>
+          </h3>
+          <div style="display:flex;gap:8px">
+            <button onclick="filtrarParticipaciones('PENDIENTE')"
+                    class="btn btn-sm"
+                    style="background:#fef3c7;color:#92400e;border:none">
+              ⏳ Pendientes
+            </button>
+            <button onclick="filtrarParticipaciones('APROBADA')"
+                    class="btn btn-sm"
+                    style="background:#d1fae5;color:#065f46;border:none">
+              ✅ Aprobadas
+            </button>
+            <button onclick="filtrarParticipaciones(null)"
+                    class="btn btn-outline btn-sm">
+              Todas
+            </button>
+            <button onclick="cerrarPanelParts()"
+                    class="btn btn-sm"
+                    style="background:var(--gris-l);border:none">
+              ✕
+            </button>
+          </div>
+        </div>
+        <div id="lista-participaciones">
+          <div style="text-align:center;padding:20px">
+            <span class="spinner"></span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── MODAL CREAR/EDITAR RETO ── -->
+<div class="modal-overlay" id="modal-reto">
+  <div class="modal-box">
+    <h3 class="modal-titulo" id="modal-reto-titulo">
+      ➕ Nuevo Reto Mensual
+    </h3>
+    <div id="modal-reto-error" class="alert alert-error"
+         style="display:none"></div>
+    <input type="hidden" id="reto-id">
+
+    <div class="form-group">
+      <label>Nombre del reto *</label>
+      <input type="text" id="reto-nombre"
+             placeholder="Ej: Reto Amigurumi de Junio 2026" required>
+    </div>
+    <div class="form-group">
+      <label>Descripción *</label>
+      <textarea id="reto-descripcion" rows="3"
+                placeholder="Describe el reto, las reglas y qué deben crear..."
+                style="resize:vertical" required></textarea>
+    </div>
+    <div class="form-group">
+      <label>URL del patrón (PDF o imagen)</label>
+      <input type="url" id="reto-patron"
+             placeholder="https://... (opcional)">
+      <small style="color:var(--gris);font-size:.78rem">
+        Sube el patrón guía para los participantes
+      </small>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Fecha inicio *</label>
+        <input type="date" id="reto-inicio" required>
+      </div>
+      <div class="form-group">
+        <label>Fecha fin *</label>
+        <input type="date" id="reto-fin" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Premio / Reconocimiento</label>
+      <input type="text" id="reto-premio"
+             placeholder="Ej: Descuento 20% + mención en Instagram">
+    </div>
+    <div class="form-group">
+      <label>Estado</label>
+      <select id="reto-estado">
+        <option value="ACTIVO">🟢 ACTIVO</option>
+        <option value="FINALIZADO">🏁 FINALIZADO</option>
+        <option value="CANCELADO">❌ CANCELADO</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button onclick="guardarReto()"
+              class="btn btn-primary" id="btn-guardar-reto">
+        💾 Guardar reto
+      </button>
+      <button onclick="cerrarModal()"
+              class="btn btn-outline">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL FINALIZAR RETO ── -->
+<div class="modal-overlay" id="modal-finalizar">
+  <div class="modal-box" style="max-width:480px">
+    <h3 class="modal-titulo">🏁 Finalizar Reto</h3>
+    <p style="color:var(--gris);font-size:.9rem;margin-bottom:16px">
+      Selecciona la participación ganadora. Esto cerrará el reto y
+      notificará al ganador.
+    </p>
+    <input type="hidden" id="fin-reto-id">
+    <div id="lista-finalizar">
+      <div style="text-align:center;padding:20px">
+        <span class="spinner"></span>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <button onclick="cerrarModalFin()"
+              class="btn btn-outline btn-full">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  requireAuth();
+  const rolActual = Auth.getRol();
+  if (!['ADMIN','MERCADEO'].includes(rolActual)) Auth.redirectByRol(rolActual);
+  renderNav(rolActual);
+  registrarVisita('/retos-admin.html');
+
+  let retoSeleccionadoId = null;
+
+  // ── Modales ────────────────────────────────────────────────────────
+  function cerrarModal() {
+    document.getElementById('modal-reto').classList.remove('open');
+  }
+  function cerrarModalFin() {
+    document.getElementById('modal-finalizar').classList.remove('open');
+  }
+
+  // ── Cargar retos ───────────────────────────────────────────────────
+  async function cargarRetos() {
+    const lista = document.getElementById('lista-retos');
+    lista.innerHTML = '<div style="text-align:center;padding:40px">' +
+      '<span class="spinner"></span></div>';
+    try {
+      const retos = await apiGet('/retos');
+      actualizarStats(retos);
+
+      if (!retos.length) {
+        lista.innerHTML = `<div class="empty-state">
+          <div class="cat">🐱</div>
+          <h3>Sin retos mensuales</h3>
+          <p>Crea el primer reto para la comunidad Sarichi 🏆</p>
+        </div>`;
+        return;
+      }
+
+      lista.innerHTML = retos.map(r => {
+        const inicio = formatearFecha(r.fechaInicio);
+        const fin    = formatearFecha(r.fechaFin);
+        const diasRestantes = r.estado === 'ACTIVO'
+          ? calcularDias(r.fechaFin) : null;
+
+        return `
+          <div class="reto-card ${r.estado}">
+            <div class="reto-header">
+              <div style="flex:1">
+                <div class="reto-nombre">${r.nombre}</div>
+                <div class="reto-meta">
+                  📅 ${inicio} → ${fin}
+                  ${r.premioDescripcion
+                    ? ` &nbsp;·&nbsp; 🎁 ${r.premioDescripcion}` : ''}
+                </div>
+                <div class="reto-stats">
+                  <span class="badge ${`badge-${r.estado}`}">
+                    ${r.estado}
+                  </span>
+                  ${diasRestantes !== null
+                    ? `<span class="countdown">
+                        ${diasRestantes > 0
+                          ? `⏳ ${diasRestantes} días restantes`
+                          : '⚠️ Venció hoy'}
+                      </span>` : ''}
+                  ${r.patronUrl
+                    ? `<a href="${r.patronUrl}" target="_blank"
+                         class="btn btn-sm"
+                         style="background:var(--celeste);color:#fff;
+                                border:none;padding:3px 10px;font-size:.75rem">
+                         📄 Patrón
+                       </a>` : ''}
+                </div>
+                <p style="font-size:.85rem;color:var(--gris);
+                           margin-top:8px;line-height:1.5">
+                  ${truncar(r.descripcion, 140)}
+                </p>
+              </div>
+              <div class="reto-acciones">
+                <button onclick="verParticipaciones('${r.id}','${r.nombre}')"
+                        class="btn btn-secondary btn-sm">
+                  👥 Participaciones
+                </button>
+                <button onclick="editarReto('${r.id}')"
+                        class="btn btn-outline btn-sm">✏️</button>
+                ${r.estado === 'ACTIVO'
+                  ? `<button onclick="abrirModalFinalizar('${r.id}')"
+                             class="btn btn-sm"
+                             style="background:#fef3c7;color:#92400e;border:none">
+                       🏁 Finalizar
+                     </button>` : ''}
+                <button onclick="eliminarReto('${r.id}','${r.nombre}')"
+                        class="btn btn-sm"
+                        style="background:#fee2e2;color:#991b1b;border:none">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch(e) {
+      lista.innerHTML =
+        `<div class="alert alert-error">${e.message}</div>`;
+    }
+  }
+
+  function actualizarStats(retos) {
+    document.getElementById('stat-activos').textContent =
+      retos.filter(r => r.estado === 'ACTIVO').length;
+    document.getElementById('stat-fin').textContent =
+      retos.filter(r => r.estado === 'FINALIZADO').length;
+    // Total participaciones se actualiza al abrir el panel
+    document.getElementById('stat-parts').textContent = '—';
+  }
+
+  function calcularDias(fechaFin) {
+    if (!fechaFin) return null;
+    const hoy  = new Date();
+    const fin  = new Date(fechaFin);
+    const diff = Math.ceil((fin - hoy) / (1000*60*60*24));
+    return Math.max(0, diff);
+  }
+
+  // ── Abrir modal crear ──────────────────────────────────────────────
+  function abrirModalReto() {
+    document.getElementById('reto-id').value          = '';
+    document.getElementById('reto-nombre').value      = '';
+    document.getElementById('reto-descripcion').value = '';
+    document.getElementById('reto-patron').value      = '';
+    document.getElementById('reto-inicio').value      = '';
+    document.getElementById('reto-fin').value         = '';
+    document.getElementById('reto-premio').value      = '';
+    document.getElementById('reto-estado').value      = 'ACTIVO';
+    document.getElementById('modal-reto-titulo').textContent =
+      '➕ Nuevo Reto Mensual';
+    document.getElementById('modal-reto-error').style.display = 'none';
+    // Pre-llenar fechas del mes actual
+    const hoy    = new Date();
+    const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    const fin    = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0);
+    document.getElementById('reto-inicio').value =
+      inicio.toISOString().split('T')[0];
+    document.getElementById('reto-fin').value =
+      fin.toISOString().split('T')[0];
+    document.getElementById('modal-reto').classList.add('open');
+  }
+
+  async function editarReto(id) {
+    try {
+      const retos = await apiGet('/retos');
+      const r = retos.find(x => x.id === id);
+      if (!r) return;
+      document.getElementById('reto-id').value    = r.id;
+      document.getElementById('reto-nombre').value = r.nombre;
+      document.getElementById('reto-descripcion').value = r.descripcion;
+      document.getElementById('reto-patron').value = r.patronUrl || '';
+      document.getElementById('reto-inicio').value =
+        r.fechaInicio?.split('T')[0] || '';
+      document.getElementById('reto-fin').value =
+        r.fechaFin?.split('T')[0] || '';
+      document.getElementById('reto-premio').value =
+        r.premioDescripcion || '';
+      document.getElementById('reto-estado').value = r.estado;
+      document.getElementById('modal-reto-titulo').textContent =
+        '✏️ Editar: ' + r.nombre;
+      document.getElementById('modal-reto-error').style.display = 'none';
+      document.getElementById('modal-reto').classList.add('open');
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function guardarReto() {
+    const err = document.getElementById('modal-reto-error');
+    err.style.display = 'none';
+    const nombre = document.getElementById('reto-nombre').value.trim();
+    const desc   = document.getElementById('reto-descripcion').value.trim();
+    const inicio = document.getElementById('reto-inicio').value;
+    const fin    = document.getElementById('reto-fin').value;
+    if (!nombre) { err.textContent='El nombre es obligatorio'; err.style.display='block'; return; }
+    if (!desc)   { err.textContent='La descripción es obligatoria'; err.style.display='block'; return; }
+    if (!inicio || !fin) { err.textContent='Las fechas son obligatorias'; err.style.display='block'; return; }
+    if (new Date(fin) <= new Date(inicio)) {
+      err.textContent='La fecha fin debe ser posterior al inicio';
+      err.style.display='block'; return;
+    }
+    const dto = {
+      nombre, descripcion: desc,
+      patronUrl:         document.getElementById('reto-patron').value.trim() || null,
+      fechaInicio:       inicio + 'T00:00:00',
+      fechaFin:          fin    + 'T23:59:59',
+      premioDescripcion: document.getElementById('reto-premio').value.trim() || null,
+      estado:            document.getElementById('reto-estado').value,
+    };
+    const id = document.getElementById('reto-id').value;
+    try {
+      const btn = document.getElementById('btn-guardar-reto');
+      btn.innerHTML = '<span class="spinner"></span>';
+      btn.disabled  = true;
+      if (id) await apiFetch(`/retos/${id}`, 'PUT', dto);
+      else    await apiFetch('/retos', 'POST', dto);
+      cerrarModal();
+      showToast('Reto guardado exitosamente', 'success');
+      cargarRetos();
+    } catch(e) {
+      err.textContent = e.message; err.style.display = 'block';
+    } finally {
+      const btn = document.getElementById('btn-guardar-reto');
+      btn.innerHTML = '💾 Guardar reto'; btn.disabled = false;
+    }
+  }
+
+  async function eliminarReto(id, nombre) {
+    if (!confirm(`¿Eliminar el reto "${nombre}"?`)) return;
+    try {
+      await apiFetch(`/retos/${id}`, 'DELETE');
+      showToast('Reto eliminado', 'success');
+      cargarRetos();
+      cerrarPanelParts();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  // ── Participaciones ────────────────────────────────────────────────
+  async function verParticipaciones(retoId, nombre) {
+    retoSeleccionadoId = retoId;
+    document.getElementById('reto-seleccionado-nombre').textContent =
+      nombre;
+    document.getElementById('panel-participaciones').classList.add('visible');
+    document.getElementById('panel-participaciones')
+      .scrollIntoView({ behavior: 'smooth' });
+    await cargarParticipaciones(retoId, null);
+  }
+
+  async function cargarParticipaciones(retoId, estadoFiltro) {
+    const lista = document.getElementById('lista-participaciones');
+    lista.innerHTML = '<div style="text-align:center;padding:16px">' +
+      '<span class="spinner"></span></div>';
+    try {
+      let url = `/retos/${retoId}/participaciones`;
+      if (estadoFiltro) url += `?estado=${estadoFiltro}`;
+      const parts = await apiGet(url);
+      document.getElementById('stat-parts').textContent = parts.length;
+
+      if (!parts.length) {
+        lista.innerHTML = `<div class="empty-state" style="padding:32px">
+          <div class="cat">🐱</div>
+          <h3>Sin participaciones${estadoFiltro ? ' ' + estadoFiltro.toLowerCase() + 's' : ''}</h3>
+          <p>Las participaciones de los clientes aparecerán aquí</p>
+        </div>`;
+        return;
+      }
+
+      lista.innerHTML = parts.map(p => `
+        <div class="participacion-card">
+          ${p.urlFotoParticipacion
+            ? `<img src="${p.urlFotoParticipacion}" class="part-img"
+                    alt="Participación"
+                    onerror="this.outerHTML='<div class=\\'part-img\\'>🧸</div>'">`
+            : `<div class="part-img">🧸</div>`}
+          <div class="part-info">
+            <div class="part-usuario">
+              👤 ${p.nombreUsuario || 'Usuario'}
+              &nbsp;
+              <span class="badge badge-${p.estado}
+                     estado-badge">${p.estado}</span>
+            </div>
+            <div class="part-desc">${p.descripcion || 'Sin descripción'}</div>
+            <div style="font-size:.78rem;color:var(--gris);margin-bottom:6px">
+              📅 ${formatearFecha(p.fechaParticipacion)}
+            </div>
+            <div class="part-votos">❤️ ${p.votos || 0} votos</div>
+            <div class="part-acciones" style="margin-top:8px">
+              ${p.estado === 'PENDIENTE'
+                ? `<button onclick="cambiarEstadoPart('${p.id}','APROBADA')"
+                           class="btn btn-sm"
+                           style="background:#d1fae5;color:#065f46;border:none">
+                     ✅ Aprobar
+                   </button>
+                   <button onclick="cambiarEstadoPart('${p.id}','RECHAZADA')"
+                           class="btn btn-sm"
+                           style="background:#fee2e2;color:#991b1b;border:none">
+                     ❌ Rechazar
+                   </button>` : ''}
+              ${p.estado === 'APROBADA'
+                ? `<span style="font-size:.78rem;color:var(--verde);
+                               font-weight:600">✅ Aprobada</span>` : ''}
+              ${p.estado === 'RECHAZADA'
+                ? `<span style="font-size:.78rem;color:#991b1b;
+                               font-weight:600">❌ Rechazada</span>
+                   <button onclick="cambiarEstadoPart('${p.id}','PENDIENTE')"
+                           class="btn btn-sm"
+                           style="background:#fef3c7;color:#92400e;border:none;
+                                  font-size:.75rem">
+                     ↩️ Revertir
+                   </button>` : ''}
+            </div>
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      lista.innerHTML =
+        `<div class="alert alert-error">${e.message}</div>`;
+    }
+  }
+
+  async function filtrarParticipaciones(estado) {
+    if (!retoSeleccionadoId) return;
+    await cargarParticipaciones(retoSeleccionadoId, estado);
+  }
+
+  async function cambiarEstadoPart(partId, nuevoEstado) {
+    try {
+      await apiFetch(
+        `/retos/participaciones/${partId}/estado`,
+        'PUT', { estado: nuevoEstado }
+      );
+      showToast(`Participación ${nuevoEstado.toLowerCase()}`, 'success');
+      await cargarParticipaciones(retoSeleccionadoId, null);
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  function cerrarPanelParts() {
+    document.getElementById('panel-participaciones')
+      .classList.remove('visible');
+    retoSeleccionadoId = null;
+  }
+
+  // ── Finalizar reto ─────────────────────────────────────────────────
+  async function abrirModalFinalizar(retoId) {
+    document.getElementById('fin-reto-id').value = retoId;
+    document.getElementById('modal-finalizar').classList.add('open');
+    const lista = document.getElementById('lista-finalizar');
+    lista.innerHTML = '<div style="text-align:center;padding:20px">' +
+      '<span class="spinner"></span></div>';
+    try {
+      const parts = await apiGet(
+        `/retos/${retoId}/participaciones?estado=APROBADA`
+      );
+      if (!parts.length) {
+        lista.innerHTML = `<div class="alert alert-warn">
+          No hay participaciones aprobadas para seleccionar como ganadora.
+          Aprueba participaciones primero.
+        </div>`;
+        return;
+      }
+      lista.innerHTML = `
+        <p style="font-size:.85rem;color:var(--gris);margin-bottom:12px">
+          Haz click en "Seleccionar ganador" en la participación ganadora:
+        </p>` +
+        parts.map(p => `
+          <div class="participacion-card" style="margin-bottom:10px">
+            ${p.urlFotoParticipacion
+              ? `<img src="${p.urlFotoParticipacion}" class="part-img"
+                      style="width:64px;height:64px"
+                      onerror="this.outerHTML='<div class=\\'part-img\\'
+                               style=\\'width:64px;height:64px\\'>🧸</div>'">`
+              : `<div class="part-img" style="width:64px;height:64px">🧸</div>`}
+            <div class="part-info">
+              <div class="part-usuario">
+                ${p.nombreUsuario || 'Usuario'}
+              </div>
+              <div class="part-votos">❤️ ${p.votos || 0} votos</div>
+              <button onclick="confirmarGanador('${p.id}')"
+                      class="btn btn-primary btn-sm"
+                      style="margin-top:8px">
+                🏆 Seleccionar ganador
+              </button>
+            </div>
+          </div>`).join('');
+    } catch(e) {
+      lista.innerHTML =
+        `<div class="alert alert-error">${e.message}</div>`;
+    }
+  }
+
+  async function confirmarGanador(participacionId) {
+    const retoId = document.getElementById('fin-reto-id').value;
+    if (!confirm('¿Confirmar este ganador y finalizar el reto?')) return;
+    try {
+      await apiFetch(`/retos/${retoId}/finalizar`, 'PUT',
+        { ganadorParticipacionId: participacionId });
+      cerrarModalFin();
+      showToast('🏆 ¡Reto finalizado y ganador seleccionado!', 'success');
+      cargarRetos();
+      cerrarPanelParts();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  // ── Inicializar ───────────────────────────────────────────────────
+  cargarRetos();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Recuperar Contraseña</title></head>
+<body style="font-family:Inter,Arial;background:#FDFAF6;padding:32px;">
+  <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;">
+    <div style="text-align:center;font-size:3rem;">🔑</div>
+    <h1 style="color:#E8527A;font-family:'Playfair Display',serif;text-align:center;">Recupera tu contraseña</h1>
+    <p style="color:#666;">Hola <strong th:text="${nombre}">Usuario</strong>,</p>
+    <p style="color:#666;">Haz clic en el botón para restablecer tu contraseña. Este enlace expira en 1 hora.</p>
+    <div style="text-align:center;margin-top:24px;">
+      <a th:href="${resetUrl}" style="background:#E8527A;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;">Restablecer contraseña</a>
+    </div>
+    <p style="color:#999;font-size:.85rem;text-align:center;margin-top:24px;">Crocheting Sarichi 🧵 UTS 2026</p>
+  </div>
+</body>
+</html>

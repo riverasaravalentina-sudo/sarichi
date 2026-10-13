@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pedidos - Sarichi Crocheting</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .filtros {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filtro-select {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .tabla-contenedor {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #f5f5f5;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .pedido-id {
+            font-weight: 600;
+            color: #2980b9;
+        }
+        .badge-estado {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+        }
+        .estado-pendiente { background: #f39c12; }
+        .estado-en-produccion { background: #3498db; }
+        .estado-listo { background: #9b59b6; }
+        .estado-despachado { background: #1abc9c; }
+        .estado-entregado { background: #27ae60; }
+        .estado-cancelado { background: #e74c3c; }
+        
+        .select-estado {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-actualizar {
+            padding: 0.5rem 1rem;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-actualizar:hover {
+            background: #229954;
+        }
+        .btn-ver-detalles {
+            padding: 0.5rem 1rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-ver-detalles:hover {
+            background: #2980b9;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 700px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        .detalle-fila {
+            display: flex;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detalle-label {
+            font-weight: 600;
+            min-width: 150px;
+            color: #666;
+        }
+        .detalle-valor {
+            flex: 1;
+        }
+        .items-lista {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .item-fila {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .item-fila:last-child {
+            border-bottom: none;
+        }
+        .sin-pedidos {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div id="topnav"></div>
+    <div id="toast" class="toast"></div>
+    
+    <div class="admin-container">
+        <h1>📋 Gestión de Pedidos</h1>
+        
+        <div class="filtros">
+            <label style="margin: 0;">Filtrar por Estado:</label>
+            <select id="filtroEstado" class="filtro-select" onchange="aplicarFiltro()">
+                <option value="">Todos</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="EN_PRODUCCION">En Producción</option>
+                <option value="LISTO">Listo</option>
+                <option value="DESPACHADO">Despachado</option>
+                <option value="ENTREGADO">Entregado</option>
+                <option value="CANCELADO">Cancelado</option>
+            </select>
+        </div>
+        
+        <div class="tabla-contenedor">
+            <table id="pedidosTable">
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado Actual</th>
+                        <th>Nuevo Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="pedidosBody">
+                    <tr><td colspan="7" class="sin-pedidos">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Modal Detalles -->
+    <div id="detallesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalles del Pedido</h2>
+                <button class="modal-close" onclick="cerrarModalDetalles()">&times;</button>
+            </div>
+            <div id="detallesContenido"></div>
+        </div>
+    </div>
+
+    <script src="sarichi.js"></script>
+    <script>
+        requireAuth();
+        
+        let pedidosOriginal = [];
+        let pedidosFiltrados = [];
+        
+        async function cargarPedidos() {
+            try {
+                pedidosOriginal = await apiGet('/pedidos');
+                pedidosFiltrados = pedidosOriginal;
+                renderizarTabla();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        function renderizarTabla() {
+            if (pedidosFiltrados.length === 0) {
+                document.getElementById('pedidosBody').innerHTML = 
+                    '<tr><td colspan="7" class="sin-pedidos">No hay pedidos</td></tr>';
+                return;
+            }
+            
+            document.getElementById('pedidosBody').innerHTML = pedidosFiltrados.map(pedido => `
+                <tr>
+                    <td>
+                        <span class="pedido-id">${pedido.id.substring(0, 8)}</span>
+                    </td>
+                    <td>${pedido.usuarioNombre}</td>
+                    <td>${new Date(pedido.fechaPedido).toLocaleDateString('es-CO', {
+                        year: 'numeric', month: 'short', day: 'numeric'
+                    })}</td>
+                    <td>$${pedido.total.toLocaleString('es-CO', {maximumFractionDigits: 2})}</td>
+                    <td>
+                        <span class="badge-estado estado-${pedido.estado.toLowerCase().replace('_', '-')}">
+                            ${pedido.estado}
+                        </span>
+                    </td>
+                    <td>
+                        <select class="select-estado" id="estado-${pedido.id}">
+                            <option value="">-- Seleccionar --</option>
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="EN_PRODUCCION">En Producción</option>
+                            <option value="LISTO">Listo</option>
+                            <option value="DESPACHADO">Despachado</option>
+                            <option value="ENTREGADO">Entregado</option>
+                            <option value="CANCELADO">Cancelado</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn-ver-detalles" onclick="verDetalles('${pedido.id}')">Detalles</button>
+                        <button class="btn-actualizar" onclick="actualizarEstado('${pedido.id}')" 
+                                style="margin-top: 0.5rem; padding: 0.4rem 0.8rem;">
+                            Actualizar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function aplicarFiltro() {
+            const estado = document.getElementById('filtroEstado').value;
+            if (estado) {
+                pedidosFiltrados = pedidosOriginal.filter(p => p.estado === estado);
+            } else {
+                pedidosFiltrados = pedidosOriginal;
+            }
+            renderizarTabla();
+        }
+        
+        function verDetalles(pedidoId) {
+            const pedido = pedidosOriginal.find(p => p.id === pedidoId);
+            if (!pedido) return;
+            
+            const detalles = `
+                <div class="detalle-fila">
+                    <div class="detalle-label">ID Pedido:</div>
+                    <div class="detalle-valor">${pedido.id}</div>
+                </div>
+                <div class="detalle-fila">
+                    <div class="detalle-label">Cliente:</div>
+                    <div class="detalle-valor">${pedido.usuarioNombre}</div>
+                </div>
+                <div class="detalle-fila">
+                    <div class="detalle-label">Fecha de Pedido:</div>
+                    <div class="detalle-valor">${new Date(pedido.fechaPedido).toLocaleDateString('es-CO', {
+                        year: 'numeric', month: 'long', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    })}</div>
+                </div>
+                <div class="detalle-fila">
+                    <div class="detalle-label">Estado:</div>
+                    <div class="detalle-valor">
+                        <span class="badge-estado estado-${pedido.estado.toLowerCase().replace('_', '-')}">
+                            ${pedido.estado}
+                        </span>
+                    </div>
+                </div>
+                <div class="detalle-fila">
+                    <div class="detalle-label">Dirección de Envío:</div>
+                    <div class="detalle-valor">${pedido.direccionEnvio}</div>
+                </div>
+                
+                <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Items del Pedido</h3>
+                <div class="items-lista">
+                    ${pedido.items.map(item => `
+                        <div class="item-fila">
+                            <div>
+                                <strong>${item.nombreProducto}</strong>
+                                ${item.colorSolicitado ? `<br><small>${item.colorSolicitado}</small>` : ''}
+                            </div>
+                            <div style="text-align: right;">
+                                x${item.cantidad} @ $${item.precioUnitario.toLocaleString('es-CO', {maximumFractionDigits: 2})}
+                                <br><strong>$${item.subtotal.toLocaleString('es-CO', {maximumFractionDigits: 2})}</strong>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="item-fila" style="border-top: 2px solid #ccc; margin-top: 0.5rem; padding-top: 0.5rem; font-weight: 700; font-size: 1.1rem;">
+                        <div>TOTAL</div>
+                        <div>$${pedido.total.toLocaleString('es-CO', {maximumFractionDigits: 2})}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('detallesContenido').innerHTML = detalles;
+            document.getElementById('detallesModal').style.display = 'block';
+        }
+        
+        function cerrarModalDetalles() {
+            document.getElementById('detallesModal').style.display = 'none';
+        }
+        
+        async function actualizarEstado(pedidoId) {
+            const select = document.getElementById(`estado-${pedidoId}`);
+            const nuevoEstado = select.value;
+            
+            if (!nuevoEstado) {
+                showToast('Por favor selecciona un estado', 'error');
+                return;
+            }
+            
+            try {
+                await apiFetch(`/pedidos/${pedidoId}/estado`, 'PUT', { estado: nuevoEstado });
+                showToast('Estado actualizado exitosamente', 'success');
+                cargarPedidos();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('detallesModal');
+            if (event.target === modal) {
+                cerrarModalDetalles();
+            }
+        }
+        
+        // Inicializar
+        renderNav(Auth.getRol());
+        cargarPedidos();
+    </script>
+</body>
+</html>

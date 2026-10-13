@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Despachos — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="despachos.html" class="sidebar-item active">🚚 Despachos del día</a>
+      <a href="guias.html"     class="sidebar-item">📋 Historial guías</a>
+      <a href="zonas.html"     class="sidebar-item">🗺️ Zonas de envío</a>
+    </aside>
+    <main class="main-content">
+      <h2 class="section-title">🚚 Panel Logística — Despachos del Día</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-icon">📦</div>
+          <div class="kpi-label">Por despachar</div><div class="kpi-value">3</div></div>
+        <div class="kpi-card celeste"><div class="kpi-icon">✅</div>
+          <div class="kpi-label">Despachados hoy</div><div class="kpi-value">5</div></div>
+        <div class="kpi-card verde"><div class="kpi-icon">🌆</div>
+          <div class="kpi-label">Ciudades distintas</div><div class="kpi-value">4</div></div>
+        <div class="kpi-card naranja"><div class="kpi-icon">⏰</div>
+          <div class="kpi-label">Guías pendientes</div><div class="kpi-value">2</div></div>
+      </div>
+      <div class="card">
+        <h3 class="section-title">📋 Pedidos listos para despachar</h3>
+        <div class="empty-state">
+          <div class="cat">🐱</div>
+          <h3>¡Sin despachos pendientes!</h3>
+          <p>Los pedidos en estado "Listo" aparecerán aquí (Sprint 4) 📦</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>requireAuth(); renderNav(Auth.getRol());</script>
+</body>
+</html>

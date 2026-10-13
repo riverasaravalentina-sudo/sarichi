@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Iniciar Sesión — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-auth">
+  <div class="card-auth">
+    <div class="auth-logo">
+      <div style="font-size:3rem">🐱</div>
+      <h1>Crocheting Sarichi</h1>
+      <p>Amigurumis · Accesorios · Detalles Personalizados 🧵</p>
+    </div>
+
+    <div id="error-msg" class="alert alert-error" style="display:none"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="correo">Correo electrónico</label>
+        <input type="email" id="correo" placeholder="tu@correo.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="contrasena">Contraseña</label>
+        <input type="password" id="contrasena" placeholder="Mínimo 8 caracteres" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="btnLogin">
+        Ingresar
+      </button>
+    </form>
+
+    <div class="auth-footer" style="margin-top:14px">
+      <a href="recuperar.html">¿Olvidaste tu contraseña?</a>
+    </div>
+    <div class="auth-footer">
+      ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  // Si ya está logueado, redirigir
+  if (Auth.isLoggedIn()) Auth.redirectByRol(Auth.getRol());
+
+  document.getElementById('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('btnLogin');
+    const err = document.getElementById('error-msg');
+    err.style.display = 'none';
+    btn.innerHTML = '<span class="spinner"></span> Ingresando...';
+    btn.disabled = true;
+
+    try {
+      const data = await apiPost('/auth/login', {
+        correo:    document.getElementById('correo').value,
+        contrasena: document.getElementById('contrasena').value,
+      });
+      Auth.save(data);
+      showToast('¡Bienvenida! Redirigiendo...', 'success');
+      setTimeout(() => Auth.redirectByRol(data.usuario.rol), 900);
+    } catch(ex) {
+      err.textContent = ex.message;
+      err.style.display = 'block';
+      btn.innerHTML = 'Ingresar';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

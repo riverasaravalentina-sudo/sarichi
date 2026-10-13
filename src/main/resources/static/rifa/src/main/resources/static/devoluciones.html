@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devoluciones - Sarichi Crocheting</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .devolucion-container { max-width: 1000px; margin: 20px auto; padding: 20px; }
+        .devolucion-section { margin: 30px 0; }
+        .devolucion-section h2 { border-bottom: 2px solid #8B4513; padding-bottom: 10px; margin-bottom: 20px; }
+        .devolucion-card { background: white; border: 1px solid #DDD; border-radius: 8px; padding: 20px; margin-bottom: 15px; }
+        .devolucion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .devolucion-header h3 { margin: 0; }
+        .estado-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .estado-solicitada { background: #FFF3CD; color: #856404; }
+        .estado-aprobada { background: #D1ECF1; color: #0C5460; }
+        .estado-rechazada { background: #F8D7DA; color: #721C24; }
+        .estado-completada { background: #D4EDDA; color: #155724; }
+        .devolucion-details { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .detail-item { }
+        .detail-label { font-weight: bold; color: #666; font-size: 12px; }
+        .detail-value { color: #333; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 10px; }
+        .btn-primary { background: #8B4513; color: white; }
+        .btn-success { background: #28A745; color: white; }
+        .btn-danger { background: #DC3545; color: white; }
+        .btn-info { background: #17A2B8; color: white; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #DDD; border-radius: 5px; box-sizing: border-box; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-close { float: right; cursor: pointer; font-size: 24px; }
+        .alert { padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+        .alert-info { background: #D1ECF1; color: #0C5460; border: 1px solid #BEE5EB; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #DDD; }
+        .tab-btn { padding: 10px 20px; background: white; border: none; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab-btn.active { border-bottom-color: #8B4513; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🔄 Devoluciones - Sarichi Crocheting</h1>
+        <div class="nav-right">
+            <span id="usuario-badge"></span>
+            <button onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <div class="devolucion-container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="cambiarTab('cliente')">Mis Devoluciones (Cliente)</button>
+            <button class="tab-btn" onclick="cambiarTab('admin')">Todas las Devoluciones (Admin)</button>
+        </div>
+
+        <!-- TAB: CLIENTE -->
+        <div id="tab-cliente" style="display: block;">
+            <div class="alert alert-info">
+                ℹ️ Puedes solicitar devolución de pedidos entregados dentro de 15 días.
+            </div>
+
+            <div class="devolucion-section">
+                <h2>📝 Solicitar Nueva Devolución</h2>
+                <div class="devolucion-card">
+                    <form onsubmit="solicitarDevolucion(event)">
+                        <div class="form-group">
+                            <label>Selecciona un Pedido</label>
+                            <select id="pedidoSelector" required>
+                                <option value="">-- Cargando pedidos --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Motivo de la Devolución</label>
+                            <textarea id="motivoDevolucion" placeholder="Describe por qué quieres devolver este producto" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">📬 Solicitar Devolución</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="devolucion-section">
+                <h2>📋 Mis Devoluciones</h2>
+                <div id="misDevoluciones">
+                    <p style="text-align: center; color: #999;">Cargando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: ADMIN -->
+        <div id="tab-admin" style="display: none;">
+            <div class="alert alert-info">
+                ℹ️ Panel de administración de devoluciones.
+            </div>
+
+            <div class="devolucion-section">
+                <h2>📦 Todas las Devoluciones</h2>
+                <div id="todasDevoluciones">
+                    <p style="text-align: center; color: #999;">Cargando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aprobar/Rechazar -->
+    <div id="modalDevolucion" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="cerrarModal('modalDevolucion')">&times;</span>
+            <h3 id="modalTitle">Gestionar Devolución</h3>
+            <p id="modalDevInfo"></p>
+            <div class="form-group">
+                <label>Observaciones</label>
+                <textarea id="obsAdmin" placeholder="Notas para el cliente o documentación interna"></textarea>
+            </div>
+            <button onclick="aprobarDevolucion()" class="btn btn-success" style="width: 100%; margin-bottom: 10px;">✓ Aprobar</button>
+            <button onclick="rechazarDevolucion()" class="btn btn-danger" style="width: 100%;">✗ Rechazar</button>
+        </div>
+    </div>
+
+    <script src="sarichi.js"></script>
+    <script>
+        requireAuth();
+        
+        let devolucionEnProceso = null;
+        const usuario = JSON.parse(sessionStorage.getItem('usuario')) || {};
+        const esAdmin = usuario.rol === 'ADMIN' || usuario.rol === 'LOGISTICA';
+
+        window.addEventListener('load', () => {
+            renderNav();
+            
+            // Mostrar u ocultar tab de admin
+            if (!esAdmin) {
+                document.querySelector('[onclick="cambiarTab(\'admin\')"]').style.display = 'none';
+            }
+            
+            cargarPedidosDisponibles();
+            cargarMisDevoluciones();
+            if (esAdmin) {
+                cargarTodasDevoluciones();
+            }
+        });
+
+        function cambiarTab(tab) {
+            // Ocultar todos
+            document.getElementById('tab-cliente').style.display = 'none';
+            document.getElementById('tab-admin').style.display = 'none';
+            
+            // Mostrar seleccionado
+            document.getElementById(`tab-${tab}`).style.display = 'block';
+            
+            // Actualizar botones
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function cargarPedidosDisponibles() {
+            apiGet('/pedidos/mis-pedidos')
+                .then(pedidos => {
+                    const select = document.getElementById('pedidoSelector');
+                    select.innerHTML = '<option value="">-- Seleccionar pedido --</option>';
+                    
+                    const pedidosEntregados = (pedidos || []).filter(p => p.estado === 'ENTREGADO');
+                    
+                    if (pedidosEntregados.length === 0) {
+                        select.innerHTML = '<option value="">No hay pedidos entregados disponibles</option>';
+                        return;
+                    }
+                    
+                    pedidosEntregados.forEach(p => {
+                        select.innerHTML += `<option value="${p.id}">${p.id} - $${(p.total || 0).toLocaleString('es-CO')}</option>`;
+                    });
+                })
+                .catch(err => console.error('Error cargando pedidos:', err));
+        }
+
+        function cargarMisDevoluciones() {
+            apiGet('/devoluciones/mis-devoluciones')
+                .then(devoluciones => {
+                    const container = document.getElementById('misDevoluciones');
+                    container.innerHTML = '';
+                    
+                    if (!devoluciones || devoluciones.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #999;">No tienes devoluciones registradas</p>';
+                        return;
+                    }
+                    
+                    devoluciones.forEach(d => {
+                        const estadoClass = `estado-${d.estado?.toLowerCase() || 'solicitada'}`;
+                        const html = `<div class="devolucion-card">
+                            <div class="devolucion-header">
+                                <div>
+                                    <h3>Pedido ${d.pedidoId}</h3>
+                                    <p style="margin: 5px 0; color: #666;">Motivo: ${d.motivo}</p>
+                                </div>
+                                <span class="estado-badge ${estadoClass}">${d.estado}</span>
+                            </div>
+                            <div class="devolucion-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Fecha Solicitud</div>
+                                    <div class="detail-value">${new Date(d.fechaSolicitud).toLocaleDateString('es-CO')}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Observaciones Admin</div>
+                                    <div class="detail-value">${d.observacionesAdmin || 'Pendiente'}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                        container.innerHTML += html;
+                    });
+                })
+                .catch(err => console.error('Error cargando mis devoluciones:', err));
+        }
+
+        function cargarTodasDevoluciones() {
+            apiGet('/devoluciones')
+                .then(devoluciones => {
+                    const container = document.getElementById('todasDevoluciones');
+                    container.innerHTML = '';
+                    
+                    if (!devoluciones || devoluciones.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #999;">No hay devoluciones registradas</p>';
+                        return;
+                    }
+                    
+                    devoluciones.forEach(d => {
+                        const estadoClass = `estado-${d.estado?.toLowerCase() || 'solicitada'}`;
+                        const botonesHtml = d.estado === 'SOLICITADA'
+                            ? `<button class="btn btn-success" onclick="abrirModalAprobacion('${d.id}', '${d.usuarioNombre}', '${d.motivo}')">Gestionar</button>`
+                            : '';
+                        
+                        const html = `<div class="devolucion-card">
+                            <div class="devolucion-header">
+                                <div>
+                                    <h3>Pedido ${d.pedidoId}</h3>
+                                    <p style="margin: 5px 0; color: #666;">Cliente: ${d.usuarioNombre} | Motivo: ${d.motivo}</p>
+                                </div>
+                                <span class="estado-badge ${estadoClass}">${d.estado}</span>
+                            </div>
+                            <div class="devolucion-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Fecha Solicitud</div>
+                                    <div class="detail-value">${new Date(d.fechaSolicitud).toLocaleDateString('es-CO')}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Fecha Aprobación</div>
+                                    <div class="detail-value">${d.fechaAprobacion ? new Date(d.fechaAprobacion).toLocaleDateString('es-CO') : 'Pendiente'}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                ${botonesHtml}
+                                ${d.estado === 'APROBADA' ? `<button class="btn btn-info" onclick="marcarRecibida('${d.id}')">📦 Marcar Recibida</button>` : ''}
+                            </div>
+                        </div>`;
+                        container.innerHTML += html;
+                    });
+                })
+                .catch(err => console.error('Error cargando todas devoluciones:', err));
+        }
+
+        function solicitarDevolucion(event) {
+            event.preventDefault();
+            const pedidoId = document.getElementById('pedidoSelector').value;
+            const motivo = document.getElementById('motivoDevolucion').value;
+
+            if (!pedidoId) {
+                showToast('Selecciona un pedido');
+                return;
+            }
+
+            const dto = { pedidoId, motivo };
+            
+            apiPost('/devoluciones/solicitar', dto)
+                .then(() => {
+                    showToast('✓ Devolución solicitada exitosamente');
+                    document.getElementById('motivoDevolucion').value = '';
+                    cargarPedidosDisponibles();
+                    cargarMisDevoluciones();
+                })
+                .catch(err => showToast('Error: ' + (err.mensaje || err.message)));
+        }
+
+        function abrirModalAprobacion(devolucionId, cliente, motivo) {
+            devolucionEnProceso = devolucionId;
+            document.getElementById('modalTitle').textContent = 'Gestionar Devolución';
+            document.getElementById('modalDevInfo').textContent = `Cliente: ${cliente} | Motivo: ${motivo}`;
+            document.getElementById('obsAdmin').value = '';
+            document.getElementById('modalDevolucion').classList.add('active');
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function aprobarDevolucion() {
+            const observaciones = document.getElementById('obsAdmin').value;
+            
+            apiFetch(`/devoluciones/${devolucionEnProceso}/aprobar`, 'PUT', { observaciones })
+                .then(() => {
+                    showToast('✓ Devolución aprobada');
+                    cerrarModal('modalDevolucion');
+                    cargarTodasDevoluciones();
+                })
+                .catch(err => showToast('Error: ' + (err.mensaje || err.message)));
+        }
+
+        function rechazarDevolucion() {
+            const observaciones = document.getElementById('obsAdmin').value;
+            
+            apiFetch(`/devoluciones/${devolucionEnProceso}/rechazar`, 'PUT', { observaciones })
+                .then(() => {
+                    showToast('✓ Devolución rechazada');
+                    cerrarModal('modalDevolucion');
+                    cargarTodasDevoluciones();
+                })
+                .catch(err => showToast('Error: ' + (err.mensaje || err.message)));
+        }
+
+        function marcarRecibida(devolucionId) {
+            apiFetch(`/devoluciones/${devolucionId}/recibir`, 'PUT', {})
+                .then(() => {
+                    showToast('✓ Devolución marcada como recibida');
+                    cargarTodasDevoluciones();
+                })
+                .catch(err => showToast('Error: ' + (err.mensaje || err.message)));
+        }
+
+        // Auto-refresh
+        setInterval(() => {
+            cargarMisDevoluciones();
+            if (esAdmin) {
+                cargarTodasDevoluciones();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

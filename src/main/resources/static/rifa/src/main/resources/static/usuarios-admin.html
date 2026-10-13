@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gestión de Usuarios — Sarichi Crocheting</title>
+  <link rel="stylesheet" href="sarichi.css">
+</head>
+<body>
+<div class="page-app">
+  <nav id="topnav"></nav>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="dashboard.html"      class="sidebar-item">📊 Dashboard</a>
+      <a href="usuarios-admin.html" class="sidebar-item active">👥 Gestión Usuarios</a>
+      <a href="pedidos.html"        class="sidebar-item">📦 Pedidos</a>
+      <a href="inventario.html"     class="sidebar-item">🧵 Inventario</a>
+      <a href="despachos.html"      class="sidebar-item">🚚 Despachos</a>
+      <a href="analiticas.html"     class="sidebar-item">📈 Analíticas</a>
+    </aside>
+
+    <main class="main-content">
+      <h2 class="section-title">👥 Gestión de Usuarios Internos</h2>
+      <p style="color:var(--gris);margin-bottom:24px;font-size:.9rem">
+        Solo el <strong>Administrador</strong> puede crear cuentas para el equipo interno 
+        (Artesana, Logística, Bodega, Mercadeo). 
+        Los clientes se registran por su propia cuenta.
+      </p>
+
+      <div class="dash-grid">
+
+        <!-- Formulario crear usuario interno -->
+        <div class="card">
+          <h3 class="section-title">➕ Crear Usuario Interno</h3>
+
+          <div id="form-error"   class="alert alert-error"   style="display:none"></div>
+          <div id="form-success" class="alert alert-success" style="display:none"></div>
+
+          <form id="crearUsuarioForm">
+            <div class="form-group">
+              <label>Nombre completo</label>
+              <input type="text" id="nombre" placeholder="Nombre del colaborador" required>
+            </div>
+            <div class="form-group">
+              <label>Correo electrónico</label>
+              <input type="email" id="correo" placeholder="correo@sarichi.com" required>
+            </div>
+            <div class="form-group">
+              <label>Teléfono (opcional)</label>
+              <input type="tel" id="telefono" placeholder="3XX XXX XXXX">
+            </div>
+            <div class="form-group">
+              <label>Contraseña temporal</label>
+              <input type="password" id="contrasena" placeholder="Mínimo 8 caracteres" required>
+            </div>
+            <div class="form-group">
+              <label>Confirmar contraseña</label>
+              <input type="password" id="confirmar" placeholder="Repite la contraseña" required>
+            </div>
+            <div class="form-group">
+              <label>Rol del sistema</label>
+              <select id="rol" required>
+                <option value="">— Selecciona un rol —</option>
+                <option value="ARTESANA">🧶 Artesana — Gestiona pedidos y producción</option>
+                <option value="LOGISTICA">🚚 Logística — Gestiona despachos y envíos</option>
+                <option value="BODEGA">🧵 Bodega — Controla inventario de hilos</option>
+                <option value="MERCADEO">📈 Mercadeo — Blog, analíticas y campañas</option>
+                <option value="ADMIN">🔑 Administrador — Acceso completo al sistema</option>
+              </select>
+            </div>
+
+            <!-- Info del rol seleccionado -->
+            <div id="rol-info" class="alert alert-warn" style="display:none;font-size:.83rem"></div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="btnCrear">
+              ➕ Crear usuario interno
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de usuarios internos -->
+        <div class="card">
+          <h3 class="section-title">👤 Usuarios del sistema</h3>
+          <div class="alert alert-warn" style="font-size:.83rem;margin-bottom:16px">
+            ℹ️ La lista completa de usuarios estará disponible en el Sprint 2 
+            cuando se implemente el endpoint <code>GET /api/usuarios</code>.
+          </div>
+
+          <!-- Usuarios de ejemplo -->
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;
+                        padding:12px;background:var(--crema-d);border-radius:8px">
+              <div>
+                <strong style="font-size:.9rem">Sara Admin</strong>
+                <div style="font-size:.78rem;color:var(--gris)">sara@sarichi.com</div>
+              </div>
+              <span class="badge badge-activo">ADMIN</span>
+            </div>
+            <div id="usuarios-lista">
+              <div class="empty-state" style="padding:30px">
+                <div class="cat" style="font-size:2rem">🐱</div>
+                <p style="font-size:.85rem">Los nuevos usuarios aparecerán aquí</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tabla de roles y permisos -->
+      <div class="card" style="margin-top:20px">
+        <h3 class="section-title">🔑 Roles y permisos del sistema</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Rol</th>
+                <th>Dashboard</th>
+                <th>Acceso principal</th>
+                <th>Restricciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge" style="background:#fce7f3;color:#9d174d">ADMIN</span></td>
+                <td>/dashboard</td>
+                <td>Acceso completo a todo el sistema</td>
+                <td>Ninguna</td>
+              </tr>
+              <tr>
+                <td><span class="badge" style="background:#ede9fe;color:#5b21b6">ARTESANA</span></td>
+                <td>/pedidos</td>
+                <td>Pedidos, cotizaciones, galería del proceso</td>
+                <td>Sin acceso a analíticas ni configuración</td>
+              </tr>
+              <tr>
+                <td><span class="badge" style="background:#dbeafe;color:#1e40af">LOGISTICA</span></td>
+                <td>/despachos</td>
+                <td>Despachos del día, guías de envío, zonas</td>
+                <td>Sin acceso a producción ni inventario</td>
+              </tr>
+              <tr>
+                <td><span class="badge" style="background:#fef3c7;color:#92400e">BODEGA</span></td>
+                <td>/inventario</td>
+                <td>Hilos, materiales, entradas/salidas de stock</td>
+                <td>Sin acceso a ventas ni pedidos de clientes</td>
+              </tr>
+              <tr>
+                <td><span class="badge" style="background:#d1fae5;color:#065f46">MERCADEO</span></td>
+                <td>/analiticas</td>
+                <td>Blog, galería, métricas de tráfico, retos</td>
+                <td>Sin acceso a inventario ni logística</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-activo">CLIENTE</span></td>
+                <td>/tienda</td>
+                <td>Catálogo, carrito, pedidos propios, wishlist</td>
+                <td>Sin acceso a módulos internos</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="sarichi.js"></script>
+<script>
+  requireAuth();
+  const rol = Auth.getRol();
+  if (rol !== 'ADMIN') {
+    showToast('Acceso denegado. Solo administradores.', 'error');
+    setTimeout(() => Auth.redirectByRol(rol), 1500);
+  }
+  renderNav(rol);
+
+  // Info dinámica por rol
+  const rolInfo = {
+    ARTESANA:  '🧶 Artesana: podrá gestionar pedidos personalizados, actualizar estados y subir fotos del proceso de tejido.',
+    LOGISTICA: '🚚 Logística: verá los despachos del día, generará guías con Coordinadora/Interrapidísimo y gestionará zonas de envío.',
+    BODEGA:    '🧵 Bodega: controlará el stock de hilos y materiales, registrará entradas/salidas y recibirá alertas de stock crítico.',
+    MERCADEO:  '📈 Mercadeo: publicará en el blog, gestionará la galería y analizará métricas de tráfico e Instagram.',
+    ADMIN:     '🔑 Administrador: acceso completo. Úsalo solo para crear cuentas de administración adicionales.',
+  };
+
+  document.getElementById('rol').addEventListener('change', e => {
+    const info = document.getElementById('rol-info');
+    if (rolInfo[e.target.value]) {
+      info.textContent = rolInfo[e.target.value];
+      info.style.display = 'block';
+    } else {
+      info.style.display = 'none';
+    }
+  });
+
+  // Crear usuario
+  document.getElementById('crearUsuarioForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('btnCrear');
+    const err = document.getElementById('form-error');
+    const ok  = document.getElementById('form-success');
+    err.style.display = 'none'; ok.style.display = 'none';
+
+    const pass = document.getElementById('contrasena').value;
+    const conf = document.getElementById('confirmar').value;
+
+    if (!document.getElementById('rol').value) {
+      err.textContent = 'Debes seleccionar un rol.';
+      err.style.display = 'block'; return;
+    }
+    if (pass !== conf) {
+      err.textContent = 'Las contraseñas no coinciden.';
+      err.style.display = 'block'; return;
+    }
+
+    btn.innerHTML = '<span class="spinner"></span> Creando...';
+    btn.disabled = true;
+
+    try {
+      const nuevoUsuario = await apiPost('/auth/register', {
+        nombre:              document.getElementById('nombre').value,
+        correo:              document.getElementById('correo').value,
+        telefono:            document.getElementById('telefono').value || null,
+        contrasena:          pass,
+        confirmarContrasena: conf,
+        rol:                 document.getElementById('rol').value,
+      }, true);
+
+      ok.textContent = `✅ Usuario "${nuevoUsuario.nombre}" creado con rol ${nuevoUsuario.rol}. Ya puede iniciar sesión.`;
+      ok.style.display = 'block';
+
+      // Agregar a la lista visual
+      const lista = document.getElementById('usuarios-lista');
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--crema-d);border-radius:8px';
+      item.innerHTML = `
+        <div>
+          <strong style="font-size:.9rem">${nuevoUsuario.nombre}</strong>
+          <div style="font-size:.78rem;color:var(--gris)">${nuevoUsuario.correo}</div>
+        </div>
+        <span class="badge badge-activo">${nuevoUsuario.rol}</span>`;
+      lista.querySelector('.empty-state')?.remove();
+      lista.appendChild(item);
+
+      // Limpiar form
+      document.getElementById('crearUsuarioForm').reset();
+      document.getElementById('rol-info').style.display = 'none';
+      showToast('Usuario creado exitosamente', 'success');
+
+    } catch(ex) {
+      err.textContent = ex.message;
+      err.style.display = 'block';
+    }
+
+    btn.innerHTML = '➕ Crear usuario interno';
+    btn.disabled = false;
+  });
+</script>
+</body>
+</html>

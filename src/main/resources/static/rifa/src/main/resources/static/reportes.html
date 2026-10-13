@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Admin Sarichi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .navbar { background: white; border-bottom: 1px solid #ddd; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar-nav { display: flex; gap: 20px; }
+        .navbar-nav a { text-decoration: none; color: #333; font-weight: 500; }
+        .navbar-nav a.active { color: #667eea; font-weight: bold; }
+        .report-section { background: white; border-radius: 8px; padding: 30px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .section-title { font-size: 1.5em; font-weight: bold; margin-bottom: 20px; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .button-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #764ba2; }
+        .btn-secondary { background: #ddd; color: #333; }
+        .btn-secondary:hover { background: #ccc; }
+        .preview-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .preview-table th, .preview-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .preview-table th { background: #667eea; color: white; font-weight: bold; }
+        .preview-table tr:nth-child(even) { background: #f9f9f9; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+        .error { color: #d32f2f; padding: 10px; background: #ffebee; border-radius: 4px; margin-bottom: 10px; }
+        .success { color: #388e3c; padding: 10px; background: #e8f5e9; border-radius: 4px; margin-bottom: 10px; }
+        footer { background: #f5f5f5; padding: 40px 20px; text-align: center; color: #666; margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Sarichi Crocheting - Admin</h1>
+        <div class="navbar-nav">
+            <a href="/dashboard.html">Dashboard</a>
+            <a href="/admin-pedidos.html">Pedidos</a>
+            <a href="/reportes.html" class="active">Reportes</a>
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+    </div>
+
+    <header>
+        <h1>📊 Generador de Reportes</h1>
+        <p>Exporta datos de ventas, inventario y pedidos</p>
+    </header>
+
+    <div class="container">
+        <!-- Reporte de Ventas -->
+        <div class="report-section">
+            <h2 class="section-title">💰 Reporte de Ventas</h2>
+            <div id="ventasError" class="error" style="display:none;"></div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha Inicio:</label>
+                    <input type="date" id="ventasDesde" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Fin:</label>
+                    <input type="date" id="ventasHasta" required>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="descargarVentasPDF()">📥 Descargar PDF</button>
+                <button class="btn btn-secondary" onclick="previsualizarVentas()">👁️ Previsualizar</button>
+            </div>
+
+            <div id="ventasPreview"></div>
+        </div>
+
+        <!-- Reporte de Inventario -->
+        <div class="report-section">
+            <h2 class="section-title">📦 Reporte de Inventario</h2>
+            <div id="inventarioError" class="error" style="display:none;"></div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="descargarInventarioExcel()">📥 Descargar Excel</button>
+                <button class="btn btn-secondary" onclick="previsualizarInventario()">👁️ Previsualizar</button>
+            </div>
+
+            <div id="inventarioPreview"></div>
+        </div>
+
+        <!-- Reportes Rápidos -->
+        <div class="report-section">
+            <h2 class="section-title">⚡ Reportes Rápidos</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <button class="btn btn-primary" onclick="descargarVentasHoyPDF()" style="width: 100%;">Ventas de Hoy</button>
+                <button class="btn btn-primary" onclick="descargarVentasSemanaPDF()" style="width: 100%;">Ventas Semana</button>
+                <button class="btn btn-primary" onclick="descargarVentasMesPDF()" style="width: 100%;">Ventas Mes</button>
+                <button class="btn btn-primary" onclick="descargarInventarioExcel()" style="width: 100%;">Inventario</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Sarichi Crocheting. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="/sarichi.js"></script>
+    <script>
+        // Establecer fechas predeterminadas
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoy = new Date();
+            const hace30dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            document.getElementById('ventasHasta').valueAsDate = hoy;
+            document.getElementById('ventasDesde').valueAsDate = hace30dias;
+
+            // Verificar autenticación
+            requireAuth();
+            const usuario = Auth.get();
+            if (usuario.rol !== 'ADMIN') {
+                window.location.href = '/tienda.html';
+            }
+        });
+
+        async function descargarVentasPDF() {
+            try {
+                const desde = new Date(document.getElementById('ventasDesde').value).toISOString();
+                const hasta = new Date(document.getElementById('ventasHasta').value).toISOString();
+                
+                const url = `/api/reportes/ventas/pdf?desde=${desde}&hasta=${hasta}`;
+                descargarArchivo(url, 'reporte-ventas.pdf');
+                showToast('Descargando reporte de ventas...');
+            } catch (error) {
+                document.getElementById('ventasError').textContent = error.message;
+                document.getElementById('ventasError').style.display = 'block';
+            }
+        }
+
+        async function descargarInventarioExcel() {
+            try {
+                const url = '/api/reportes/inventario/excel';
+                descargarArchivo(url, 'reporte-inventario.xlsx');
+                showToast('Descargando reporte de inventario...');
+            } catch (error) {
+                document.getElementById('inventarioError').textContent = error.message;
+                document.getElementById('inventarioError').style.display = 'block';
+            }
+        }
+
+        async function previsualizarVentas() {
+            try {
+                const desde = new Date(document.getElementById('ventasDesde').value).toISOString();
+                const hasta = new Date(document.getElementById('ventasHasta').value).toISOString();
+                
+                const datos = await apiGet(`/api/reportes/ventas/datos?desde=${desde}&hasta=${hasta}`);
+                
+                let html = `
+                    <h3>Previsualización</h3>
+                    <table class="preview-table">
+                        <tr>
+                            <th>Período</th>
+                            <td>${datos.periodo}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Ventas</th>
+                            <td>$${datos.totalVentas.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <th>Cantidad de Pedidos</th>
+                            <td>${datos.cantidadPedidos}</td>
+                        </tr>
+                        <tr>
+                            <th>Promedio por Pedido</th>
+                            <td>$${datos.promedioPedido.toFixed(2)}</td>
+                        </tr>
+                    </table>
+                `;
+                
+                document.getElementById('ventasPreview').innerHTML = html;
+            } catch (error) {
+                document.getElementById('ventasError').textContent = error.message;
+                document.getElementById('ventasError').style.display = 'block';
+            }
+        }
+
+        async function previsualizarInventario() {
+            try {
+                const datos = await apiGet('/api/reportes/inventario/datos');
+                
+                let html = `
+                    <h3>Previsualización</h3>
+                    <table class="preview-table">
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Valor</th>
+                        </tr>
+                        <tr>
+                            <td>Productos Activos</td>
+                            <td>${datos.productosActivos}</td>
+                        </tr>
+                        <tr>
+                            <td>Productos Agotados</td>
+                            <td>${datos.productosAgotados}</td>
+                        </tr>
+                        <tr>
+                            <td>Stock Crítico</td>
+                            <td>${datos.stockCritico}</td>
+                        </tr>
+                        <tr>
+                            <td>Valor Total Inventario</td>
+                            <td>$${datos.valorTotalInventario.toFixed(2)}</td>
+                        </tr>
+                    </table>
+                `;
+                
+                document.getElementById('inventarioPreview').innerHTML = html;
+            } catch (error) {
+                document.getElementById('inventarioError').textContent = error.message;
+                document.getElementById('inventarioError').style.display = 'block';
+            }
+        }
+
+        function descargarVentasHoyPDF() {
+            const hoy = new Date().toISOString();
+            const url = `/api/reportes/ventas/pdf?desde=${hoy}&hasta=${hoy}`;
+            descargarArchivo(url, 'reporte-ventas-hoy.pdf');
+        }
+
+        function descargarVentasSemanaPDF() {
+            const hoy = new Date().toISOString();
+            const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+            const url = `/api/reportes/ventas/pdf?desde=${hace7dias}&hasta=${hoy}`;
+            descargarArchivo(url, 'reporte-ventas-semana.pdf');
+        }
+
+        function descargarVentasMesPDF() {
+            const hoy = new Date().toISOString();
+            const hace30dias = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+            const url = `/api/reportes/ventas/pdf?desde=${hace30dias}&hasta=${hoy}`;
+            descargarArchivo(url, 'reporte-ventas-mes.pdf');
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            Auth.logout();
+            window.location.href = '/login.html';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rifa Garfield Estilo Simpsons — Sarichi Crocheting</title>
+  <meta name="description" content="Rifa de un amigurumi de Garfield estilo Los Simpsons, tejido a mano en hilo chenille. 100 números, $2.500 por boleta. Sorteo 31 de Octubre de 2026.">
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rosa:  '#E8527A',
+            rosad: '#d43f68',
+            teal:  '#2DB5C8',
+            crema: '#FDFAF6',
+            tinta: '#333333',
+            negro: '#111111',
+          },
+          fontFamily: {
+            playfair: ['"Playfair Display"', 'serif'],
+            inter:    ['Inter', 'system-ui', 'sans-serif'],
+          },
+          keyframes: {
+            pop: {
+              '0%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.15)' },
+              '100%': { transform: 'scale(1.1)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+          },
+          animation: {
+            pop: 'pop 0.25s ease-out forwards',
+            float: 'float 3s ease-in-out infinite',
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background-color: #FDFAF6; color: #333333; line-height: 1.6; }
+    html { scroll-behavior: smooth; }
+
+    /* ── Estados del tablero de números ───────────────────────── */
+    .numero-btn {
+      @apply flex items-center justify-center font-semibold transition-all duration-200 ease-out select-none;
+      @apply border-2 border-transparent;
+      @apply rounded-md sm:rounded-md md:rounded-md aspect-square;
+      @apply text-[10px] xs:text-xs sm:text-sm md:text-base leading-none;
+      width: 100%;
+      min-height: 28px;
+    }
+    .numero-btn.disponible {
+      @apply bg-[#DCF6E4] text-[#1B7A44] border-[#B7EBC7];
+    }
+    .numero-btn.disponible:hover {
+      @apply -translate-y-0.5 shadow-md shadow-green-200/50;
+    }
+    .numero-btn.seleccionado {
+      @apply bg-rosa text-white border-rosad shadow-lg shadow-rosa/40;
+      transform: scale(1.05);
+    }
+    .numero-btn.vendido {
+      @apply bg-gray-200 text-gray-400 cursor-not-allowed opacity-50;
+      text-decoration: line-through;
+    }
+
+    /* ── Thumbnails carrusel ───────────────────────────────── */
+    .thumb-btn {
+      @apply px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white shadow-md border-2 border-gray-200 text-xs sm:text-sm font-medium transition-all duration-300 hover:border-rosa/60;
+    }
+    .thumb-btn.active {
+      @apply border-rosa ring-2 ring-rosa/40 shadow-xl scale-105;
+    }
+
+    /* ── Modal ───────────────────────────────────────────────── */
+    .modal-backdrop {
+      @apply fixed inset-0 bg-negro/60 backdrop-blur-sm flex items-center justify-center p-4 z-50;
+      transition: opacity 0.3s ease;
+    }
+    .modal-backdrop.hidden {
+      @apply opacity-0 pointer-events-none;
+    }
+    .modal-content {
+      @apply bg-white rounded-3xl max-w-md w-full shadow-2xl;
+      animation: modalSlide 0.3s ease-out;
+      max-height: min(92vh, 680px);
+    }
+    @keyframes modalSlide {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Smooth scroll offset for sticky header */
+    [id] { scroll-margin-top: 20px; }
+  </style>
+</head>
+<body class="font-inter antialiased">
+
+  <!-- ═══════════════ 1. HERO ═══════════════ -->
+  <header class="relative overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-br from-crema via-[#FFF0F4] to-[#E6F7F9]"></div>
+    <div class="absolute top-20 left-10 text-4xl opacity-20 animate-float">🍝</div>
+    <div class="absolute top-32 right-16 text-3xl opacity-20 animate-float" style="animation-delay: 1s;">😎</div>
+    <div class="absolute bottom-20 left-20 text-3xl opacity-20 animate-float" style="animation-delay: 2s;">🧶</div>
+
+    <div class="max-w-6xl mx-auto px-5 pt-12 pb-16 md:pt-20 md:pb-24 grid md:grid-cols-2 gap-12 items-center">
+      <div class="text-center md:text-left">
+        <span class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm text-teal font-semibold text-xs tracking-widest uppercase px-4 py-2 rounded-full mb-6 border border-teal/20 shadow-sm">
+          🐱 Sarichi Crocheting
+        </span>
+        <h1 class="font-playfair text-4xl sm:text-5xl lg:text-6xl font-bold text-rosa leading-tight mb-4">
+          Rifa Garfield
+          <span class="block text-tinta">Estilo Simpsons</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-tinta/70 mb-2 font-medium">Tejido a mano en hilo chenille súper suave</p>
+        <p class="text-tinta/80 mb-8 text-lg">¡Llévate este amigurumi único a casa!</p>
+
+        <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-3 mb-8">
+          <div class="bg-white rounded-2xl shadow-lg px-6 py-3 text-center border border-rosa/10">
+            <p class="text-xs text-tinta/50 uppercase tracking-wider font-medium">Precio por boleta</p>
+            <p class="font-bold text-rosa text-2xl">$2.500</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-lg px-6 py-3 text-center border border-teal/10">
+            <p class="text-xs text-tinta/50 uppercase tracking-wider font-medium">Sorteo</p>
+            <p class="font-semibold text-tinta">31 de Octubre de 2026</p>
+            <p class="text-xs text-tinta/50">Lotería de Santander</p>
+          </div>
+        </div>
+
+        <a href="#tablero"
+          class="inline-flex items-center gap-2 bg-gradient-to-r from-rosa to-rosad hover:from-rosad hover:to-rosa text-white font-bold text-lg px-10 py-5 rounded-full shadow-xl shadow-rosa/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-rosa/40">
+          ¡QUIERO MI NÚMERO!
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          </svg>
+        </a>
+      </div>
+
+      <div>
+        <div class="relative mx-auto max-w-sm">
+          <div class="absolute -inset-6 bg-gradient-to-tr from-rosa/30 via-teal/30 to-naranja/30 rounded-[3rem] blur-3xl opacity-70"></div>
+          <div class="absolute -inset-3 bg-gradient-to-br from-rosa/20 to-teal/20 rounded-[2.8rem]"></div>
+          <img id="heroImg" src="images/garfiel-1.jpeg"
+                onerror="this.src='https://placehold.co/600x600/FDFAF6/E8527A?text=Pon+garfiel-1.jpeg+en+images/'"
+                alt="Amigurumi de Garfield estilo Simpsons tejido a crochet"
+                class="relative rounded-[2.8rem] shadow-2xl w-full h-[420px] md:h-[520px] object-cover object-center md:object-top border-6 border-white">
+          <span class="absolute -top-5 -left-5 bg-gradient-to-r from-rosa to-teal text-white text-sm font-bold px-6 py-3 rounded-full shadow-xl rotate-[-12deg] animate-float">
+            100% HECHO A MANO
+          </span>
+          <span class="absolute -bottom-5 -right-5 bg-gradient-to-r from-teal to-rosa text-white text-sm font-bold px-6 py-3 rounded-full shadow-xl rotate-[12deg] animate-float" style="animation-delay: 0.5s;">
+            ÚNICO EN COLOMBIA
+          </span>
+        </div>
+
+        <div class="flex justify-center gap-2 mt-8 flex-wrap">
+          <button onclick="cambiarFoto(1)" class="thumb-btn active">Foto 1</button>
+          <button onclick="cambiarFoto(2)" class="thumb-btn">Foto 2</button>
+          <button onclick="cambiarFoto(3)" class="thumb-btn">Foto 3</button>
+          <button onclick="cambiarFoto(4)" class="thumb-btn">Foto 4</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ 2. CÓMO FUNCIONA ═══════════════ -->
+  <section class="max-w-6xl mx-auto px-5 py-16 md:py-20">
+    <h2 class="font-playfair text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-rosa mb-12">
+      ¿Cómo funciona?
+    </h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-3xl p-8 shadow-xl border border-rosa/10 text-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+        <div class="text-6xl mb-4">1</div>
+        <h3 class="font-bold text-xl mb-3 text-tinta">Elige tus números</h3>
+        <p class="text-tinta/60">Selecciona los que quieras del <strong>00 al 99</strong> en el tablero.</p>
+      </div>
+      <div class="bg-white rounded-3xl p-8 shadow-xl border border-teal/10 text-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 md:mt-4">
+        <div class="text-6xl mb-4">2</div>
+        <h3 class="font-bold text-xl mb-3 text-tinta">Paga por Nequi o Bre-B</h3>
+        <p class="text-tinta/60">Transfiere el total correspondiente a tus números.</p>
+      </div>
+      <div class="bg-white rounded-3xl p-8 shadow-xl border border-rosa/10 text-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 md:mt-8">
+        <div class="text-6xl mb-4">3</div>
+        <h3 class="font-bold text-xl mb-3 text-tinta">Envía el comprobante</h3>
+        <p class="text-tinta/60">Mándalo a nuestro WhatsApp <strong>321 439 4862</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 3. TABLERO DE NÚMEROS ═══════════════ -->
+  <section id="tablero" class="bg-gradient-to-br from-[#FFF0F4] to-[#E6F7F9] py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-5">
+      <h2 class="font-playfair text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-rosa mb-3">
+        Elige tus números de la suerte
+      </h2>
+      <p class="text-center text-tinta/70 mb-8 text-lg">Toca los números que quieras. Puedes elegir varios.</p>
+
+      <!-- Leyenda -->
+      <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mb-8">
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
+          <div class="w-4 h-4 rounded-md bg-white border-2 border-gray-200"></div>
+          <span class="text-sm font-medium">Disponible</span>
+        </div>
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
+          <div class="w-4 h-4 rounded-md bg-rosa border-2 border-rosad"></div>
+          <span class="text-sm font-medium">Seleccionado</span>
+        </div>
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
+          <div class="w-4 h-4 rounded-md bg-gray-100 border-2 border-gray-200 opacity-50"></div>
+          <span class="text-sm font-medium">Vendido</span>
+        </div>
+      </div>
+
+      <!-- Contenedor del tablero -->
+      <div class="bg-white rounded-3xl shadow-2xl p-3 sm:p-5 md:p-6 border border-rosa/10">
+        <div id="grid" class="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-0.5 sm:gap-1 md:gap-1"></div>
+      </div>
+
+      <!-- Resumen -->
+      <div class="mt-8 bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-rosa/10 text-center max-w-2xl mx-auto">
+        <p class="text-tinta/70 mb-2 text-lg">
+          Números seleccionados: <span id="listaSeleccionados" class="font-bold text-tinta">ninguno</span>
+        </p>
+        <p class="text-2xl sm:text-3xl">
+          Total a pagar: <span id="total" class="font-bold text-rosa">$0</span>
+        </p>
+        <button id="btnReservar" onclick="abrirModal()" disabled
+          class="mt-6 bg-gradient-to-r from-rosa to-rosad disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:shadow-none text-white font-bold text-lg px-10 py-4 rounded-full shadow-xl shadow-rosa/30 transition-all duration-300 disabled:hover:-translate-y-0 hover:-translate-y-1 hover:shadow-2xl hover:shadow-rosa/40">
+          RESERVAR Y PAGAR
+        </button>
+      </div>
+    </div>
+  </section>
+
+   <!-- Resumen sticky para móvil -->
+  <div id="stickyResumen" class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg shadow-[0_-12px_40px_rgba(232,82,122,0.12)] border-t-2 border-rosa/20 z-40 hidden">
+    <div class="flex items-center justify-between p-3 sm:p-4 gap-3">
+      <div class="min-w-0">
+        <p class="text-[10px] sm:text-xs text-tinta/60"><span id="stickyCount">0</span> número(s)</p>
+        <p class="font-bold text-rosa text-base sm:text-lg" id="stickyTotal">$0</p>
+        <p class="text-[10px] sm:text-xs text-tinta/60 truncate max-w-[160px] sm:max-w-[200px]" id="stickyLista">ninguno</p>
+      </div>
+      <button onclick="abrirModal()" class="bg-gradient-to-r from-rosa to-rosad text-white font-bold px-5 sm:px-6 py-2.5 sm:py-3 rounded-full shadow-lg whitespace-nowrap text-sm sm:text-base">
+        PAGAR
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ 4. MODAL DE PAGO ═══════════════ -->
+    <div id="modalPago" class="modal-backdrop hidden">
+      <div class="modal-content overflow-y-auto overscroll-contain">
+      <div class="bg-gradient-to-r from-rosa to-teal text-white px-6 py-5 flex items-center justify-between">
+        <h3 class="font-playfair font-bold text-xl sm:text-2xl">Reservar mis números</h3>
+        <button onclick="cerrarModal()" class="text-white/90 hover:text-white text-3xl leading-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-all">
+          &times;
+        </button>
+      </div>
+
+      <div class="p-4 sm:p-6">
+        <div class="bg-gradient-to-br from-crema to-white rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 text-center border border-rosa/10 shadow-inner">
+          <p class="text-sm text-tinta/60 mb-2 uppercase tracking-wider font-medium">Vas a reservar</p>
+          <p id="modalNumeros" class="font-bold text-tinta text-lg mb-2">—</p>
+          <p class="text-sm text-tinta/60 mb-1 uppercase tracking-wider font-medium">Total a pagar</p>
+          <p id="modalTotal" class="font-bold text-rosa text-3xl">$0</p>
+        </div>
+
+        <h4 class="font-bold text-lg mb-4 text-tinta">Transfiere el total a:</h4>
+        <div class="space-y-3 mb-6">
+          <div class="flex items-center justify-between bg-white border-2 border-rosa/20 rounded-2xl px-5 py-4 hover:border-rosa/40 transition-all">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-teal to-rosa rounded-full flex items-center justify-center text-white font-bold">N</div>
+              <span class="font-semibold text-tinta">Nequi</span>
+            </div>
+            <button onclick="copiar('NEQUI', this)" class="font-bold text-rosa hover:text-rosad transition-colors text-sm sm:text-base">
+              317 811 3232 <span class="ml-1">📋</span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between bg-white border-2 border-teal/20 rounded-2xl px-5 py-4 hover:border-teal/40 transition-all">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-teal to-rosa rounded-full flex items-center justify-center text-white font-bold">B</div>
+              <span class="font-semibold text-tinta">Bre-B</span>
+            </div>
+            <button onclick="copiar('BREB', this)" class="font-bold text-teal hover:text-rosa transition-colors text-sm sm:text-base">
+              317 811 3232 <span class="ml-1">📋</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-teal/10 to-rosa/10 border-2 border-teal/30 rounded-2xl p-4 mb-6">
+          <p class="text-sm text-tinta/80"><strong>Paso final:</strong> envía el comprobante a nuestro WhatsApp haciendo clic aquí.</p>
+        </div>
+
+        <a id="btnWhatsApp" href="#" target="_blank" rel="noopener"
+          class="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-[#25D366] to-[#20BA5A] hover:from-[#20BA5A] hover:to-[#25D366] text-white font-bold py-3.5 sm:py-4 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl text-sm sm:text-base">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          Enviar comprobante por WhatsApp
+        </a>
+
+          <p class="text-xs text-tinta/50 text-center mt-4 sm:mt-5 pb-2">
+            ⚠️ Los números quedan <strong>reservados únicamente</strong> una vez verificado el pago.
+          </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ 5. FOOTER ═══════════════ -->
+  <footer class="bg-negro text-gray-300 pt-12 pb-32 md:pb-12">
+    <div class="max-w-4xl mx-auto px-5 text-center">
+      <p class="font-playfair text-white text-2xl mb-3">🐱 Crocheting Sarichi</p>
+      <p class="text-sm text-gray-400 mb-5">Amigurumis · Accesorios · Detalles Personalizados · Bucaramanga, Colombia</p>
+
+      <a href="https://www.instagram.com/sarichi_crocheting?igsh=MW1lMm1wcGxjeDB3" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-full mb-6 shadow-lg transition-transform hover:scale-105"
+         style="background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af)">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+        </svg>
+        @sarichi_crocheting
+      </a>
+
+      <div class="max-w-2xl mx-auto border-t border-gray-700 pt-6">
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Rifa válida hasta el 30 de Octubre de 2026 o hasta agotar los 100 números. Sorteo el 31 de Octubre de 2026
+          con las últimas 2 cifras del premio mayor de la Lotería de Santander. Envíos solo en el área metropolitana de
+          Bucaramanga. Organiza: Sarichi Crocheting.
+        </p>
+        <p class="text-xs text-gray-500 mt-4">© 2026 Crocheting Sarichi · Hecho con 🩷</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════════
+       CONFIGURACIÓN — EDITA SOLO ESTA SECCIÓN
+       ═══════════════════════════════════════════════════════════ */
+    const PRECIO = 2500;
+    const WHATSAPP = '573214394862';
+    const NEQUI = '317 811 3232';
+    const BREB  = '317 811 3232';
+
+    // Números YA VENDIDOS: ej: [5, 23, 88]
+    const numerosVendidos = [];
+
+    const STORAGE_KEY = 'rifa_garfield_seleccion';
+    /* ═══════════════════════════════════════════════════════════ */
+
+    const grid = document.getElementById('grid');
+    let seleccionados = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+    seleccionados = seleccionados.filter(n => !numerosVendidos.includes(n));
+
+    // Generar tablero 00-99
+    for (let i = 0; i < 100; i++) {
+      const num = String(i).padStart(2, '0');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = num;
+      btn.dataset.num = i;
+      btn.className = 'numero-btn disponible';
+
+      if (numerosVendidos.includes(i)) {
+        btn.classList.remove('disponible');
+        btn.classList.add('vendido');
+        btn.disabled = true;
+      } else if (seleccionados.includes(i)) {
+        btn.classList.remove('disponible');
+        btn.classList.add('seleccionado');
+      }
+
+      btn.addEventListener('click', () => toggleNumero(i, btn));
+      grid.appendChild(btn);
+    }
+
+    function toggleNumero(i, btn) {
+      if (numerosVendidos.includes(i)) return;
+      const idx = seleccionados.indexOf(i);
+      if (idx === -1) {
+        seleccionados.push(i);
+        btn.classList.remove('disponible');
+        btn.classList.add('seleccionado');
+      } else {
+        seleccionados.splice(idx, 1);
+        btn.classList.remove('seleccionado');
+        btn.classList.add('disponible');
+      }
+      seleccionados.sort((a, b) => a - b);
+      guardar();
+      actualizarResumen();
+    }
+
+    function guardar() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seleccionados));
+    }
+
+    function listaNumeros() {
+      return seleccionados.map(n => String(n).padStart(2, '0')).join(', ');
+    }
+
+    function formatoCOP(v) {
+      return '$' + v.toLocaleString('es-CO');
+    }
+
+    function actualizarResumen() {
+      const cantidad = seleccionados.length;
+      const total = cantidad * PRECIO;
+      const lista = listaNumeros();
+
+      document.getElementById('listaSeleccionados').textContent = cantidad ? lista : 'ninguno';
+      document.getElementById('total').textContent = formatoCOP(total);
+      document.getElementById('stickyCount').textContent = cantidad;
+      document.getElementById('stickyTotal').textContent = formatoCOP(total);
+      document.getElementById('stickyLista').textContent = cantidad ? lista : 'ninguno';
+
+      const btn = document.getElementById('btnReservar');
+      if (cantidad > 0) {
+        btn.disabled = false;
+      } else {
+        btn.disabled = true;
+      }
+
+      const sticky = document.getElementById('stickyResumen');
+      sticky.classList.toggle('hidden', cantidad === 0);
+
+      document.getElementById('modalNumeros').textContent = cantidad ? lista : '—';
+      document.getElementById('modalTotal').textContent = formatoCOP(total);
+      actualizarWhatsApp(lista, total);
+    }
+
+    function actualizarWhatsApp(lista, total) {
+      const texto = 'Hola, quiero los números ' + lista +
+        ' para la rifa de Garfield. Total: ' + formatoCOP(total) +
+        '. Adjunto comprobante.';
+      document.getElementById('btnWhatsApp').href =
+        'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(texto);
+    }
+
+    function abrirModal() {
+      if (seleccionados.length === 0) return;
+      document.getElementById('modalPago').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModal() {
+      document.getElementById('modalPago').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('modalPago').addEventListener('click', (e) => {
+      if (e.target.id === 'modalPago') cerrarModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') cerrarModal();
+    });
+
+    function copiar(cual, el) {
+      const num = cual === 'NEQUI' ? NEQUI : BREB;
+      navigator.clipboard.writeText(num.replace(/\s/g, '')).then(() => {
+        const original = el.innerHTML;
+        el.innerHTML = '¡Copiado! ✅';
+        setTimeout(() => { el.innerHTML = original; }, 1500);
+      }).catch(() => {});
+    }
+
+    function cambiarFoto(n) {
+      const img = document.getElementById('heroImg');
+      img.src = 'images/garfiel-' + n + '.jpeg';
+      document.querySelectorAll('.thumb-btn').forEach((b, i) => b.classList.toggle('active', (i + 1) === n));
+    }
+
+    actualizarResumen();
+  </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito - Sarichi Crocheting</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .carrito-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .carrito-items {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .item-carrito {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+            gap: 1rem;
+        }
+        .item-carrito:last-child {
+            border-bottom: none;
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-nombre {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .item-detalle {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .item-cantidad {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 1rem;
+        }
+        .btn-cantidad {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background: #f5f5f5;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .item-precio {
+            font-weight: 600;
+            min-width: 100px;
+            text-align: right;
+        }
+        .btn-eliminar {
+            padding: 0.5rem 1rem;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-eliminar:hover {
+            background: #c0392b;
+        }
+        .carrito-vacio {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        .carrito-resumen {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+        }
+        .resumen-fila {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        .resumen-total {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #27ae60;
+            border-top: 2px solid #ddd;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        .form-envio {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .btn-checkout {
+            width: 100%;
+            padding: 1rem;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .btn-checkout:hover {
+            background: #229954;
+        }
+        .btn-checkout:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div id="topnav"></div>
+    <div id="toast" class="toast"></div>
+    
+    <div class="carrito-container">
+        <h1>🛒 Mi Carrito</h1>
+        
+        <div class="carrito-items" id="cartItems">
+            <div class="carrito-vacio">Tu carrito está vacío</div>
+        </div>
+        
+        <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 400px;">
+                <div class="form-envio">
+                    <h2>Dirección de Envío</h2>
+                    <div class="form-group">
+                        <label>Calle y número *</label>
+                        <input type="text" id="direccion" placeholder="Calle Principal 123" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ciudad *</label>
+                        <input type="text" id="ciudad" placeholder="Medellín" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Departamento *</label>
+                        <input type="text" id="departamento" placeholder="Antioquia" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Código Postal</label>
+                        <input type="text" id="codigoPostal" placeholder="050001">
+                    </div>
+                    <div class="form-group">
+                        <label>Notas adicionales</label>
+                        <textarea id="notasAdicionles" placeholder="Ej: Apto, piso, referencias..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="flex: 0 0 400px;">
+                <div class="carrito-resumen">
+                    <h2>Resumen del Pedido</h2>
+                    <div class="resumen-fila">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">$0</span>
+                    </div>
+                    <div class="resumen-fila">
+                        <span>Envío:</span>
+                        <span id="envio">$0</span>
+                    </div>
+                    <div class="resumen-total">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Total:</span>
+                            <span id="total">$0</span>
+                        </div>
+                    </div>
+                    <button class="btn-checkout" id="btnCheckout" onclick="finalizarPedido()" disabled>
+                        Finalizar Pedido
+                    </button>
+                    <button class="btn-checkout" style="background: #95a5a6; margin-top: 0.5rem;" onclick="location.href='tienda.html'">
+                        Continuar Comprando
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="sarichi.js"></script>
+    <script>
+        requireAuth();
+        
+        function renderCart() {
+            const items = Carrito.obtener();
+            const container = document.getElementById('cartItems');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="carrito-vacio">Tu carrito está vacío. <a href="tienda.html">Ir a tienda</a></div>';
+                document.getElementById('btnCheckout').disabled = true;
+                return;
+            }
+            
+            document.getElementById('btnCheckout').disabled = false;
+            container.innerHTML = items.map(item => `
+                <div class="item-carrito">
+                    <div class="item-info">
+                        <div class="item-nombre">${item.nombre}</div>
+                        <div class="item-detalle">
+                            ${item.color ? `Color: ${item.color}` : ''}
+                            <br>Precio unitario: $${item.precio.toLocaleString('es-CO', {maximumFractionDigits: 2})}
+                        </div>
+                    </div>
+                    <div class="item-cantidad">
+                        <button class="btn-cantidad" onclick="cambiarCantidad('${item.id}', '${item.color}', -1)">-</button>
+                        <input type="number" value="${item.cantidad}" min="1" style="width: 50px; text-align: center;" 
+                               onchange="cambiarCantidad('${item.id}', '${item.color}', this.value - ${item.cantidad})">
+                        <button class="btn-cantidad" onclick="cambiarCantidad('${item.id}', '${item.color}', 1)">+</button>
+                    </div>
+                    <div class="item-precio">$${(item.precio * item.cantidad).toLocaleString('es-CO', {maximumFractionDigits: 2})}</div>
+                    <button class="btn-eliminar" onclick="Carrito.eliminar('${item.id}', '${item.color}'); renderCart()">Eliminar</button>
+                </div>
+            `).join('');
+            
+            actualizarResumen();
+        }
+        
+        function cambiarCantidad(productoId, color, cambio) {
+            const items = Carrito.obtener();
+            const item = items.find(i => i.id === productoId && i.color === color);
+            if (item) {
+                item.cantidad += parseInt(cambio);
+                if (item.cantidad <= 0) {
+                    Carrito.eliminar(productoId, color);
+                } else {
+                    Carrito.guardar(items);
+                }
+                renderCart();
+            }
+        }
+        
+        function actualizarResumen() {
+            const subtotal = Carrito.obtenerTotal();
+            const envio = 0; // Sprint 4: calcular envío por zona
+            const total = subtotal + envio;
+            
+            document.getElementById('subtotal').textContent = '$' + subtotal.toLocaleString('es-CO', {maximumFractionDigits: 2});
+            document.getElementById('envio').textContent = '$' + envio.toLocaleString('es-CO', {maximumFractionDigits: 2});
+            document.getElementById('total').textContent = '$' + total.toLocaleString('es-CO', {maximumFractionDigits: 2});
+        }
+        
+        async function finalizarPedido() {
+            const items = Carrito.obtener();
+            if (items.length === 0) {
+                showToast('El carrito está vacío', 'error');
+                return;
+            }
+            
+            const direccion = document.getElementById('direccion').value.trim();
+            const ciudad = document.getElementById('ciudad').value.trim();
+            const departamento = document.getElementById('departamento').value.trim();
+            const codigoPostal = document.getElementById('codigoPostal').value.trim();
+            const notas = document.getElementById('notasAdicionles').value.trim();
+            
+            if (!direccion || !ciudad || !departamento) {
+                showToast('Por favor completa los campos obligatorios', 'error');
+                return;
+            }
+            
+            const direccionEnvio = `${direccion}, ${ciudad}, ${departamento}${codigoPostal ? ', CP: ' + codigoPostal : ''}${notas ? ' - ' + notas : ''}`;
+            
+            try {
+                document.getElementById('btnCheckout').disabled = true;
+                
+                const pedidoRequest = {
+                    items: items.map(item => ({
+                        productoId: item.id,
+                        cantidad: item.cantidad,
+                        colorSolicitado: item.color
+                    })),
+                    direccionEnvio: direccionEnvio
+                };
+                
+                const response = await apiPost('/pedidos', pedidoRequest, true);
+                
+                showToast('¡Pedido creado exitosamente!', 'success');
+                Carrito.vaciar();
+                
+                setTimeout(() => {
+                    location.href = 'mis-pedidos.html';
+                }, 2000);
+                
+            } catch (error) {
+                showToast(error.message || 'Error al crear el pedido', 'error');
+                document.getElementById('btnCheckout').disabled = false;
+            }
+        }
+        
+        // Inicializar
+        renderNav(Auth.getRol());
+        renderCart();
+        Carrito.actualizarBadge();
+    </script>
+</body>
+</html>

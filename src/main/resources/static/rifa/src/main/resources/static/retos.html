@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retos Mensuales - Sarichi Crocheting</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f9f9f9; }
+        header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 40px 20px; text-align: center; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .reto-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 30px; transition: transform 0.3s ease; }
+        .reto-card:hover { transform: translateY(-5px); }
+        .reto-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; }
+        .reto-header h2 { font-size: 1.8em; margin-bottom: 10px; }
+        .reto-meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.9em; }
+        .reto-meta-item { display: flex; align-items: center; gap: 5px; }
+        .reto-body { padding: 30px; }
+        .reto-descripcion { margin-bottom: 20px; color: #666; }
+        .reto-premio { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .reto-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; transition: all 0.3s ease; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #764ba2; }
+        .btn-secondary { background: #ddd; color: #333; }
+        .btn-secondary:hover { background: #ccc; }
+        .participaciones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; }
+        .participacion-item { background: white; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; }
+        .participacion-item:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .participacion-image { width: 100%; height: 120px; object-fit: cover; }
+        .participacion-info { padding: 10px; text-align: center; font-size: 0.85em; }
+        .participacion-votos { color: #f5576c; font-weight: bold; }
+        .navbar { background: white; border-bottom: 1px solid #ddd; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar-nav { display: flex; gap: 20px; }
+        .navbar-nav a { text-decoration: none; color: #333; font-weight: 500; }
+        .navbar-nav a:hover { color: #667eea; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 500px; width: 90%; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-close { background: none; border: none; font-size: 1.5em; cursor: pointer; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+        .form-group textarea { resize: vertical; }
+        footer { background: #f5f5f5; padding: 40px 20px; text-align: center; color: #666; margin-top: 40px; }
+        .error { color: #d32f2f; padding: 10px; background: #ffebee; border-radius: 4px; margin-bottom: 10px; }
+        .success { color: #388e3c; padding: 10px; background: #e8f5e9; border-radius: 4px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Sarichi Crocheting</h1>
+        <div class="navbar-nav">
+            <a href="/tienda.html">Tienda</a>
+            <a href="/blog.html">Blog</a>
+            <a href="/galeria.html">Galería</a>
+            <a href="/retos.html" style="color: #667eea; font-weight: bold;">Retos</a>
+            <a href="#" id="loginBtn">Login</a>
+        </div>
+    </div>
+
+    <header>
+        <h1>🎨 Retos Mensuales Sarichi</h1>
+        <p>Participa, crea y gana premios increíbles</p>
+    </header>
+
+    <div class="container">
+        <div id="retosContainer"></div>
+        <div id="loading" style="text-align: center; padding: 40px; color: #999;">Cargando retos...</div>
+    </div>
+
+    <!-- Modal de Participación -->
+    <div id="modalParticipacion" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Participa en el Reto</h2>
+                <button class="modal-close" onclick="cerrarModal()">×</button>
+            </div>
+            <div id="modalError" class="error" style="display:none;"></div>
+            <form onsubmit="enviarParticipacion(event)">
+                <div class="form-group">
+                    <label>URL de tu foto:</label>
+                    <input type="url" id="urlFoto" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción de tu trabajo:</label>
+                    <textarea id="descripcion" placeholder="Cuéntanos sobre tu creación..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar Participación</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Sarichi Crocheting. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="/sarichi.js"></script>
+    <script>
+        let retoActualId = null;
+
+        async function cargarRetos() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                const response = await apiGet('/retos/activos');
+                const retosContainer = document.getElementById('retosContainer');
+                retosContainer.innerHTML = '';
+
+                if (response.length === 0) {
+                    retosContainer.innerHTML = '<p style="text-align: center; color: #999;">No hay retos activos en este momento</p>';
+                } else {
+                    for (const reto of response) {
+                        const participaciones = await apiGet(`/retos/${reto.id}/participaciones`);
+                        renderReto(reto, participaciones);
+                    }
+                }
+
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: red;">Error cargando retos: ' + error.message + '</p>';
+            }
+        }
+
+        function renderReto(reto, participaciones) {
+            const card = document.createElement('div');
+            card.className = 'reto-card';
+
+            const usuario = Auth.get();
+            const puedeParticipar = usuario && usuario.rol !== 'ADMIN';
+
+            let participacionesHTML = '';
+            if (participaciones && participaciones.length > 0) {
+                participacionesHTML = '<div class="participaciones-grid>';
+                participaciones.forEach(p => {
+                    participacionesHTML += `
+                        <div class="participacion-item">
+                            <img src="${p.urlFotoParticipacion}" alt="Participación" class="participacion-image">
+                            <div class="participacion-info">
+                                <div>${p.nombreUsuario}</div>
+                                <div class="participacion-votos">⭐ ${p.votos || 0} votos</div>
+                                <button class="btn btn-secondary" style="width: 90%; margin-top: 5px;" ${!usuario ? 'disabled' : ''} onclick="votarParticipacion('${p.id}')">Votar</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                participacionesHTML += '</div>';
+            }
+
+            card.innerHTML = `
+                <div class="reto-header">
+                    <h2>${reto.nombre}</h2>
+                    <div class="reto-meta">
+                        <div class="reto-meta-item">📅 ${new Date(reto.fechaInicio).toLocaleDateString()} - ${new Date(reto.fechaFin).toLocaleDateString()}</div>
+                        <div class="reto-meta-item">👥 ${reto.participacionesCount || 0} participantes</div>
+                    </div>
+                </div>
+                <div class="reto-body">
+                    <div class="reto-descripcion">${reto.descripcion}</div>
+                    ${reto.premioDescripcion ? `<div class="reto-premio"><strong>🎁 Premio:</strong> ${reto.premioDescripcion}</div>` : ''}
+                    ${reto.patronUrl ? `<button class="btn btn-secondary" onclick="window.open('${reto.patronUrl}')">Descargar Patrón</button>` : ''}
+                    ${puedeParticipar ? `<button class="btn btn-primary" onclick="abrirModalParticipacion('${reto.id}')">Participar</button>` : ''}
+                    ${participacionesHTML}
+                </div>
+            `;
+
+            document.getElementById('retosContainer').appendChild(card);
+        }
+
+        function abrirModalParticipacion(retoId) {
+            if (!Auth.get()) {
+                showToast('Debes iniciar sesión para participar');
+                return;
+            }
+            retoActualId = retoId;
+            document.getElementById('modalParticipacion').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalParticipacion').style.display = 'none';
+            document.getElementById('urlFoto').value = '';
+            document.getElementById('descripcion').value = '';
+            document.getElementById('modalError').style.display = 'none';
+        }
+
+        async function enviarParticipacion(e) {
+            e.preventDefault();
+            const usuario = Auth.get();
+            if (!usuario) {
+                showToast('Debes estar autenticado');
+                return;
+            }
+
+            try {
+                await apiPost(`/retos/${retoActualId}/participar`, {
+                    urlFotoParticipacion: document.getElementById('urlFoto').value,
+                    descripcion: document.getElementById('descripcion').value
+                });
+                showToast('¡Participación enviada exitosamente!');
+                cerrarModal();
+                cargarRetos();
+            } catch (error) {
+                document.getElementById('modalError').textContent = error.message;
+                document.getElementById('modalError').style.display = 'block';
+            }
+        }
+
+        async function votarParticipacion(participacionId) {
+            if (!Auth.get()) {
+                showToast('Debes iniciar sesión para votar');
+                return;
+            }
+            try {
+                await apiPost(`/retos/${retoActualId}/participaciones/${participacionId}/votar`, {});
+                showToast('¡Voto registrado!');
+                cargarRetos();
+            } catch (error) {
+                showToast('Error al votar: ' + error.message);
+            }
+        }
+
+        cargarRetos();
+    </script>
+</body>
+</html>
