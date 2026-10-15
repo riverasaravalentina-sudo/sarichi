@@ -15,4 +15,9 @@ public class RootController {
     public String redirectRifa() {
         return "redirect:/rifa/index.html";
     }
+
+    @GetMapping({ "/qa", "/qa/", "/qa/rifa-informe", "/qa/rifa-informe/" })
+    public String redirectQa() {
+        return "redirect:/qa/rifa-informe/index.html";
+    }
 }
