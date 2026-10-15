@@ -182,6 +182,7 @@ public class RifaService {
                     .codigoReserva(d == null ? null : d.getCodigoReserva())
                     .reservadoHasta(d == null ? null : d.getReservadoHasta())
                     .notas(d == null ? null : d.getNotas())
+                    .actualizadoEn(d == null ? null : d.getActualizadoEn())
                     .build());
         }
 

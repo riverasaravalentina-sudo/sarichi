@@ -158,14 +158,29 @@
         </div>
       </div>
 
-      <!-- Reservas activas -->
-      <div>
+      <!-- Columna derecha: detalle de la selección + apartados activos -->
+      <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border border-rosa/10 p-4 sm:p-5">
+          <h2 class="font-bold text-lg text-tinta mb-3">Detalle de la selección</h2>
+          <div id="detalleSel" class="space-y-2">
+            <p class="text-sm text-tinta/50">Selecciona números en el tablero para ver aquí sus datos.</p>
+          </div>
+        </div>
+
         <div class="bg-white rounded-3xl shadow-xl border border-rosa/10 p-4 sm:p-5">
           <h2 class="font-bold text-lg text-tinta mb-3">Apartados activos</h2>
           <div id="reservas" class="space-y-3">
             <p class="text-sm text-tinta/50">Sin apartados activos.</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Ventas confirmadas -->
+    <div class="mt-6 bg-white rounded-3xl shadow-xl border border-rosa/10 p-4 sm:p-5">
+      <h2 class="font-bold text-lg text-tinta mb-3">Ventas confirmadas <span id="ventasCount" class="text-sm font-normal text-tinta/50"></span></h2>
+      <div id="ventas" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <p class="text-sm text-tinta/50">Aún no hay ventas confirmadas.</p>
       </div>
     </div>
   </div>
@@ -375,13 +390,14 @@
         }
         if (q) {
           const d = datoDe(i);
-          const texto = ((d && (d.compradorTelefono || '') + ' ' + (d && d.codigoReserva || '')) || '').toLowerCase();
-          if (texto.includes(q)) btn.classList.add('match');
+          const texto = ((d && [d.compradorNombre || '', d.compradorTelefono || '', d.codigoReserva || '', d.notas || ''].join(' ')) || '').toLowerCase();
+          if (texto.includes(q) || String(i).padStart(2, '0').includes(q)) btn.classList.add('match');
         }
       }
 
       actualizarBarra();
       renderReservas(q);
+      renderVentas(q);
     }
 
     function renderReservas(q) {
@@ -409,7 +425,7 @@
             '<span class="text-xs text-amber-700">' + formatoCOP(r.total * 2500) + '</span>' +
           '</div>' +
           '<p class="text-sm text-tinta"><strong>' + ns + '</strong></p>' +
-          '<p class="text-xs text-tinta/60 mb-2">' + quien + ' · vence ' + hora(r.reservadoHasta) + '</p>' +
+          '<p class="text-xs text-tinta/60 mb-2">' + esc(quien) + ' · vence ' + hora(r.reservadoHasta) + '</p>' +
           '<div class="flex gap-2">' +
             '<button onclick="marcarPagado(\'' + r.codigoReserva + '\')" class="flex-1 bg-green-600 text-white text-xs font-bold py-1.5 rounded-full hover:bg-green-700 transition-all">Pagado</button>' +
             '<button onclick="liberarCodigo(\'' + r.codigoReserva + '\')" class="flex-1 bg-white border-2 border-gray-200 text-tinta/70 text-xs font-semibold py-1.5 rounded-full hover:border-gray-300 transition-all">Liberar</button>' +
@@ -418,11 +434,119 @@
       }).join('');
     }
 
+    function claveGrupoVenta(d) {
+      if (d.codigoReserva) return 'c:' + d.codigoReserva;
+      const base = 'b:' + (d.compradorNombre || '') + '|' + (d.compradorTelefono || '') + '|' + (d.notas || '');
+      return base === 'b:||' ? 'n:' + d.numero : base;
+    }
+
+    function renderVentas(q) {
+      const cont = document.getElementById('ventas');
+      const countEl = document.getElementById('ventasCount');
+      if (!panelData) return;
+      const vendidos = (panelData.numeros || []).filter(n => n.estado === 'VENDIDO');
+      countEl.textContent = vendidos.length
+        ? '(' + vendidos.length + ' número' + (vendidos.length === 1 ? '' : 's') + ')'
+        : '';
+
+      const grupos = new Map();
+      vendidos.forEach(d => {
+        const k = claveGrupoVenta(d);
+        if (!grupos.has(k)) {
+          grupos.set(k, {
+            numeros: [], nombre: d.compradorNombre, telefono: d.compradorTelefono,
+            notas: d.notas, codigo: d.codigoReserva, fecha: d.actualizadoEn,
+          });
+        }
+        const g = grupos.get(k);
+        g.numeros.push(d.numero);
+        if (!g.nombre && d.compradorNombre) g.nombre = d.compradorNombre;
+        if (!g.telefono && d.compradorTelefono) g.telefono = d.compradorTelefono;
+        if (!g.notas && d.notas) g.notas = d.notas;
+        if (!g.codigo && d.codigoReserva) g.codigo = d.codigoReserva;
+        if (d.actualizadoEn && (!g.fecha || d.actualizadoEn > g.fecha)) g.fecha = d.actualizadoEn;
+      });
+
+      let lista = [...grupos.values()].map(g => ({ ...g, numeros: g.numeros.sort((a, b) => a - b) }));
+      const term = (q || '').trim().toLowerCase();
+      if (term) {
+        lista = lista.filter(g =>
+          g.numeros.some(n => String(n).padStart(2, '0').includes(term)) ||
+          (g.nombre || '').toLowerCase().includes(term) ||
+          (g.telefono || '').toLowerCase().includes(term) ||
+          (g.notas || '').toLowerCase().includes(term) ||
+          (g.codigo || '').toLowerCase().includes(term));
+      }
+
+      if (!lista.length) {
+        cont.innerHTML = '<p class="text-sm text-tinta/50">' +
+          (term ? 'Sin coincidencias.' : 'Aún no hay ventas confirmadas.') + '</p>';
+        return;
+      }
+
+      lista.sort((a, b) => a.numeros[0] - b.numeros[0]);
+      cont.innerHTML = lista.map(g => {
+        const ns = g.numeros.map(n => String(n).padStart(2, '0')).join(', ');
+        const quien = g.nombre || g.telefono || 'Sin datos';
+        return '<div class="border-2 border-green-200 bg-green-50 rounded-2xl p-3">' +
+          '<div class="flex items-center justify-between gap-2 mb-1">' +
+            '<span class="font-bold tracking-widest text-green-800">' + ns + '</span>' +
+            '<span class="text-xs text-green-700">' + formatoCOP(g.numeros.length * 2500) + '</span>' +
+          '</div>' +
+          '<p class="text-sm text-tinta font-medium">' + esc(quien) + '</p>' +
+          (g.telefono ? '<p class="text-xs text-tinta/70">📱 ' + esc(g.telefono) + '</p>' : '') +
+          (g.notas ? '<p class="text-xs text-tinta/60 mt-1">📝 ' + esc(g.notas) + '</p>' : '') +
+          (g.codigo ? '<p class="text-xs text-green-700 mt-1">Código: ' + esc(g.codigo) + '</p>' : '') +
+          '<p class="text-[11px] text-tinta/50 mt-1">Vendido ' + hora(g.fecha) + '</p>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderDetalleSeleccion() {
+      const cont = document.getElementById('detalleSel');
+      if (!cont) return;
+      const nums = [...seleccion].sort((a, b) => a - b);
+      if (!nums.length) {
+        cont.innerHTML = '<p class="text-sm text-tinta/50">Selecciona números en el tablero para ver aquí sus datos.</p>';
+        return;
+      }
+      cont.innerHTML = nums.map(n => {
+        const d = datoDe(n) || { numero: n, estado: 'DISPONIBLE' };
+        const estado = d.estado;
+        const badge = estado === 'VENDIDO'
+          ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">Vendido</span>'
+          : estado === 'RESERVADO'
+            ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Apartado</span>'
+            : '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">Disponible</span>';
+        let extra = '';
+        if (estado !== 'DISPONIBLE') {
+          const partes = [];
+          if (d.compradorNombre) partes.push('<strong>' + esc(d.compradorNombre) + '</strong>');
+          if (d.compradorTelefono) partes.push('📱 ' + esc(d.compradorTelefono));
+          if (d.codigoReserva) partes.push('Código ' + esc(d.codigoReserva));
+          if (d.notas) partes.push('📝 ' + esc(d.notas));
+          if (estado === 'VENDIDO') partes.push('Vendido ' + hora(d.actualizadoEn));
+          else if (d.reservadoHasta) partes.push('Vence ' + hora(d.reservadoHasta));
+          extra = '<p class="text-xs text-tinta/60 mt-1">' + partes.join(' · ') + '</p>';
+        }
+        return '<div class="border border-gray-100 rounded-xl p-2">' +
+          '<div class="flex items-center justify-between">' +
+            '<span class="font-bold tracking-widest">' + String(n).padStart(2, '0') + '</span>' + badge +
+          '</div>' + extra +
+        '</div>';
+      }).join('');
+    }
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
     function actualizarBarra() {
       const barra = document.getElementById('barra');
       const n = seleccion.size;
       document.getElementById('selCount').textContent = n;
       barra.classList.toggle('hidden', n === 0);
+      renderDetalleSeleccion();
     }
 
     // ── Selección ──────────────────────────────────────────
@@ -539,7 +663,8 @@
 
     function hora(iso) {
       if (!iso) return '—';
-      const d = new Date(iso);
+      const limpio = String(iso).replace(/(\.\d{3})\d+/, '$1');
+      const d = new Date(limpio);
       if (isNaN(d.getTime())) return '—';
       return d.toLocaleString('es-CO', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     }

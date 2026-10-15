@@ -19,4 +19,5 @@ public class NumeroPanelDTO {
     private String codigoReserva;
     private LocalDateTime reservadoHasta;
     private String notas;
+    private LocalDateTime actualizadoEn;
 }
