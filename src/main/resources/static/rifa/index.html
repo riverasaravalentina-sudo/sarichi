@@ -53,36 +53,81 @@
     body { font-family: 'Inter', system-ui, sans-serif; background-color: #FDFAF6; color: #333333; line-height: 1.6; }
     html { scroll-behavior: smooth; }
 
-    /* ── Estados del tablero de números ───────────────────────── */
+    /* ── Estados del tablero de números (CSS plano) ──────────── */
     .numero-btn {
-      @apply flex items-center justify-center font-semibold transition-all duration-200 ease-out select-none;
-      @apply border-2 border-transparent;
-      @apply rounded-md sm:rounded-md md:rounded-md aspect-square;
-      @apply text-[10px] sm:text-sm md:text-base leading-none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      user-select: none;
+      cursor: pointer;
       width: 100%;
       min-height: 28px;
+      aspect-ratio: 1 / 1;
+      font-size: 10px;
+      line-height: 1;
+      border: 2px solid transparent;
+      border-radius: 0.375rem;
+      background: #DCF6E4;
+      color: #1B7A44;
+      border-color: #B7EBC7;
+      transition: all 0.2s ease-out;
+    }
+    @media (min-width: 640px) {
+      .numero-btn { font-size: 0.875rem; }
+    }
+    @media (min-width: 768px) {
+      .numero-btn { font-size: 1rem; }
     }
     .numero-btn.disponible {
-      @apply bg-[#DCF6E4] text-[#1B7A44] border-[#B7EBC7];
+      background: #DCF6E4;
+      color: #1B7A44;
+      border-color: #B7EBC7;
     }
     .numero-btn.disponible:hover {
-      @apply -translate-y-0.5 shadow-md shadow-green-200/50;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px -2px rgba(74, 222, 128, 0.5);
     }
     .numero-btn.seleccionado {
-      @apply bg-rosa text-white border-rosad shadow-lg shadow-rosa/40;
+      background: #E8527A;
+      color: #ffffff;
+      border-color: #d43f68;
+      box-shadow: 0 10px 15px -3px rgba(232, 82, 122, 0.45), 0 4px 6px -4px rgba(232, 82, 122, 0.45);
       transform: scale(1.05);
+      z-index: 1;
     }
     .numero-btn.vendido {
-      @apply bg-gray-200 text-gray-400 cursor-not-allowed opacity-50;
+      background: #f3f4f6;
+      color: #9ca3af;
+      border-color: #e5e7eb;
+      cursor: not-allowed;
+      opacity: 0.5;
       text-decoration: line-through;
+      transform: none;
+      box-shadow: none;
     }
 
-    /* ── Thumbnails carrusel ───────────────────────────────── */
+    /* ── Thumbnails carrusel (CSS plano) ──────────────────────── */
     .thumb-btn {
-      @apply px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white shadow-md border-2 border-gray-200 text-xs sm:text-sm font-medium transition-all duration-300 hover:border-rosa/60;
+      padding: 0.375rem 0.875rem;
+      border-radius: 9999px;
+      background: #ffffff;
+      border: 2px solid #e5e7eb;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #333333;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
+    @media (min-width: 640px) {
+      .thumb-btn { padding: 0.5rem 1rem; font-size: 0.875rem; }
+    }
+    .thumb-btn:hover { border-color: rgba(232, 82, 122, 0.6); }
     .thumb-btn.active {
-      @apply border-rosa ring-2 ring-rosa/40 shadow-xl scale-105;
+      border-color: #E8527A;
+      box-shadow: 0 0 0 3px rgba(232, 82, 122, 0.25), 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+      transform: scale(1.05);
     }
 
     /* ── Modal (CSS plano, sin @apply — máximo soporte) ───────── */
