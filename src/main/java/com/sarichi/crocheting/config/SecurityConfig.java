@@ -80,6 +80,9 @@ public class SecurityConfig {
                     "/favicon.ico", "/error"
                 ).permitAll()
 
+                // ── Rifa Garfield — página estática pública ──────────────────────
+                .requestMatchers("/rifa/**").permitAll()
+
                 // ── API Auth pública ───────────────────────────────────────────────
                 .requestMatchers("/api/auth/**").permitAll()
 
