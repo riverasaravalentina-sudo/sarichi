@@ -10,4 +10,9 @@ public class RootController {
     public String redirectRoot() {
         return "redirect:/api/web/";
     }
+
+    @GetMapping({ "/rifa", "/rifa/" })
+    public String redirectRifa() {
+        return "redirect:/rifa/index.html";
+    }
 }

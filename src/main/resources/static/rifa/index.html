@@ -468,10 +468,7 @@
       }
       seleccionados.sort((a, b) => a - b);
       guardar();
-    // Seguridad: nunca dejar la página sin scroll (overflow del body)
-    document.body.style.overflow = '';
-
-    actualizarResumen();
+      actualizarResumen();
     }
 
     function guardar() {
@@ -553,6 +550,9 @@
       img.src = 'images/garfiel-' + n + '.jpeg';
       document.querySelectorAll('.thumb-btn').forEach((b, i) => b.classList.toggle('active', (i + 1) === n));
     }
+
+    // Seguridad: nunca cargar la página sin scroll (overflow del body)
+    document.body.style.overflow = '';
 
     actualizarResumen();
   </script>

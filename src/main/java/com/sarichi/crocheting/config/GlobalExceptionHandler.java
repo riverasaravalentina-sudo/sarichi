@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.sarichi.crocheting.exception.CredencialesInvalidasException;
 import com.sarichi.crocheting.exception.DespachoException;
@@ -97,6 +98,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> manejarArgumentoIlegal(
             IllegalArgumentException ex) {
         return error(HttpStatus.BAD_REQUEST, "Argumento inválido", ex.getMessage());
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> manejarRecursoNoEncontrado(
+            NoResourceFoundException ex) {
+        return error(HttpStatus.NOT_FOUND, "Recurso no encontrado",
+                "La ruta solicitada no existe");
     }
 
     @ExceptionHandler(Exception.class)
