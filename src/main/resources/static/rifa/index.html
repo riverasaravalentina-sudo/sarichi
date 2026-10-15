@@ -106,6 +106,15 @@
       transform: none;
       box-shadow: none;
     }
+    .numero-btn.reservado {
+      background: #FFF3CD;
+      color: #8A6100;
+      border-color: #FFE08A;
+      cursor: not-allowed;
+      opacity: 0.85;
+      transform: none;
+      box-shadow: none;
+    }
 
     /* ── Flechas del carrusel (CSS plano) ─────────────────────── */
     .arrow-btn {
@@ -285,15 +294,23 @@
       </h2>
       <p class="text-center text-tinta/70 mb-8 text-lg">Toca los números que quieras. Puedes elegir varios.</p>
 
+      <!-- Avisos e información de conexión -->
+      <div id="avisoTablero" role="status" aria-live="polite" class="hidden"></div>
+      <p id="estadoTablero" class="text-center text-xs text-tinta/50 mb-4"></p>
+
       <!-- Leyenda -->
       <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mb-8">
         <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
-          <div class="w-4 h-4 rounded-md bg-white border-2 border-gray-200"></div>
+          <div class="w-4 h-4 rounded-md border-2" style="background:#DCF6E4;border-color:#B7EBC7;"></div>
           <span class="text-sm font-medium">Disponible</span>
         </div>
         <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
           <div class="w-4 h-4 rounded-md bg-rosa border-2 border-rosad"></div>
           <span class="text-sm font-medium">Seleccionado</span>
+        </div>
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
+          <div class="w-4 h-4 rounded-md border-2" style="background:#FFF3CD;border-color:#FFE08A;"></div>
+          <span class="text-sm font-medium">Apartado</span>
         </div>
         <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
           <div class="w-4 h-4 rounded-md bg-gray-100 border-2 border-gray-200 opacity-50"></div>
@@ -314,6 +331,7 @@
         <p class="text-2xl sm:text-3xl">
           Total a pagar: <span id="total" class="font-bold text-rosa">$0</span>
         </p>
+        <p id="reservaInfo" class="hidden mt-4 text-sm sm:text-base text-amber-800 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3"></p>
         <button id="btnReservar" onclick="abrirModal()" disabled
           class="mt-6 bg-gradient-to-r from-rosa to-rosad disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:shadow-none text-white font-bold text-lg px-10 py-4 rounded-full shadow-xl shadow-rosa/30 transition-all duration-300 disabled:hover:-translate-y-0 hover:-translate-y-1 hover:shadow-2xl hover:shadow-rosa/40">
           RESERVAR Y PAGAR
@@ -352,6 +370,9 @@
           <p id="modalNumeros" class="font-bold text-tinta text-lg mb-2">—</p>
           <p class="text-sm text-tinta/60 mb-1 uppercase tracking-wider font-medium">Total a pagar</p>
           <p id="modalTotal" class="font-bold text-rosa text-3xl">$0</p>
+          <p id="modalCodigoWrap" class="hidden mt-3 text-sm text-tinta/70">
+            Código de reserva: <span id="modalCodigo" class="font-bold tracking-widest text-rosa"></span>
+          </p>
         </div>
 
         <h4 class="font-bold text-lg mb-4 text-tinta">Transfiere el total a:</h4>
@@ -389,7 +410,8 @@
         </a>
 
           <p class="text-xs text-tinta/50 text-center mt-3 sm:mt-4 pb-2 sm:pb-1">
-            ⚠️ Los números quedan <strong>reservados únicamente</strong> una vez verificado el pago.
+            ⚠️ Tus números quedan <strong>apartados 24 horas</strong>. Se confirman como vendidos
+            cuando verificamos tu pago. Menciona tu código de reserva en el mensaje.
           </p>
       </div>
     </div>
@@ -430,18 +452,32 @@
     const NEQUI = '317 811 3232';
     const BREB  = '317 811 3232';
 
-    // Números YA VENDIDOS: ej: [5, 23, 88]
-    const numerosVendidos = [];
+    const API_BASE = '/api/rifa';
+    const POLL_MS = 10000;
 
     const STORAGE_KEY = 'rifa_garfield_seleccion';
+    const RESERVA_KEY = 'rifa_garfield_reserva';
+    const CACHE_KEY   = 'rifa_garfield_tablero';
     /* ═══════════════════════════════════════════════════════════ */
 
     const grid = document.getElementById('grid');
+    const avisoEl = document.getElementById('avisoTablero');
+    const estadoEl = document.getElementById('estadoTablero');
+    const reservaInfoEl = document.getElementById('reservaInfo');
+
     let seleccionados = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let estadoPorNumero = {};
+    let ultimaActualizacion = null;
+    let tableroListo = false;
+    let pollingId = null;
+    let modalReserva = null;
 
-    seleccionados = seleccionados.filter(n => !numerosVendidos.includes(n));
+    // Reserva activa del visitante: { codigo, numeros: [...] }
+    let miReserva = JSON.parse(localStorage.getItem(RESERVA_KEY) || 'null');
 
-    // Generar tablero 00-99
+    const btnMap = {};
+
+    // ── Construir tablero 00-99 ──────────────────────────────
     for (let i = 0; i < 100; i++) {
       const num = String(i).padStart(2, '0');
       const btn = document.createElement('button');
@@ -449,34 +485,140 @@
       btn.textContent = num;
       btn.dataset.num = i;
       btn.className = 'numero-btn disponible';
-
-      if (numerosVendidos.includes(i)) {
-        btn.classList.remove('disponible');
-        btn.classList.add('vendido');
-        btn.disabled = true;
-      } else if (seleccionados.includes(i)) {
-        btn.classList.remove('disponible');
-        btn.classList.add('seleccionado');
-      }
-
-      btn.addEventListener('click', () => toggleNumero(i, btn));
+      btn.addEventListener('click', () => toggleNumero(i));
       grid.appendChild(btn);
+      btnMap[i] = btn;
     }
 
-    function toggleNumero(i, btn) {
-      if (numerosVendidos.includes(i)) return;
-      const idx = seleccionados.indexOf(i);
-      if (idx === -1) {
-        seleccionados.push(i);
-        btn.classList.remove('disponible');
-        btn.classList.add('seleccionado');
-      } else {
-        seleccionados.splice(idx, 1);
-        btn.classList.remove('seleccionado');
-        btn.classList.add('disponible');
+    function estadoDe(i) { return estadoPorNumero[i] || 'DISPONIBLE'; }
+
+    function renderEstados() {
+      for (let i = 0; i < 100; i++) {
+        const btn = btnMap[i];
+        const estado = estadoDe(i);
+        btn.classList.remove('disponible', 'seleccionado', 'reservado', 'vendido');
+        if (estado === 'VENDIDO') {
+          btn.classList.add('vendido');
+          btn.disabled = true;
+        } else if (estado === 'RESERVADO') {
+          btn.classList.add('reservado');
+          btn.disabled = true;
+        } else if (seleccionados.includes(i)) {
+          btn.classList.add('seleccionado');
+          btn.disabled = false;
+        } else {
+          btn.classList.add('disponible');
+          btn.disabled = false;
+        }
       }
+    }
+
+    // ── Carga y refresco del tablero ─────────────────────────
+    function aplicarTablero(datos) {
+      const mapa = {};
+      (datos.numeros || []).forEach(n => { mapa[n.numero] = n.estado; });
+      estadoPorNumero = mapa;
+      ultimaActualizacion = new Date();
+
+      // Purga: quitar de mi selección lo que ya no está disponible
+      const purgados = seleccionados.filter(i => estadoDe(i) !== 'DISPONIBLE');
+      if (purgados.length) {
+        seleccionados = seleccionados.filter(i => estadoDe(i) === 'DISPONIBLE');
+        guardar();
+        mostrarAviso('😢 Estos números ya no están disponibles: ' +
+          purgados.map(n => String(n).padStart(2, '0')).join(', '), 'aviso');
+      }
+
+      // Si mi reserva ya no está vigente (expiró o se liberó), la olvidamos
+      if (miReserva && miReserva.numeros) {
+        const sigueVigente = miReserva.numeros.some(n => estadoDe(n) === 'RESERVADO');
+        if (!sigueVigente) { miReserva = null; localStorage.removeItem(RESERVA_KEY); }
+      }
+
+      renderEstados();
+      actualizarResumen();
+      actualizarEstadoTablero();
+      ocultarConexion();
+    }
+
+    async function cargarTablero() {
+      try {
+        const resp = await fetch(API_BASE + '/numeros', { cache: 'no-store' });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const datos = await resp.json();
+        tableroListo = true;
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), datos }));
+        aplicarTablero(datos);
+      } catch (e) {
+        const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+        if (cache && cache.datos) {
+          aplicarTablero(cache.datos);
+          tableroListo = true;
+          mostrarConexion('⚠️ Mostrando la última actualización guardada (' + hace(cache.t) + ').');
+        } else {
+          mostrarConexion('⚠️ No pudimos conectar con el servidor. Recarga la página o inténtalo más tarde.');
+        }
+      }
+    }
+
+    function hace(ts) {
+      const s = Math.round((Date.now() - ts) / 1000);
+      if (s < 60) return 'hace ' + s + ' s';
+      return 'hace ' + Math.round(s / 60) + ' min';
+    }
+
+    function actualizarEstadoTablero() {
+      if (!estadoEl || !ultimaActualizacion) return;
+      estadoEl.textContent = 'Actualizado ' + hace(ultimaActualizacion.getTime());
+    }
+
+    function mostrarConexion(msg) {
+      if (!estadoEl) return;
+      estadoEl.textContent = msg;
+      estadoEl.classList.remove('text-tinta/50');
+      estadoEl.classList.add('text-amber-600');
+    }
+    function ocultarConexion() {
+      if (!estadoEl) return;
+      estadoEl.classList.remove('text-amber-600');
+      estadoEl.classList.add('text-tinta/50');
+    }
+
+    function mostrarAviso(msg, tipo) {
+      if (!avisoEl) return;
+      avisoEl.textContent = msg;
+      avisoEl.className = 'max-w-3xl mx-auto mb-6 rounded-2xl px-5 py-3 text-sm sm:text-base font-medium text-center shadow-md border ' +
+        (tipo === 'error'
+          ? 'bg-red-50 border-red-200 text-red-700'
+          : 'bg-amber-50 border-amber-200 text-amber-800');
+      avisoEl.classList.remove('hidden');
+      clearTimeout(avisoEl._t);
+      avisoEl._t = setTimeout(() => avisoEl.classList.add('hidden'), 7000);
+    }
+
+    function iniciarPolling() {
+      if (pollingId) clearInterval(pollingId);
+      pollingId = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          actualizarEstadoTablero();
+          cargarTablero();
+        }
+      }, POLL_MS);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') cargarTablero();
+    });
+
+    // ── Selección ────────────────────────────────────────────
+    function toggleNumero(i) {
+      if (estadoDe(i) !== 'DISPONIBLE') return;
+      const idx = seleccionados.indexOf(i);
+      if (idx === -1) seleccionados.push(i);
+      else seleccionados.splice(idx, 1);
       seleccionados.sort((a, b) => a - b);
       guardar();
+      renderEstados();
       actualizarResumen();
     }
 
@@ -504,11 +646,7 @@
       document.getElementById('stickyLista').textContent = cantidad ? lista : 'ninguno';
 
       const btn = document.getElementById('btnReservar');
-      if (cantidad > 0) {
-        btn.disabled = false;
-      } else {
-        btn.disabled = true;
-      }
+      btn.disabled = cantidad === 0 || btn.dataset.busy === '1';
 
       const sticky = document.getElementById('stickyResumen');
       sticky.classList.toggle('hidden', cantidad === 0);
@@ -516,20 +654,128 @@
       document.getElementById('modalNumeros').textContent = cantidad ? lista : '—';
       document.getElementById('modalTotal').textContent = formatoCOP(total);
       actualizarWhatsApp(lista, total);
+      actualizarInfoReserva();
+    }
+
+    function actualizarInfoReserva() {
+      if (!reservaInfoEl) return;
+      if (miReserva && miReserva.numeros && miReserva.numeros.length) {
+        const ns = miReserva.numeros.map(n => String(n).padStart(2, '0')).join(', ');
+        reservaInfoEl.innerHTML = '🎟️ Tienes números <strong>apartados</strong>: ' + ns +
+          ' · código <strong>' + miReserva.codigo + '</strong>' +
+          ' <button type="button" onclick="abrirModalPago()" class="underline text-rosa hover:text-rosad ml-2">Ver pago</button>' +
+          ' <button type="button" onclick="liberarMiReserva()" class="underline text-gray-500 hover:text-gray-700 ml-2">Liberar</button>';
+        reservaInfoEl.classList.remove('hidden');
+      } else {
+        reservaInfoEl.classList.add('hidden');
+      }
     }
 
     function actualizarWhatsApp(lista, total) {
-      const texto = 'Hola, quiero los números ' + lista +
+      let texto = 'Hola, quiero los números ' + lista +
         ' para la rifa de Garfield. Total: ' + formatoCOP(total) +
         '. Adjunto comprobante.';
+      if (miReserva && miReserva.codigo) {
+        texto += ' Código de reserva: ' + miReserva.codigo + '.';
+      }
       document.getElementById('btnWhatsApp').href =
         'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(texto);
     }
 
-    function abrirModal() {
+    // ── Apartar (POST) y abrir el modal ──────────────────────
+    async function abrirModal() {
       if (seleccionados.length === 0) return;
+      const btn = document.getElementById('btnReservar');
+      if (btn.dataset.busy === '1') return;
+
+      btn.dataset.busy = '1';
+      const textoOriginal = btn.textContent;
+      btn.textContent = 'Apartando…';
+      btn.disabled = true;
+
+      let abrir = false;
+      try {
+        const resp = await fetch(API_BASE + '/reservar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ numeros: seleccionados })
+        });
+
+        if (resp.status === 409) {
+          const err = await resp.json().catch(() => ({}));
+          const conf = err.numerosConflicto || [];
+          seleccionados = seleccionados.filter(n => !conf.includes(n));
+          guardar();
+          mostrarAviso('😢 Alguien se adelantó con: ' +
+            (conf.length ? conf.map(n => String(n).padStart(2, '0')).join(', ') : 'algunos números') +
+            '. Elige otros.', 'aviso');
+          await cargarTablero();
+        } else if (!resp.ok) {
+          throw new Error('HTTP ' + resp.status);
+        } else {
+          const data = await resp.json();
+          miReserva = { codigo: data.codigoReserva, numeros: data.numeros || [] };
+          localStorage.setItem(RESERVA_KEY, JSON.stringify(miReserva));
+          modalReserva = {
+            lista: (data.numeros || []).map(n => String(n).padStart(2, '0')).join(', '),
+            total: (data.numeros || []).length * PRECIO
+          };
+          (data.numeros || []).forEach(n => { estadoPorNumero[n] = 'RESERVADO'; });
+          seleccionados = [];
+          guardar();
+          renderEstados();
+          actualizarResumen();
+          abrir = true;
+        }
+      } catch (e) {
+        // Sin conexión: permitimos continuar por WhatsApp, sin apartado en línea
+        modalReserva = null;
+        mostrarAviso('⚠️ No pudimos apartar tus números en línea. Puedes continuar por WhatsApp; quedan sujetos a disponibilidad.', 'error');
+        abrir = true;
+      } finally {
+        btn.dataset.busy = '0';
+        btn.textContent = textoOriginal;
+        actualizarResumen();
+      }
+
+      if (abrir) abrirModalPago();
+    }
+
+    function abrirModalPago() {
+      const wrap = document.getElementById('modalCodigoWrap');
+      const codeEl = document.getElementById('modalCodigo');
+
+      if (miReserva && miReserva.codigo) {
+        codeEl.textContent = miReserva.codigo;
+        wrap.classList.remove('hidden');
+      } else {
+        wrap.classList.add('hidden');
+      }
+
+      const usarReserva = (modalReserva && miReserva) ? modalReserva : (miReserva ? {
+        lista: miReserva.numeros.map(n => String(n).padStart(2, '0')).join(', '),
+        total: miReserva.numeros.length * PRECIO
+      } : null);
+      const lista = usarReserva ? usarReserva.lista : listaNumeros();
+      const total = usarReserva ? usarReserva.total : seleccionados.length * PRECIO;
+      document.getElementById('modalNumeros').textContent = lista || '—';
+      document.getElementById('modalTotal').textContent = formatoCOP(total);
+      actualizarWhatsApp(lista || '—', total);
+
       document.getElementById('modalPago').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+    }
+
+    async function liberarMiReserva() {
+      if (!miReserva || !miReserva.codigo) return;
+      const codigo = miReserva.codigo;
+      miReserva = null;
+      localStorage.removeItem(RESERVA_KEY);
+      try {
+        await fetch(API_BASE + '/reservar/' + encodeURIComponent(codigo), { method: 'DELETE' });
+      } catch (e) { /* silencioso: igual refrescamos */ }
+      mostrarAviso('Tus números quedaron libres de nuevo.', 'aviso');
+      await cargarTablero();
     }
 
     function cerrarModal() {
@@ -570,7 +816,11 @@
     // Seguridad: nunca cargar la página sin scroll (overflow del body)
     document.body.style.overflow = '';
 
+    // Arranque
+    renderEstados();
     actualizarResumen();
+    cargarTablero();
+    iniciarPolling();
   </script>
 </body>
 </html>

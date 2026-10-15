@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.sarichi.crocheting.exception.ClaveInvalidaException;
+import com.sarichi.crocheting.exception.ConflictoReservaException;
 import com.sarichi.crocheting.exception.CredencialesInvalidasException;
 import com.sarichi.crocheting.exception.DespachoException;
 import com.sarichi.crocheting.exception.DevolucionException;
+import com.sarichi.crocheting.exception.PanelNoConfiguradoException;
 import com.sarichi.crocheting.exception.ProduccionException;
 import com.sarichi.crocheting.exception.StockInsuficienteException;
 import com.sarichi.crocheting.exception.TokenInvalidoException;
@@ -70,6 +73,31 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> manejarProduccion(
             ProduccionException ex) {
         return error(HttpStatus.CONFLICT, "Error en producción", ex.getMessage());
+    }
+
+    @ExceptionHandler(ConflictoReservaException.class)
+    public ResponseEntity<Map<String, Object>> manejarConflictoReserva(
+            ConflictoReservaException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("estado", HttpStatus.CONFLICT.value());
+        body.put("error", "Números no disponibles");
+        body.put("mensaje", ex.getMessage());
+        body.put("numerosConflicto", ex.getNumerosConflicto());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(ClaveInvalidaException.class)
+    public ResponseEntity<Map<String, Object>> manejarClaveInvalida(
+            ClaveInvalidaException ex) {
+        return error(HttpStatus.UNAUTHORIZED, "Clave inválida", ex.getMessage());
+    }
+
+    @ExceptionHandler(PanelNoConfiguradoException.class)
+    public ResponseEntity<Map<String, Object>> manejarPanelNoConfigurado(
+            PanelNoConfiguradoException ex) {
+        return error(HttpStatus.SERVICE_UNAVAILABLE, "Panel no configurado",
+                ex.getMessage());
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)

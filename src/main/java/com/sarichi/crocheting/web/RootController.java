@@ -16,6 +16,11 @@ public class RootController {
         return "redirect:/rifa/index.html";
     }
 
+    @GetMapping({ "/rifa/panel", "/rifa/panel/" })
+    public String redirectRifaPanel() {
+        return "redirect:/rifa/panel.html";
+    }
+
     @GetMapping({ "/qa", "/qa/", "/qa/rifa-informe", "/qa/rifa-informe/" })
     public String redirectQa() {
         return "redirect:/qa/rifa-informe/index.html";

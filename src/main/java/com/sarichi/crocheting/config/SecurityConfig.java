@@ -86,6 +86,9 @@ public class SecurityConfig {
                 // ── QA — informes públicos de validación ────────────────────────
                 .requestMatchers("/qa/**").permitAll()
 
+                // ── API Rifa — pública; el panel valida X-Rifa-Key internamente ──
+                .requestMatchers("/api/rifa/**").permitAll()
+
                 // ── API Auth pública ───────────────────────────────────────────────
                 .requestMatchers("/api/auth/**").permitAll()
 

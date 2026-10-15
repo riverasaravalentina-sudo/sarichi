@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel de la Rifa — Sarichi Crocheting</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rosa:  '#E8527A',
+            rosad: '#d43f68',
+            teal:  '#2DB5C8',
+            crema: '#FDFAF6',
+            tinta: '#333333',
+            negro: '#111111',
+          },
+          fontFamily: {
+            playfair: ['"Playfair Display"', 'serif'],
+            inter:    ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background-color: #FDFAF6; color: #333333; line-height: 1.5; }
+
+    .pnum {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1 / 1;
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 1;
+      border: 2px solid transparent;
+      border-radius: 0.375rem;
+      background: #DCF6E4;
+      color: #1B7A44;
+      border-color: #B7EBC7;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease-out;
+    }
+    @media (min-width: 640px) { .pnum { font-size: 0.9rem; } }
+    .pnum:hover { filter: brightness(0.96); }
+    .pnum.reservado { background: #FFF3CD; color: #8A6100; border-color: #FFE08A; }
+    .pnum.vendido   { background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; text-decoration: line-through; }
+    .pnum.sel       { outline: 3px solid #E8527A; outline-offset: 1px; transform: scale(1.06); z-index: 1; }
+    .pnum.match     { box-shadow: 0 0 0 3px #2DB5C8; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      background: #111111; color: #fff; padding: 10px 18px; border-radius: 9999px;
+      font-size: 14px; font-weight: 600; z-index: 60; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+  </style>
+</head>
+<body class="font-inter antialiased min-h-screen">
+
+  <!-- ═══════════════ LOGIN ═══════════════ -->
+  <div id="login" class="min-h-screen flex items-center justify-center px-5">
+    <div class="w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-rosa/10 p-8">
+      <h1 class="font-playfair text-2xl font-bold text-rosa text-center mb-1">Panel de la Rifa</h1>
+      <p class="text-center text-tinta/60 text-sm mb-6">Ingresa la clave de administración</p>
+
+      <label for="clave" class="block text-sm font-medium text-tinta mb-2">Clave</label>
+      <input id="clave" type="password" autocomplete="current-password" placeholder="RIFA_ADMIN_KEY"
+        class="w-full border-2 border-gray-200 focus:border-rosa rounded-xl px-4 py-3 outline-none transition-colors mb-3">
+
+      <label class="flex items-center gap-2 text-sm text-tinta/70 mb-5 select-none">
+        <input id="recordar" type="checkbox" class="w-4 h-4 accent-rosa">
+        Recordarme en este dispositivo
+      </label>
+
+      <button id="btnEntrar" onclick="entrar()"
+        class="w-full bg-gradient-to-r from-rosa to-rosad text-white font-bold py-3 rounded-full shadow-lg hover:shadow-xl transition-all">
+        Entrar
+      </button>
+
+      <p id="loginError" class="hidden mt-4 text-sm text-red-600 text-center"></p>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PANEL ═══════════════ -->
+  <div id="panel" class="hidden max-w-6xl mx-auto px-4 sm:px-5 py-6 pb-32">
+    <header class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div>
+        <h1 class="font-playfair text-2xl sm:text-3xl font-bold text-rosa">Panel de la Rifa</h1>
+        <p id="estadoPanel" class="text-xs text-tinta/50"></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="cargarPanel()"
+          class="bg-white border-2 border-rosa/20 text-rosa font-semibold px-4 py-2 rounded-full hover:border-rosa/50 transition-all text-sm">
+          Actualizar
+        </button>
+        <button onclick="salir()"
+          class="bg-tinta text-white font-semibold px-4 py-2 rounded-full hover:bg-negro transition-all text-sm">
+          Salir
+        </button>
+      </div>
+    </header>
+
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4 text-center">
+        <p class="text-xs uppercase tracking-wider text-tinta/50 font-medium">Disponibles</p>
+        <p id="statDisponibles" class="text-2xl font-bold text-green-600">—</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4 text-center">
+        <p class="text-xs uppercase tracking-wider text-tinta/50 font-medium">Apartados</p>
+        <p id="statReservados" class="text-2xl font-bold text-amber-500">—</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4 text-center">
+        <p class="text-xs uppercase tracking-wider text-tinta/50 font-medium">Vendidos</p>
+        <p id="statVendidos" class="text-2xl font-bold text-tinta">—</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4 text-center">
+        <p class="text-xs uppercase tracking-wider text-tinta/50 font-medium">Recaudado</p>
+        <p id="statRecaudado" class="text-2xl font-bold text-rosa">—</p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Tablero -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-3xl shadow-xl border border-rosa/10 p-4 sm:p-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 class="font-bold text-lg text-tinta">Tablero</h2>
+            <input id="buscar" oninput="onBuscar()" type="search" placeholder="Buscar teléfono o código…"
+              class="border-2 border-gray-200 focus:border-teal rounded-full px-4 py-2 text-sm outline-none transition-colors w-full sm:w-64">
+          </div>
+
+          <div class="flex flex-wrap gap-2 mb-4 text-xs">
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded" style="background:#DCF6E4;border:1px solid #B7EBC7"></span>Disponible</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded" style="background:#FFF3CD;border:1px solid #FFE08A"></span>Apartado</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded" style="background:#f3f4f6;border:1px solid #e5e7eb"></span>Vendido</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded" style="background:#fff;border:2px solid #E8527A"></span>Seleccionado</span>
+          </div>
+
+          <div id="grid" class="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-1"></div>
+
+          <p id="ayudaSeleccion" class="text-xs text-tinta/50 mt-4">
+            Toca los números para seleccionarlos. Luego usa los botones de abajo para cambiar su estado.
+          </p>
+        </div>
+      </div>
+
+      <!-- Reservas activas -->
+      <div>
+        <div class="bg-white rounded-3xl shadow-xl border border-rosa/10 p-4 sm:p-5">
+          <h2 class="font-bold text-lg text-tinta mb-3">Apartados activos</h2>
+          <div id="reservas" class="space-y-3">
+            <p class="text-sm text-tinta/50">Sin apartados activos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ BARRA DE ACCIONES ═══════════════ -->
+  <div id="barra" class="hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t-2 border-rosa/20 shadow-[0_-12px_40px_rgba(232,82,122,0.12)] z-40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-5 py-3">
+      <div class="flex flex-wrap items-end gap-3">
+        <div class="flex-1 min-w-[140px]">
+          <label class="block text-[11px] font-medium text-tinta/60 mb-1">Seleccionados: <span id="selCount" class="font-bold text-rosa">0</span></label>
+          <input id="selLista" type="text" placeholder="Escribe o pega: 07, 12, 33" onchange="seleccionarDesdeTexto(this.value)"
+            class="w-full border-2 border-gray-200 focus:border-rosa rounded-xl px-3 py-2 text-sm outline-none transition-colors">
+        </div>
+        <div class="min-w-[130px]">
+          <label class="block text-[11px] font-medium text-tinta/60 mb-1">Comprador</label>
+          <input id="compradorNombre" type="text" placeholder="Nombre"
+            class="w-full border-2 border-gray-200 focus:border-rosa rounded-xl px-3 py-2 text-sm outline-none transition-colors">
+        </div>
+        <div class="min-w-[130px]">
+          <label class="block text-[11px] font-medium text-tinta/60 mb-1">Teléfono</label>
+          <input id="compradorTelefono" type="tel" placeholder="300 000 0000"
+            class="w-full border-2 border-gray-200 focus:border-rosa rounded-xl px-3 py-2 text-sm outline-none transition-colors">
+        </div>
+        <div class="min-w-[130px]">
+          <label class="block text-[11px] font-medium text-tinta/60 mb-1">Notas</label>
+          <input id="notas" type="text" placeholder="Opcional"
+            class="w-full border-2 border-gray-200 focus:border-rosa rounded-xl px-3 py-2 text-sm outline-none transition-colors">
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="aplicarEstado('VENDIDO')"
+            class="bg-gradient-to-r from-green-600 to-green-500 text-white font-bold px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-all text-sm">
+            Vendido
+          </button>
+          <button onclick="aplicarEstado('RESERVADO')"
+            class="bg-gradient-to-r from-amber-500 to-amber-400 text-white font-bold px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-all text-sm">
+            Apartado
+          </button>
+          <button onclick="aplicarEstado('DISPONIBLE')"
+            class="bg-gray-200 text-tinta font-bold px-4 py-2 rounded-full hover:bg-gray-300 transition-all text-sm">
+            Liberar
+          </button>
+          <button onclick="limpiarSeleccion()"
+            class="bg-white border-2 border-gray-200 text-tinta/70 font-semibold px-3 py-2 rounded-full hover:border-gray-300 transition-all text-sm">
+            Quitar selección
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API = '/api/rifa';
+    const KEY_SESSION = 'rifa_panel_key';
+    const KEY_LOCAL = 'rifa_panel_key_remember';
+    const POLL_MS = 10000;
+
+    let adminKey = null;
+    let panelData = null;
+    let seleccion = new Set();
+    let busqueda = '';
+    let ocupado = false;
+    let pollingId = null;
+    const btnMap = {};
+
+    function hdr(extra) {
+      return Object.assign({ 'X-Rifa-Key': adminKey || '' }, extra || {});
+    }
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._t);
+      t._t = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ── Login ──────────────────────────────────────────────
+    async function entrar() {
+      const input = document.getElementById('clave');
+      const err = document.getElementById('loginError');
+      const k = input.value.trim();
+      err.classList.add('hidden');
+      if (!k) { err.textContent = 'Escribe la clave'; err.classList.remove('hidden'); return; }
+
+      try {
+        const resp = await fetch(API + '/panel', { headers: { 'X-Rifa-Key': k }, cache: 'no-store' });
+        if (resp.status === 401) {
+          err.textContent = 'Clave incorrecta'; err.classList.remove('hidden'); return;
+        }
+        if (resp.status === 503) {
+          err.textContent = 'El panel no está configurado en el servidor (falta RIFA_ADMIN_KEY)';
+          err.classList.remove('hidden'); return;
+        }
+        if (!resp.ok) { err.textContent = 'Error ' + resp.status; err.classList.remove('hidden'); return; }
+
+        adminKey = k;
+        if (document.getElementById('recordar').checked) {
+          localStorage.setItem(KEY_LOCAL, k);
+          sessionStorage.removeItem(KEY_SESSION);
+        } else {
+          sessionStorage.setItem(KEY_SESSION, k);
+          localStorage.removeItem(KEY_LOCAL);
+        }
+        panelData = await resp.json();
+        mostrarPanel();
+      } catch (e) {
+        err.textContent = 'No pudimos conectar con el servidor'; err.classList.remove('hidden');
+      }
+    }
+
+    function salir() {
+      adminKey = null;
+      panelData = null;
+      seleccion.clear();
+      sessionStorage.removeItem(KEY_SESSION);
+      localStorage.removeItem(KEY_LOCAL);
+      if (pollingId) clearInterval(pollingId);
+      document.getElementById('panel').classList.add('hidden');
+      document.getElementById('login').classList.remove('hidden');
+      document.getElementById('clave').value = '';
+    }
+
+    function mostrarPanel() {
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('panel').classList.remove('hidden');
+      construirGrid();
+      render();
+      iniciarPolling();
+    }
+
+    // ── Carga de datos ─────────────────────────────────────
+    async function cargarPanel() {
+      if (!adminKey || ocupado) return;
+      try {
+        const resp = await fetch(API + '/panel', { headers: hdr(), cache: 'no-store' });
+        if (resp.status === 401) { toast('La clave ya no es válida'); salir(); return; }
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        panelData = await resp.json();
+        render();
+      } catch (e) {
+        document.getElementById('estadoPanel').textContent = '⚠️ Sin conexión con el servidor';
+      }
+    }
+
+    function iniciarPolling() {
+      if (pollingId) clearInterval(pollingId);
+      pollingId = setInterval(() => {
+        if (document.visibilityState === 'visible') cargarPanel();
+      }, POLL_MS);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') cargarPanel();
+    });
+
+    // ── Grid ───────────────────────────────────────────────
+    function construirGrid() {
+      const grid = document.getElementById('grid');
+      if (grid.dataset.listo === '1') return;
+      for (let i = 0; i < 100; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = String(i).padStart(2, '0');
+        btn.className = 'pnum';
+        btn.dataset.num = i;
+        btn.addEventListener('click', () => toggleSeleccion(i));
+        grid.appendChild(btn);
+        btnMap[i] = btn;
+      }
+      grid.dataset.listo = '1';
+    }
+
+    function estadoDe(numero) {
+      if (!panelData) return 'DISPONIBLE';
+      const d = panelData.numeros.find(n => n.numero === numero);
+      return d ? d.estado : 'DISPONIBLE';
+    }
+
+    function datoDe(numero) {
+      if (!panelData) return null;
+      return panelData.numeros.find(n => n.numero === numero) || null;
+    }
+
+    function render() {
+      if (!panelData) return;
+
+      document.getElementById('statDisponibles').textContent = panelData.disponibles;
+      document.getElementById('statReservados').textContent = panelData.reservados;
+      document.getElementById('statVendidos').textContent = panelData.vendidos;
+      document.getElementById('statRecaudado').textContent = formatoCOP(panelData.recaudado);
+      document.getElementById('estadoPanel').textContent = 'Actualizado ' + hora(panelData.actualizadoEn);
+
+      const q = busqueda.trim().toLowerCase();
+
+      for (let i = 0; i < 100; i++) {
+        const btn = btnMap[i];
+        const estado = estadoDe(i);
+        btn.classList.remove('reservado', 'vendido', 'sel', 'match');
+        if (estado === 'VENDIDO') btn.classList.add('vendido');
+        else if (estado === 'RESERVADO') btn.classList.add('reservado');
+        if (seleccion.has(i)) {
+          if (estado === 'VENDIDO') btn.classList.add('vendido');
+          else if (estado === 'RESERVADO') btn.classList.add('reservado');
+          btn.classList.add('sel');
+        }
+        if (q) {
+          const d = datoDe(i);
+          const texto = ((d && (d.compradorTelefono || '') + ' ' + (d && d.codigoReserva || '')) || '').toLowerCase();
+          if (texto.includes(q)) btn.classList.add('match');
+        }
+      }
+
+      actualizarBarra();
+      renderReservas(q);
+    }
+
+    function renderReservas(q) {
+      const cont = document.getElementById('reservas');
+      const reservas = (panelData.reservasActivas || []);
+      const filtradas = q
+        ? reservas.filter(r =>
+            (r.codigoReserva || '').toLowerCase().includes(q) ||
+            (r.compradorTelefono || '').toLowerCase().includes(q) ||
+            (r.compradorNombre || '').toLowerCase().includes(q))
+        : reservas;
+
+      if (!filtradas.length) {
+        cont.innerHTML = '<p class="text-sm text-tinta/50">' +
+          (reservas.length ? 'Sin coincidencias.' : 'Sin apartados activos.') + '</p>';
+        return;
+      }
+
+      cont.innerHTML = filtradas.map(r => {
+        const ns = (r.numeros || []).map(n => String(n).padStart(2, '0')).join(', ');
+        const quien = r.compradorNombre || r.compradorTelefono || 'Sin datos';
+        return '<div class="border-2 border-amber-200 bg-amber-50 rounded-2xl p-3">' +
+          '<div class="flex items-center justify-between gap-2 mb-1">' +
+            '<span class="font-bold tracking-widest text-amber-800">' + r.codigoReserva + '</span>' +
+            '<span class="text-xs text-amber-700">' + formatoCOP(r.total * 2500) + '</span>' +
+          '</div>' +
+          '<p class="text-sm text-tinta"><strong>' + ns + '</strong></p>' +
+          '<p class="text-xs text-tinta/60 mb-2">' + quien + ' · vence ' + hora(r.reservadoHasta) + '</p>' +
+          '<div class="flex gap-2">' +
+            '<button onclick="marcarPagado(\'' + r.codigoReserva + '\')" class="flex-1 bg-green-600 text-white text-xs font-bold py-1.5 rounded-full hover:bg-green-700 transition-all">Pagado</button>' +
+            '<button onclick="liberarCodigo(\'' + r.codigoReserva + '\')" class="flex-1 bg-white border-2 border-gray-200 text-tinta/70 text-xs font-semibold py-1.5 rounded-full hover:border-gray-300 transition-all">Liberar</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function actualizarBarra() {
+      const barra = document.getElementById('barra');
+      const n = seleccion.size;
+      document.getElementById('selCount').textContent = n;
+      barra.classList.toggle('hidden', n === 0);
+    }
+
+    // ── Selección ──────────────────────────────────────────
+    function toggleSeleccion(numero) {
+      if (seleccion.has(numero)) seleccion.delete(numero);
+      else seleccion.add(numero);
+      const btn = btnMap[numero];
+      btn.classList.toggle('sel', seleccion.has(numero));
+      actualizarBarra();
+    }
+
+    function limpiarSeleccion() {
+      seleccion.forEach(n => btnMap[n] && btnMap[n].classList.remove('sel'));
+      seleccion.clear();
+      document.getElementById('selLista').value = '';
+      actualizarBarra();
+    }
+
+    function seleccionarDesdeTexto(texto) {
+      const nums = (texto.match(/\d{1,2}/g) || [])
+        .map(x => parseInt(x, 10))
+        .filter(n => n >= 0 && n < 100);
+      nums.forEach(n => {
+        seleccion.add(n);
+        if (btnMap[n]) btnMap[n].classList.add('sel');
+      });
+      actualizarBarra();
+    }
+
+    function onBuscar() {
+      busqueda = document.getElementById('buscar').value;
+      render();
+    }
+
+    // ── Acciones ───────────────────────────────────────────
+    async function aplicarEstado(estado) {
+      if (seleccion.size === 0 || ocupado) return;
+      const numeros = [...seleccion].sort((a, b) => a - b);
+      ocupado = true;
+      try {
+        const body = {
+          numeros: numeros,
+          estado: estado,
+          compradorNombre: document.getElementById('compradorNombre').value.trim() || null,
+          compradorTelefono: document.getElementById('compradorTelefono').value.trim() || null,
+          notas: document.getElementById('notas').value.trim() || null
+        };
+        const resp = await fetch(API + '/numeros/estado', {
+          method: 'POST',
+          headers: hdr({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(body)
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        panelData = await resp.json();
+        limpiarSeleccion();
+        render();
+        toast('Guardado');
+      } catch (e) {
+        toast('No se pudo guardar');
+      } finally {
+        ocupado = false;
+      }
+    }
+
+    async function marcarPagado(codigo) {
+      if (ocupado) return;
+      const reserva = (panelData.reservasActivas || []).find(r => r.codigoReserva === codigo);
+      if (!reserva) return;
+      ocupado = true;
+      try {
+        const resp = await fetch(API + '/numeros/estado', {
+          method: 'POST',
+          headers: hdr({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            numeros: reserva.numeros,
+            estado: 'VENDIDO',
+            compradorNombre: reserva.compradorNombre,
+            compradorTelefono: reserva.compradorTelefono
+          })
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        panelData = await resp.json();
+        render();
+        toast('Marcado como pagado');
+      } catch (e) {
+        toast('No se pudo guardar');
+      } finally {
+        ocupado = false;
+      }
+    }
+
+    async function liberarCodigo(codigo) {
+      if (ocupado) return;
+      ocupado = true;
+      try {
+        const resp = await fetch(API + '/liberar?codigo=' + encodeURIComponent(codigo), {
+          method: 'POST',
+          headers: hdr()
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        await cargarPanel();
+        toast('Apartado liberado');
+      } catch (e) {
+        toast('No se pudo liberar');
+      } finally {
+        ocupado = false;
+      }
+    }
+
+    // ── Utilidades ─────────────────────────────────────────
+    function formatoCOP(v) {
+      return '$' + (v || 0).toLocaleString('es-CO');
+    }
+
+    function hora(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleString('es-CO', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ── Arranque ───────────────────────────────────────────
+    (function init() {
+      const guardada = localStorage.getItem(KEY_LOCAL) || sessionStorage.getItem(KEY_SESSION);
+      document.getElementById('clave').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') entrar();
+      });
+      if (guardada) {
+        adminKey = guardada;
+        document.getElementById('clave').value = guardada;
+        fetch(API + '/panel', { headers: { 'X-Rifa-Key': guardada }, cache: 'no-store' })
+          .then(r => {
+            if (r.ok) return r.json();
+            throw new Error('no');
+          })
+          .then(data => { panelData = data; mostrarPanel(); })
+          .catch(() => { adminKey = null; });
+      }
+    })();
+  </script>
+</body>
+</html>
