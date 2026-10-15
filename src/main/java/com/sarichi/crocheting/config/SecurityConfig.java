@@ -83,6 +83,9 @@ public class SecurityConfig {
                 // ── Rifa Garfield — página estática pública ──────────────────────
                 .requestMatchers("/rifa/**").permitAll()
 
+                // ── QA — informes públicos de validación ────────────────────────
+                .requestMatchers("/qa/**").permitAll()
+
                 // ── API Auth pública ───────────────────────────────────────────────
                 .requestMatchers("/api/auth/**").permitAll()
 

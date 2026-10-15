@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe QA — Rifa Garfield | Sarichi Crocheting</title>
+  <meta name="robots" content="noindex">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    body { background: #FDFAF6; color: #333; font-family: 'Segoe UI', system-ui, sans-serif; }
+    .hero-rosa { background: linear-gradient(135deg, #E8527A 0%, #d43f68 55%, #2DB5C8 100%); }
+    .badge-ok { background: #DCF6E4; color: #1B7A44; border: 1px solid #B7EBC7; }
+    .badge-skip { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+    table td, table th { vertical-align: middle; }
+    .num { font-variant-numeric: tabular-nums; }
+    .grupo { background: #fff0f4; font-weight: 700; color: #E8527A; }
+    .ruta { font-family: Consolas, monospace; font-size: .85em; }
+  </style>
+</head>
+<body>
+
+<header class="hero-rosa text-white text-center py-5">
+  <div class="container">
+    <p class="mb-1 opacity-75 text-uppercase" style="letter-spacing:.2em; font-size:.8rem;">Crocheting Sarichi · Control de calidad</p>
+    <h1 class="display-5 fw-bold mb-2">Informe de validación — Rifa Garfield</h1>
+    <p class="mb-4 opacity-90">21 pruebas automatizadas · 3 dispositivos · ejecutadas contra producción</p>
+    <span class="badge badge-ok text-dark fs-6 px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> 61 pruebas aprobadas · 0 fallos</span>
+  </div>
+</header>
+
+<main class="container py-5">
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100 text-center p-3">
+        <div class="fs-2 fw-bold text-rosa" style="color:#E8527A">61</div>
+        <div class="text-muted small">Pruebas aprobadas</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100 text-center p-3">
+        <div class="fs-2 fw-bold" style="color:#1B7A44">0</div>
+        <div class="text-muted small">Fallos</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100 text-center p-3">
+        <div class="fs-2 fw-bold" style="color:#2DB5C8">3</div>
+        <div class="text-muted small">Dispositivos</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100 text-center p-3">
+        <div class="fs-2 fw-bold text-muted">15/10/2026</div>
+        <div class="text-muted small">Última ejecución</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h5 mb-3"><i class="bi bi-phone me-2" style="color:#E8527A"></i>Dispositivos probados</h2>
+      <div class="row g-3">
+        <div class="col-md-4"><div class="border rounded p-3 h-100"><strong>Escritorio</strong><br><span class="text-muted">Chromium 1280 × 800 px</span></div></div>
+        <div class="col-md-4"><div class="border rounded p-3 h-100"><strong>Tablet</strong><br><span class="text-muted">Chromium 834 × 1112 px</span></div></div>
+        <div class="col-md-4"><div class="border rounded p-3 h-100"><strong>Móvil</strong><br><span class="text-muted">Pixel 5 — 393 × 851 px</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 mb-3"><i class="bi bi-list-check me-2" style="color:#E8527A"></i>Resultados por prueba</h2>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-light">
+            <tr><th style="width:70px">Código</th><th>Validación</th><th style="width:150px">Resultado</th><th style="width:170px">Dispositivos</th></tr>
+          </thead>
+          <tbody>
+            <tr class="grupo"><td colspan="4">Carga general</td></tr>
+            <tr><td class="num">P01</td><td>Página carga sin errores JS · título correcto · tablero con 100 botones (00–99) · foto del hero cargada</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+
+            <tr class="grupo"><td colspan="4">Selección de números</td></tr>
+            <tr><td class="num">P02</td><td>Al tocar un número se pone <strong>rosita (#E8527A)</strong>, texto blanco, lista "07", total $2.500 y botón habilitado</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P03</td><td>Al tocar de nuevo vuelve a verde, total $0 y botón RESERVAR deshabilitado</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P04</td><td>Varios números: lista ordenada "05, 10, 77" y total multiplicado $7.500</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P05</td><td>La selección sobrevive a recargar la página (almacenamiento local)</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+
+            <tr class="grupo"><td colspan="4">Diseño adaptable (responsive)</td></tr>
+            <tr><td class="num">P06</td><td>Barra inferior de resumen: visible en móvil, oculta en tablet y escritorio</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P07</td><td>Tablero: 10 columnas en escritorio, 8 en tablet, 5 en móvil</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P08</td><td>Sin desplazamiento horizontal de la página</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+
+            <tr class="grupo"><td colspan="4">Galería y navegación</td></tr>
+            <tr><td class="num">P09</td><td>Carrusel: cambiar de foto actualiza la imagen y resalta el miniatura activa</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P10</td><td>El botón "¡QUIERO MI NÚMERO!" lleva al tablero</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+
+            <tr class="grupo"><td colspan="4">Modal de pago</td></tr>
+            <tr><td class="num">P11</td><td>Abre con encabezado fijo, números/total, botón de WhatsApp y aviso final</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P12</td><td>Se cierra con ✕, con Escape y con clic fuera, y libera el scroll de la página</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P13</td><td>El enlace de WhatsApp trae los números y el total exactos</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P14</td><td>Copiar Nequi / Bre-B al portapapeles y confirmación "¡Copiado!"</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P15</td><td>El modal cabe en pantalla y el scroll interno llega al botón de WhatsApp</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+
+            <tr class="grupo"><td colspan="4">Números vendidos</td></tr>
+            <tr><td class="num">P16</td><td>Un número vendido se ve gris, tachado, deshabilitado y no se puede elegir</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+
+            <tr class="grupo"><td colspan="4">Integración con el sitio</td></tr>
+            <tr><td class="num">P17</td><td>Desde la página principal, el enlace "🎁 Rifa" del menú llega a la rifa</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P18</td><td><span class="ruta">/rifa</span> y <span class="ruta">/rifa/</span> redirigen bien y el servicio está sano, sin necesidad de inicio de sesión</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P19</td><td>Una ruta estática inexistente responde 404 (antes devolvía 500)</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+
+            <tr class="grupo"><td colspan="4">Enlaces externos y flujo móvil</td></tr>
+            <tr><td class="num">P20</td><td>Instagram del pie de página abre en pestaña nueva; fechas del sorteo visibles</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P21</td><td>Flujo completo en celular: barra inferior → PAGAR → modal → WhatsApp</td><td><span class="badge badge-ok">Aprobada</span></td><td>solo móvil</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mt-4">
+    <div class="card-body">
+      <h2 class="h5 mb-3"><i class="bi bi-tools me-2" style="color:#E8527A"></i>Correcciones incluidas en esta validación</h2>
+      <ul class="mb-0">
+        <li><strong>/rifa y /rifa/</strong> ahora redirigen a la página (antes respondían error 500).</li>
+        <li><strong>Rutas inexistentes</strong> responden 404 en lugar de un error 500 genérico.</li>
+        <li>Se corrigió el bloqueo del scroll de la página al cerrar el modal.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="/rifa/index.html" class="btn btn-lg fw-bold text-white px-4 py-2 shadow" style="background:linear-gradient(90deg,#E8527A,#d43f68)">
+      <i class="bi bi-gift me-1"></i>Ir a la rifa
+    </a>
+  </div>
+
+</main>
+
+<footer class="text-center text-muted small py-4">
+  🐱 Crocheting Sarichi · Bucaramanga, Colombia · Suite Playwright en <code>qa/rifa-playwright/</code>
+</footer>
+
+</body>
+</html>
