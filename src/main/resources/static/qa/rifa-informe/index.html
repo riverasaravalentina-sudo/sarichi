@@ -24,8 +24,8 @@
   <div class="container">
     <p class="mb-1 opacity-75 text-uppercase" style="letter-spacing:.2em; font-size:.8rem;">Crocheting Sarichi · Control de calidad</p>
     <h1 class="display-5 fw-bold mb-2">Informe de validación — Rifa Garfield</h1>
-    <p class="mb-4 opacity-90">21 pruebas automatizadas · 3 dispositivos · ejecutadas contra producción</p>
-    <span class="badge badge-ok text-dark fs-6 px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> 61 pruebas aprobadas · 0 fallos</span>
+    <p class="mb-4 opacity-90">28 pruebas automatizadas · 3 dispositivos · ejecutadas contra producción</p>
+    <span class="badge badge-ok text-dark fs-6 px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> 79 pruebas aprobadas · 0 fallos</span>
   </div>
 </header>
 
@@ -34,14 +34,14 @@
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
       <div class="card border-0 shadow-sm h-100 text-center p-3">
-        <div class="fs-2 fw-bold text-rosa" style="color:#E8527A">61</div>
+        <div class="fs-2 fw-bold text-rosa" style="color:#E8527A">79</div>
         <div class="text-muted small">Pruebas aprobadas</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="card border-0 shadow-sm h-100 text-center p-3">
         <div class="fs-2 fw-bold" style="color:#1B7A44">0</div>
-        <div class="text-muted small">Fallos</div>
+        <div class="text-muted small">Fallos (5 omitidas)</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
@@ -99,11 +99,11 @@
             <tr class="grupo"><td colspan="4">Modal de pago</td></tr>
             <tr><td class="num">P11</td><td>Abre con encabezado fijo, números/total, botón de WhatsApp y aviso final</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
             <tr><td class="num">P12</td><td>Se cierra con ✕, con Escape y con clic fuera, y libera el scroll de la página</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
-            <tr><td class="num">P13</td><td>El enlace de WhatsApp trae los números y el total exactos</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P13</td><td>El enlace de WhatsApp trae los números, el total exactos y el <strong>código de reserva</strong></td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
             <tr><td class="num">P14</td><td>Copiar Nequi / Bre-B al portapapeles y confirmación "¡Copiado!"</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
             <tr><td class="num">P15</td><td>El modal cabe en pantalla y el scroll interno llega al botón de WhatsApp</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
 
-            <tr class="grupo"><td colspan="4">Números vendidos</td></tr>
+            <tr class="grupo"><td colspan="4">Números vendidos (estado leído de la API)</td></tr>
             <tr><td class="num">P16</td><td>Un número vendido se ve gris, tachado, deshabilitado y no se puede elegir</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
 
             <tr class="grupo"><td colspan="4">Integración con el sitio</td></tr>
@@ -114,6 +114,15 @@
             <tr class="grupo"><td colspan="4">Enlaces externos y flujo móvil</td></tr>
             <tr><td class="num">P20</td><td>Instagram del pie de página abre en pestaña nueva; fechas del sorteo visibles</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
             <tr><td class="num">P21</td><td>Flujo completo en celular: barra inferior → PAGAR → modal → WhatsApp</td><td><span class="badge badge-ok">Aprobada</span></td><td>solo móvil</td></tr>
+
+            <tr class="grupo"><td colspan="4">Estado compartido en tiempo real (API + panel de la artista)</td></tr>
+            <tr><td class="num">P22</td><td>Un número apartado se ve <strong>ámbar</strong>, deshabilitado y no se puede elegir</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P23</td><td>El tablero se <strong>refresca solo</strong> (cada 10 s) al cambiar el estado en el servidor</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P24</td><td>Reserva exitosa: aparta los números, muestra el código y lo añade al mensaje de WhatsApp</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P25</td><td>Conflicto (números ya tomados, 409): avisa y los quita de la selección</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P26</td><td>La API pública responde el tablero con 100 números y su estado</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P27</td><td>El panel rechaza el acceso <strong>sin clave</strong> y con clave incorrecta (401)</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P28</td><td>El panel acepta la clave correcta (200) — requiere <span class="ruta">RIFA_ADMIN_KEY</span> en el entorno</td><td><span class="badge badge-skip">Omitida</span></td><td>3/3 saltadas</td></tr>
           </tbody>
         </table>
       </div>
@@ -122,11 +131,14 @@
 
   <div class="card border-0 shadow-sm mt-4">
     <div class="card-body">
-      <h2 class="h5 mb-3"><i class="bi bi-tools me-2" style="color:#E8527A"></i>Correcciones incluidas en esta validación</h2>
+      <h2 class="h5 mb-3"><i class="bi bi-tools me-2" style="color:#E8527A"></i>Correcciones y funciones incluidas en esta validación</h2>
       <ul class="mb-0">
-        <li>El carrusel de fotos ahora usa <strong>flechas ‹ ›</strong> con contador (n / 4) en lugar de los botones "Foto 1…4".</li>
-        <li><strong>/rifa y /rifa/</strong> ahora redirigen a la página (antes respondían error 500).</li>
-        <li><strong>Rutas inexistentes</strong> responden 404 en lugar de un error 500 genérico.</li>
+        <li><strong>Estado compartido en tiempo real:</strong> los números ahora viven en el servidor (MongoDB). El tablero público se refresca solo cada 10 s y muestra los números disponibles, apartados (ámbar) y vendidos (gris).</li>
+        <li><strong>Apartado con reserva:</strong> al reservar, el sistema genera un <strong>código</strong> y bloquea los números por 24 h; el código viaja en el mensaje de WhatsApp.</li>
+        <li><strong>Panel privado de la artista:</strong> con clave secreta, marca números como vendidos, confirma pagos y libera apartados; incluye recaudado y buscador.</li>
+        <li>Los números apartados por otras personas ya no se pueden seleccionar y desaparecen de tu selección si alguien se adelanta.</li>
+        <li>El carrusel de fotos usa <strong>flechas ‹ ›</strong> con contador (n / 4) en lugar de los botones "Foto 1…4".</li>
+        <li><strong>/rifa y /rifa/</strong> redirigen a la página y las rutas inexistentes responden 404 (antes 500).</li>
         <li>Se corrigió el bloqueo del scroll de la página al cerrar el modal.</li>
       </ul>
     </div>

@@ -216,7 +216,7 @@ test('P11 el modal abre con header fijo, botón de WhatsApp y aviso final', asyn
   await expect(page.locator('#modalTotal')).toHaveText('$5.000');
   await expect(page.locator('#btnWhatsApp')).toBeVisible();
   await expect(page.locator('#btnWhatsApp')).toContainText('Enviar comprobante por WhatsApp');
-  await expect(page.locator('.modal-body p', { hasText: 'Los números quedan' })).toBeAttached();
+  await expect(page.locator('.modal-body p', { hasText: 'Tus números quedan' })).toBeAttached();
 
   const overflow = await page.evaluate(() => document.body.style.overflow);
   expect(overflow, 'al abrir el modal la página deja de scrollear').toBe('hidden');
@@ -294,7 +294,7 @@ test('P15 el modal no se desborda de la pantalla', async ({ page }) => {
   const cuerpo = page.locator('.modal-body');
   await cuerpo.evaluate(el => { el.scrollTop = el.scrollHeight; });
   await expect(page.locator('#btnWhatsApp')).toBeInViewport();
-  await expect(page.locator('.modal-body p', { hasText: 'Los números quedan' })).toBeInViewport();
+  await expect(page.locator('.modal-body p', { hasText: 'Tus números quedan' })).toBeInViewport();
 });
 
 // ── 7. Números vendidos (desde la API) ───────────────────────────
