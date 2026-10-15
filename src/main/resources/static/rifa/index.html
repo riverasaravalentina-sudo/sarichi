@@ -58,7 +58,7 @@
       @apply flex items-center justify-center font-semibold transition-all duration-200 ease-out select-none;
       @apply border-2 border-transparent;
       @apply rounded-md sm:rounded-md md:rounded-md aspect-square;
-      @apply text-[10px] xs:text-xs sm:text-sm md:text-base leading-none;
+      @apply text-[10px] sm:text-sm md:text-base leading-none;
       width: 100%;
       min-height: 28px;
     }
@@ -85,18 +85,42 @@
       @apply border-rosa ring-2 ring-rosa/40 shadow-xl scale-105;
     }
 
-    /* ── Modal ───────────────────────────────────────────────── */
+    /* ── Modal (CSS plano, sin @apply — máximo soporte) ───────── */
     .modal-backdrop {
-      @apply fixed inset-0 bg-negro/60 backdrop-blur-sm flex items-center justify-center p-4 z-50;
-      transition: opacity 0.3s ease;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(17, 17, 17, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
-    .modal-backdrop.hidden {
-      @apply opacity-0 pointer-events-none;
-    }
+    .modal-backdrop.hidden { display: none !important; }
     .modal-content {
-      @apply bg-white rounded-3xl max-w-md w-full shadow-2xl;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 28rem;
+      max-height: calc(100vh - 2rem);
+      max-height: calc(100dvh - 2rem);
+      background: #ffffff;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       animation: modalSlide 0.3s ease-out;
-      max-height: min(92vh, 680px);
+    }
+    .modal-header {
+      flex: 0 0 auto;
+    }
+    .modal-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
     }
     @keyframes modalSlide {
       from { opacity: 0; transform: translateY(20px) scale(0.95); }
@@ -260,15 +284,15 @@
 
   <!-- ═══════════════ 4. MODAL DE PAGO ═══════════════ -->
     <div id="modalPago" class="modal-backdrop hidden">
-      <div class="modal-content overflow-y-auto overscroll-contain">
-      <div class="bg-gradient-to-r from-rosa to-teal text-white px-6 py-5 flex items-center justify-between">
+      <div class="modal-content">
+      <div class="modal-header bg-gradient-to-r from-rosa to-teal text-white px-6 py-5 flex items-center justify-between">
         <h3 class="font-playfair font-bold text-xl sm:text-2xl">Reservar mis números</h3>
         <button onclick="cerrarModal()" class="text-white/90 hover:text-white text-3xl leading-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-all">
           &times;
         </button>
       </div>
 
-      <div class="p-4 sm:p-6">
+      <div class="modal-body p-4 sm:p-6">
         <div class="bg-gradient-to-br from-crema to-white rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 text-center border border-rosa/10 shadow-inner">
           <p class="text-sm text-tinta/60 mb-2 uppercase tracking-wider font-medium">Vas a reservar</p>
           <p id="modalNumeros" class="font-bold text-tinta text-lg mb-2">—</p>
@@ -399,7 +423,10 @@
       }
       seleccionados.sort((a, b) => a - b);
       guardar();
-      actualizarResumen();
+    // Seguridad: nunca dejar la página sin scroll (overflow del body)
+    document.body.style.overflow = '';
+
+    actualizarResumen();
     }
 
     function guardar() {
