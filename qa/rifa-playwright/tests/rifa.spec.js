@@ -118,18 +118,28 @@ test('P08 sin desbordamiento horizontal de la página', async ({ page }) => {
 });
 
 // ── 5. Carrusel y navegación ─────────────────────────────────────
-test('P09 carrusel: cambiar foto actualiza imagen y thumbnail activo', async ({ page }) => {
+test('P09 carrusel: las flechas cambian de foto, dan la vuelta y actualizan el contador', async ({ page }) => {
   await irARifa(page);
   const img = page.locator('#heroImg');
-  await expect(img).toHaveAttribute('src', /garfiel-1\.jpeg$/);
+  const contador = page.locator('#fotoContador');
 
-  await page.locator('.thumb-btn', { hasText: 'Foto 3' }).click();
-  await expect(img).toHaveAttribute('src', /garfiel-3\.jpeg$/);
-  await expect(page.locator('.thumb-btn').nth(2)).toHaveClass(/active/);
-  await expect(page.locator('.thumb-btn').nth(0)).not.toHaveClass(/active/);
+  await expect(page.locator('.thumb-btn'), 'ya no deben existir botones "Foto N"').toHaveCount(0);
+  await expect(img).toHaveAttribute('src', /garfiel-1\.jpeg$/);
+  await expect(contador).toHaveText('1 / 4');
+
+  await page.locator('#btnFotoSiguiente').click();
+  await expect(img).toHaveAttribute('src', /garfiel-2\.jpeg$/);
+  await expect(contador).toHaveText('2 / 4');
+
+  await page.locator('#btnFotoAnterior').click();
+  await expect(contador).toHaveText('1 / 4');
+
+  await page.locator('#btnFotoAnterior').click();
+  await expect(img).toHaveAttribute('src', /garfiel-4\.jpeg$/);
+  await expect(contador).toHaveText('4 / 4');
 
   await expect.poll(() => img.evaluate(i => i.naturalWidth > 0), {
-    timeout: 20_000, message: 'la foto 3 debe cargarse',
+    timeout: 20_000, message: 'la foto debe cargarse',
   }).toBe(true);
 });
 
