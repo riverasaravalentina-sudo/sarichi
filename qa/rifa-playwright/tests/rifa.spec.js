@@ -443,6 +443,23 @@ test('P25 conflicto 409: avisa y quita de la selección los números ya tomados'
   await expect(page.locator('#modalPago')).toBeHidden();
 });
 
+test('P29 el mensaje de WhatsApp conserva números y monto tras el refresco automático', async ({ page }) => {
+  await irARifa(page);
+  await seleccionar(page, 7, 8);
+  await page.locator('#btnReservar').click();
+  await expect(page.locator('#modalPago')).toBeVisible();
+  await expect(page.locator('#modalNumeros')).toHaveText('07, 08');
+  await expect(page.locator('#btnWhatsApp')).toHaveAttribute('href', /07%2C%2008/);
+  await expect(page.locator('#btnWhatsApp')).toHaveAttribute('href', /%245\.000/);
+
+  await page.waitForTimeout(12_000);
+
+  await expect(page.locator('#modalNumeros')).toHaveText('07, 08');
+  await expect(page.locator('#modalTotal')).toHaveText('$5.000');
+  await expect(page.locator('#btnWhatsApp')).toHaveAttribute('href', /07%2C%2008/);
+  await expect(page.locator('#btnWhatsApp')).toHaveAttribute('href', /%245\.000/);
+});
+
 // ── 11. API pública y panel (sin depender del navegador) ─────────
 test('P26 la API pública devuelve el tablero con 100 números', async ({ request }) => {
   const resp = await request.get('/api/rifa/numeros');

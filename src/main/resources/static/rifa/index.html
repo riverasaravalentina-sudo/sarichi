@@ -651,10 +651,31 @@
       const sticky = document.getElementById('stickyResumen');
       sticky.classList.toggle('hidden', cantidad === 0);
 
-      document.getElementById('modalNumeros').textContent = cantidad ? lista : '—';
+      actualizarModalPago();
+      actualizarInfoReserva();
+    }
+
+    // Decide qué muestran el modal y el enlace de WhatsApp: la reserva activa
+    // (si el modal está abierto o no hay selección nueva) o la selección actual.
+    function actualizarModalPago() {
+      const modalAbierto = !document.getElementById('modalPago').classList.contains('hidden');
+      const usaReserva = miReserva && miReserva.numeros && miReserva.numeros.length &&
+        (modalAbierto || seleccionados.length === 0);
+
+      let lista, total;
+      if (usaReserva) {
+        lista = modalReserva
+          ? modalReserva.lista
+          : miReserva.numeros.map(n => String(n).padStart(2, '0')).join(', ');
+        total = modalReserva ? modalReserva.total : miReserva.numeros.length * PRECIO;
+      } else {
+        lista = listaNumeros();
+        total = seleccionados.length * PRECIO;
+      }
+
+      document.getElementById('modalNumeros').textContent = lista || '—';
       document.getElementById('modalTotal').textContent = formatoCOP(total);
       actualizarWhatsApp(lista, total);
-      actualizarInfoReserva();
     }
 
     function actualizarInfoReserva() {
@@ -752,18 +773,9 @@
         wrap.classList.add('hidden');
       }
 
-      const usarReserva = (modalReserva && miReserva) ? modalReserva : (miReserva ? {
-        lista: miReserva.numeros.map(n => String(n).padStart(2, '0')).join(', '),
-        total: miReserva.numeros.length * PRECIO
-      } : null);
-      const lista = usarReserva ? usarReserva.lista : listaNumeros();
-      const total = usarReserva ? usarReserva.total : seleccionados.length * PRECIO;
-      document.getElementById('modalNumeros').textContent = lista || '—';
-      document.getElementById('modalTotal').textContent = formatoCOP(total);
-      actualizarWhatsApp(lista || '—', total);
-
       document.getElementById('modalPago').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+      actualizarModalPago();
     }
 
     async function liberarMiReserva() {
