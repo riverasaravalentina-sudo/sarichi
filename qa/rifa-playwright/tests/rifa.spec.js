@@ -444,6 +444,28 @@ test('P25 conflicto 409: avisa y quita de la selección los números ya tomados'
 });
 
 test('P29 el mensaje de WhatsApp conserva números y monto tras el refresco automático', async ({ page }) => {
+  const apartados = {};
+  await page.route('**/api/rifa/numeros', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify(construirTablero(apartados)),
+  }));
+  await page.route('**/api/rifa/reservar', route => {
+    const body = route.request().postDataJSON() || {};
+    const nums = body.numeros || [];
+    nums.forEach(n => { apartados[n] = 'RESERVADO'; });
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        codigoReserva: CODIGO_MOCK,
+        numeros: nums,
+        total: nums.length,
+        expiraEn: new Date(Date.now() + 86_400_000).toISOString(),
+      }),
+    });
+  });
+
   await irARifa(page);
   await seleccionar(page, 7, 8);
   await page.locator('#btnReservar').click();
