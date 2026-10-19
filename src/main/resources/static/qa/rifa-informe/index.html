@@ -24,8 +24,8 @@
   <div class="container">
     <p class="mb-1 opacity-75 text-uppercase" style="letter-spacing:.2em; font-size:.8rem;">Crocheting Sarichi · Control de calidad</p>
     <h1 class="display-5 fw-bold mb-2">Informe de validación — Rifa Garfield</h1>
-    <p class="mb-4 opacity-90">29 pruebas automatizadas · 3 dispositivos · ejecutadas contra producción</p>
-    <span class="badge badge-ok text-dark fs-6 px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> 82 pruebas aprobadas · 0 fallos</span>
+    <p class="mb-4 opacity-90">30 pruebas automatizadas · 3 dispositivos · ejecutadas contra producción</p>
+    <span class="badge badge-ok text-dark fs-6 px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> 88 pruebas aprobadas · 0 fallos</span>
   </div>
 </header>
 
@@ -34,7 +34,7 @@
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
       <div class="card border-0 shadow-sm h-100 text-center p-3">
-        <div class="fs-2 fw-bold text-rosa" style="color:#E8527A">82</div>
+        <div class="fs-2 fw-bold text-rosa" style="color:#E8527A">88</div>
         <div class="text-muted small">Pruebas aprobadas</div>
       </div>
     </div>
@@ -122,8 +122,9 @@
             <tr><td class="num">P25</td><td>Conflicto (números ya tomados, 409): avisa y los quita de la selección</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
             <tr><td class="num">P26</td><td>La API pública responde el tablero con 100 números y su estado</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
             <tr><td class="num">P27</td><td>El panel rechaza el acceso <strong>sin clave</strong> y con clave incorrecta (401)</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
-            <tr><td class="num">P28</td><td>El panel acepta la clave correcta (200) — requiere <span class="ruta">RIFA_ADMIN_KEY</span> en el entorno</td><td><span class="badge badge-skip">Omitida</span></td><td>3/3 saltadas</td></tr>
+            <tr><td class="num">P28</td><td>El panel acepta la clave correcta (200) — requiere <span class="ruta">RIFA_ADMIN_KEY</span> en el entorno</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
             <tr><td class="num">P29</td><td>El mensaje de WhatsApp <strong>conserva los números y el monto</strong> incluso tras el refresco automático del tablero</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
+            <tr><td class="num">P30</td><td><strong>Tus datos (opcional)</strong>: guardar nombre/teléfono extiende el apartado al <strong>29 de octubre, 6:00 pm</strong>, actualiza el aviso y añade el nombre al mensaje de WhatsApp</td><td><span class="badge badge-ok">Aprobada</span></td><td>3/3</td></tr>
           </tbody>
         </table>
       </div>
@@ -135,7 +136,8 @@
       <h2 class="h5 mb-3"><i class="bi bi-tools me-2" style="color:#E8527A"></i>Correcciones y funciones incluidas en esta validación</h2>
       <ul class="mb-0">
         <li><strong>Estado compartido en tiempo real:</strong> los números ahora viven en el servidor (MongoDB). El tablero público se refresca solo cada 10 s y muestra los números disponibles, apartados (ámbar) y vendidos (gris).</li>
-        <li><strong>Apartado con reserva:</strong> al reservar, el sistema genera un <strong>código</strong> y bloquea los números por 24 h; el código viaja en el mensaje de WhatsApp.</li>
+        <li><strong>Apartado con reserva:</strong> al reservar, el sistema genera un <strong>código</strong> y bloquea los números; el código viaja en el mensaje de WhatsApp.</li>
+        <li><strong>Datos del comprador (opcional):</strong> en el modal puedes dejar tu <strong>nombre, teléfono y notas</strong>. Con nombre o teléfono el apartado se extiende hasta el <strong>29 de octubre, 6:00 pm</strong> (hora de Bogotá); sin datos, solo <strong>36 horas</strong>. El nombre se incluye en el mensaje de WhatsApp.</li>
         <li><strong>Mensaje de WhatsApp confiable:</strong> los números y el monto se conservan en el mensaje aunque el tablero se refresque automáticamente mientras el modal está abierto.</li>
         <li><strong>Panel privado de la artista:</strong> con clave secreta, marca números como vendidos, confirma pagos y libera apartados; incluye recaudado y buscador.</li>
         <li><strong>Detalle de ventas en el panel:</strong> lista de ventas confirmadas agrupadas con comprador, teléfono, notas y fecha, más un detalle automático de la selección.</li>
