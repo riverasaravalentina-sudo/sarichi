@@ -375,6 +375,27 @@
           </p>
         </div>
 
+        <div id="modalDatos" class="bg-white border-2 border-teal/20 rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6">
+          <p class="font-bold text-tinta mb-1">Tus datos <span class="text-tinta/50 font-normal text-sm">(opcional)</span></p>
+          <p class="text-xs text-tinta/60 mb-3">
+            Si dejas tu nombre o tu teléfono, apartamos tus números hasta el <strong>29 de octubre, 6:00 pm</strong>.
+            Sin datos, solo se guardan <strong>36 horas</strong>.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input id="resNombre" type="text" autocomplete="name" placeholder="Nombre"
+              class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal focus:outline-none">
+            <input id="resTelefono" type="tel" autocomplete="tel" placeholder="Teléfono / WhatsApp"
+              class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal focus:outline-none">
+          </div>
+          <input id="resNotas" type="text" placeholder="Notas (opcional)"
+            class="mt-3 w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal focus:outline-none">
+          <button type="button" id="btnGuardarDatos" onclick="guardarDatos()"
+            class="mt-3 w-full bg-gradient-to-r from-teal to-rosa text-white font-bold py-2.5 rounded-full shadow-md transition-all duration-300 hover:shadow-lg text-sm">
+            Guardar mis datos
+          </button>
+          <p id="datosMsg" class="hidden text-xs mt-2"></p>
+        </div>
+
         <h4 class="font-bold text-lg mb-4 text-tinta">Transfiere el total a:</h4>
         <div class="space-y-3 mb-6">
           <div class="flex items-center justify-between bg-white border-2 border-rosa/20 rounded-2xl px-5 py-4 hover:border-rosa/40 transition-all">
@@ -382,7 +403,7 @@
               <div class="w-10 h-10 bg-gradient-to-br from-teal to-rosa rounded-full flex items-center justify-center text-white font-bold">N</div>
               <span class="font-semibold text-tinta">Nequi</span>
             </div>
-            <button onclick="copiar('NEQUI', this)" class="font-bold text-rosa hover:text-rosad transition-colors text-sm sm:text-base">
+            <button onclick="copiar('NEQUI', this)" class="btn-copiar font-bold text-rosa hover:text-rosad transition-colors text-sm sm:text-base">
               317 811 3232 <span class="ml-1">📋</span>
             </button>
           </div>
@@ -391,7 +412,7 @@
               <div class="w-10 h-10 bg-gradient-to-br from-teal to-rosa rounded-full flex items-center justify-center text-white font-bold">B</div>
               <span class="font-semibold text-tinta">Bre-B</span>
             </div>
-            <button onclick="copiar('BREB', this)" class="font-bold text-teal hover:text-rosa transition-colors text-sm sm:text-base">
+            <button onclick="copiar('BREB', this)" class="btn-copiar font-bold text-teal hover:text-rosa transition-colors text-sm sm:text-base">
               317 811 3232 <span class="ml-1">📋</span>
             </button>
           </div>
@@ -409,8 +430,8 @@
           Enviar comprobante por WhatsApp
         </a>
 
-          <p class="text-xs text-tinta/50 text-center mt-3 sm:mt-4 pb-2 sm:pb-1">
-            ⚠️ Tus números quedan <strong>apartados 24 horas</strong>. Se confirman como vendidos
+          <p id="avisoVencimiento" class="text-xs text-tinta/50 text-center mt-3 sm:mt-4 pb-2 sm:pb-1">
+            ⚠️ Tus números quedan <strong>apartados</strong>. Se confirman como vendidos
             cuando verificamos tu pago. Menciona tu código de reserva en el mensaje.
           </p>
       </div>
@@ -682,8 +703,9 @@
       if (!reservaInfoEl) return;
       if (miReserva && miReserva.numeros && miReserva.numeros.length) {
         const ns = miReserva.numeros.map(n => String(n).padStart(2, '0')).join(', ');
+        const vence = miReserva.expiraEn ? ' · vence ' + fechaBonita(miReserva.expiraEn) : '';
         reservaInfoEl.innerHTML = '🎟️ Tienes números <strong>apartados</strong>: ' + ns +
-          ' · código <strong>' + miReserva.codigo + '</strong>' +
+          ' · código <strong>' + miReserva.codigo + '</strong>' + vence +
           ' <button type="button" onclick="abrirModalPago()" class="underline text-rosa hover:text-rosad ml-2">Ver pago</button>' +
           ' <button type="button" onclick="liberarMiReserva()" class="underline text-gray-500 hover:text-gray-700 ml-2">Liberar</button>';
         reservaInfoEl.classList.remove('hidden');
@@ -694,13 +716,94 @@
 
     function actualizarWhatsApp(lista, total) {
       let texto = 'Hola, quiero los números ' + lista +
-        ' para la rifa de Garfield. Total: ' + formatoCOP(total) +
-        '. Adjunto comprobante.';
+        ' para la rifa de Garfield.';
+      if (miReserva && miReserva.nombre) texto += ' Nombre: ' + miReserva.nombre + '.';
+      if (miReserva && miReserva.telefono) texto += ' Teléfono: ' + miReserva.telefono + '.';
+      texto += ' Total: ' + formatoCOP(total) + '. Adjunto comprobante.';
       if (miReserva && miReserva.codigo) {
         texto += ' Código de reserva: ' + miReserva.codigo + '.';
       }
       document.getElementById('btnWhatsApp').href =
         'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(texto);
+    }
+
+    // Formatea un LocalDateTime del servidor ("2026-10-29T18:00:00") sin usar
+    // Date, para mostrarlo tal cual en hora de Bogotá.
+    function fechaBonita(iso) {
+      const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!m) return '';
+      const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+      let h = parseInt(m[4], 10);
+      const ampm = h >= 12 ? 'pm' : 'am';
+      h = h % 12; if (h === 0) h = 12;
+      return parseInt(m[3], 10) + ' de ' + meses[parseInt(m[2], 10) - 1] +
+        ' a las ' + h + ':' + m[5] + ' ' + ampm;
+    }
+
+    function actualizarAvisoVencimiento() {
+      const el = document.getElementById('avisoVencimiento');
+      if (!el) return;
+      const plazo = (miReserva && miReserva.expiraEn)
+        ? 'apartados hasta el ' + fechaBonita(miReserva.expiraEn)
+        : 'apartados';
+      el.innerHTML = '⚠️ Tus números quedan <strong>' + plazo + '</strong>. Se confirman como vendidos ' +
+        'cuando verificamos tu pago. Menciona tu código de reserva en el mensaje.';
+    }
+
+    function mostrarDatosMsg(msg, tipo) {
+      const el = document.getElementById('datosMsg');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'text-xs mt-2 ' + (tipo === 'error' ? 'text-red-600' : 'text-green-700');
+      el.classList.remove('hidden');
+    }
+
+    async function guardarDatos() {
+      if (!miReserva || !miReserva.codigo) return;
+      const btn = document.getElementById('btnGuardarDatos');
+      if (btn.dataset.busy === '1') return;
+      const nombre = document.getElementById('resNombre').value.trim();
+      const telefono = document.getElementById('resTelefono').value.trim();
+      const notas = document.getElementById('resNotas').value.trim();
+
+      if (!nombre && !telefono) {
+        mostrarDatosMsg('Escribe al menos tu nombre o tu teléfono para extender el apartado.', 'error');
+        return;
+      }
+
+      btn.dataset.busy = '1';
+      const original = btn.textContent;
+      btn.textContent = 'Guardando…';
+      btn.disabled = true;
+      try {
+        const resp = await fetch(API_BASE + '/reservar/' + encodeURIComponent(miReserva.codigo) + '/datos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            compradorNombre: nombre || null,
+            compradorTelefono: telefono || null,
+            notas: notas || null
+          })
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        miReserva.nombre = nombre || null;
+        miReserva.telefono = telefono || null;
+        miReserva.notas = notas || null;
+        miReserva.expiraEn = data.expiraEn || miReserva.expiraEn;
+        localStorage.setItem(RESERVA_KEY, JSON.stringify(miReserva));
+        mostrarDatosMsg('¡Listo! Tus números quedan apartados hasta el ' + fechaBonita(miReserva.expiraEn) + '.', 'ok');
+        actualizarModalPago();
+        actualizarAvisoVencimiento();
+        actualizarInfoReserva();
+      } catch (e) {
+        mostrarDatosMsg('No pudimos guardar tus datos. Inténtalo de nuevo.', 'error');
+      } finally {
+        btn.dataset.busy = '0';
+        btn.textContent = original;
+        btn.disabled = false;
+      }
     }
 
     // ── Apartar (POST) y abrir el modal ──────────────────────
@@ -735,8 +838,9 @@
           throw new Error('HTTP ' + resp.status);
         } else {
           const data = await resp.json();
-          miReserva = { codigo: data.codigoReserva, numeros: data.numeros || [] };
+          miReserva = { codigo: data.codigoReserva, numeros: data.numeros || [], expiraEn: data.expiraEn };
           localStorage.setItem(RESERVA_KEY, JSON.stringify(miReserva));
+          limpiarFormularioDatos();
           modalReserva = {
             lista: (data.numeros || []).map(n => String(n).padStart(2, '0')).join(', '),
             total: (data.numeros || []).length * PRECIO
@@ -773,9 +877,33 @@
         wrap.classList.add('hidden');
       }
 
+      prellenarFormularioDatos();
+      actualizarAvisoVencimiento();
+
       document.getElementById('modalPago').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       actualizarModalPago();
+    }
+
+    function limpiarFormularioDatos() {
+      const n = document.getElementById('resNombre');
+      const t = document.getElementById('resTelefono');
+      const o = document.getElementById('resNotas');
+      const msg = document.getElementById('datosMsg');
+      if (n) n.value = '';
+      if (t) t.value = '';
+      if (o) o.value = '';
+      if (msg) msg.classList.add('hidden');
+    }
+
+    function prellenarFormularioDatos() {
+      if (!miReserva) return;
+      const n = document.getElementById('resNombre');
+      const t = document.getElementById('resTelefono');
+      const o = document.getElementById('resNotas');
+      if (n) n.value = miReserva.nombre || '';
+      if (t) t.value = miReserva.telefono || '';
+      if (o) o.value = miReserva.notas || '';
     }
 
     async function liberarMiReserva() {

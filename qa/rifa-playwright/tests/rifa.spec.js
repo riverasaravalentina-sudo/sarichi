@@ -266,7 +266,7 @@ test('P14 copiar Nequi / Bre-B al portapapeles', async ({ page }) => {
   await seleccionar(page, 1);
   await page.locator('#btnReservar').click();
 
-  const botones = page.locator('.modal-body button');
+  const botones = page.locator('.modal-body .btn-copiar');
   await expect(botones).toHaveCount(2);
 
   const botonNequi = botones.first();
@@ -480,6 +480,31 @@ test('P29 el mensaje de WhatsApp conserva números y monto tras el refresco auto
   await expect(page.locator('#modalTotal')).toHaveText('$5.000');
   await expect(page.locator('#btnWhatsApp')).toHaveAttribute('href', /07%2C%2008/);
   await expect(page.locator('#btnWhatsApp')).toHaveAttribute('href', /%245\.000/);
+});
+
+// ── 12. Datos de reserva (Bloque B) ──────────────────────────────
+test('P30 guardar datos extiende el apartado al 29 de octubre e incluye el nombre en el WhatsApp', async ({ page }) => {
+  await page.route('**/api/rifa/reservar/*/datos', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ codigoReserva: CODIGO_MOCK, expiraEn: '2026-10-29T18:00:00' }),
+  }));
+
+  await irARifa(page);
+  await seleccionar(page, 7, 8);
+  await page.locator('#btnReservar').click();
+  await expect(page.locator('#modalPago')).toBeVisible();
+
+  await page.locator('#resNombre').fill('Ana Pérez');
+  await page.locator('#resTelefono').fill('3001112233');
+  await page.locator('#btnGuardarDatos').click();
+
+  await expect(page.locator('#datosMsg')).toContainText('29 de octubre');
+  await expect(page.locator('#avisoVencimiento')).toContainText('29 de octubre a las 6:00 pm');
+  await expect(page.locator('#btnWhatsApp')).toHaveAttribute('href', /Ana%20P%C3%A9rez/);
+
+  await page.locator('.modal-header button').click();
+  await expect(page.locator('#reservaInfo')).toContainText('vence 29 de octubre');
 });
 
 // ── 11. API pública y panel (sin depender del navegador) ─────────
