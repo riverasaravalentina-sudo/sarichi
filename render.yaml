@@ -45,3 +45,7 @@ services:
         sync: false
       - key: RIFA_ADMIN_KEY
         sync: false
+      - key: RIFA_ZONA_HORARIA
+        value: America/Bogota
+      - key: RIFA_FIN_APARTADO
+        value: 2026-10-29T18:00:00

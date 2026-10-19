@@ -19,6 +19,7 @@ import com.sarichi.crocheting.exception.DespachoException;
 import com.sarichi.crocheting.exception.DevolucionException;
 import com.sarichi.crocheting.exception.PanelNoConfiguradoException;
 import com.sarichi.crocheting.exception.ProduccionException;
+import com.sarichi.crocheting.exception.ReservaNoEncontradaException;
 import com.sarichi.crocheting.exception.StockInsuficienteException;
 import com.sarichi.crocheting.exception.TokenInvalidoException;
 import com.sarichi.crocheting.exception.UnauthorizedException;
@@ -85,6 +86,12 @@ public class GlobalExceptionHandler {
         body.put("mensaje", ex.getMessage());
         body.put("numerosConflicto", ex.getNumerosConflicto());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(ReservaNoEncontradaException.class)
+    public ResponseEntity<Map<String, Object>> manejarReservaNoEncontrada(
+            ReservaNoEncontradaException ex) {
+        return error(HttpStatus.NOT_FOUND, "Reserva no encontrada", ex.getMessage());
     }
 
     @ExceptionHandler(ClaveInvalidaException.class)

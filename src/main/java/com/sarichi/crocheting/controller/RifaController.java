@@ -1,6 +1,7 @@
 package com.sarichi.crocheting.controller;
 
 import com.sarichi.crocheting.dto.CambioEstadoRifaDTO;
+import com.sarichi.crocheting.dto.DatosReservaRifaDTO;
 import com.sarichi.crocheting.dto.PanelRifaDTO;
 import com.sarichi.crocheting.dto.ReservaRifaRequestDTO;
 import com.sarichi.crocheting.dto.ReservaRifaResponseDTO;
@@ -39,7 +40,22 @@ public class RifaController {
     @PostMapping("/reservar")
     public ResponseEntity<ReservaRifaResponseDTO> reservar(
             @Valid @RequestBody ReservaRifaRequestDTO request) {
-        return ResponseEntity.ok(rifaService.reservar(request.getNumeros()));
+        return ResponseEntity.ok(rifaService.reservar(
+                request.getNumeros(),
+                request.getCompradorNombre(),
+                request.getCompradorTelefono(),
+                request.getNotas()));
+    }
+
+    @PostMapping("/reservar/{codigo}/datos")
+    public ResponseEntity<ReservaRifaResponseDTO> registrarDatos(
+            @PathVariable String codigo,
+            @RequestBody DatosReservaRifaDTO request) {
+        return ResponseEntity.ok(rifaService.registrarDatosReserva(
+                codigo,
+                request.getCompradorNombre(),
+                request.getCompradorTelefono(),
+                request.getNotas()));
     }
 
     @DeleteMapping("/reservar/{codigo}")

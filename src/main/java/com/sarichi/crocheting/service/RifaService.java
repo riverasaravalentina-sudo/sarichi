@@ -10,6 +10,7 @@ import com.sarichi.crocheting.dto.TableroRifaDTO;
 import com.sarichi.crocheting.entity.EstadoNumero;
 import com.sarichi.crocheting.entity.RifaNumero;
 import com.sarichi.crocheting.exception.ConflictoReservaException;
+import com.sarichi.crocheting.exception.ReservaNoEncontradaException;
 import com.sarichi.crocheting.repository.RifaNumeroRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -58,6 +60,14 @@ public class RifaService {
     @Value("${sarichi.rifa.precio:2500}")
     private long precio;
 
+    /** Zona horaria de la rifa (para el corte y las marcas de tiempo). */
+    @Value("${sarichi.rifa.zona-horaria:America/Bogota}")
+    private String zonaHoraria;
+
+    /** Fecha/hora límite de los apartados con datos (ISO local, en la zona de la rifa). */
+    @Value("${sarichi.rifa.fin-apartado:2026-10-29T18:00:00}")
+    private String finApartadoIso;
+
     // ─── Tablero público ───────────────────────────────────────────────
 
     public TableroRifaDTO obtenerTablero() {
@@ -83,7 +93,7 @@ public class RifaService {
 
         return TableroRifaDTO.builder()
                 .rifaId(rifaId)
-                .actualizadoEn(LocalDateTime.now())
+                .actualizadoEn(ahora())
                 .total(totalNumeros)
                 .disponibles(disponibles)
                 .reservados(reservados)
@@ -94,18 +104,19 @@ public class RifaService {
 
     // ─── Reserva pública ───────────────────────────────────────────────
 
-    public ReservaRifaResponseDTO reservar(List<Integer> numeros) {
+    public ReservaRifaResponseDTO reservar(List<Integer> numeros, String compradorNombre,
+                                           String compradorTelefono, String notas) {
         List<Integer> solicitados = validarNumeros(numeros);
         limpiarReservasExpiradas();
 
         String codigo = generarCodigoUnico();
-        LocalDateTime expira = LocalDateTime.now().plusHours(reservaHoras);
+        LocalDateTime expira = vencimiento(compradorNombre, compradorTelefono);
 
         List<Integer> reservados = new ArrayList<>();
         List<Integer> conflicto = new ArrayList<>();
 
         for (Integer numero : solicitados) {
-            if (intentarReservar(numero, codigo, expira)) {
+            if (intentarReservar(numero, codigo, expira, compradorNombre, compradorTelefono, notas)) {
                 reservados.add(numero);
             } else {
                 conflicto.add(numero);
@@ -142,7 +153,7 @@ public class RifaService {
     public int limpiarReservasExpiradas() {
         List<RifaNumero> expiradas = repository
                 .findByRifaIdAndEstadoAndReservadoHastaBefore(
-                        rifaId, EstadoNumero.RESERVADO, LocalDateTime.now());
+                        rifaId, EstadoNumero.RESERVADO, ahora());
         expiradas.forEach(this::liberar);
         return expiradas.size();
     }
@@ -209,7 +220,7 @@ public class RifaService {
 
         return PanelRifaDTO.builder()
                 .rifaId(rifaId)
-                .actualizadoEn(LocalDateTime.now())
+                .actualizadoEn(ahora())
                 .total(totalNumeros)
                 .disponibles(disponibles)
                 .reservados(reservados)
@@ -224,7 +235,7 @@ public class RifaService {
         List<Integer> numeros = validarNumeros(dto.getNumeros());
         EstadoNumero estado = parsearEstado(dto.getEstado());
 
-        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime momento = ahora();
         for (Integer numero : numeros) {
             RifaNumero doc = repository.findByRifaIdAndNumero(rifaId, numero)
                     .orElseGet(() -> RifaNumero.builder()
@@ -233,7 +244,7 @@ public class RifaService {
                             .build());
 
             doc.setEstado(estado);
-            doc.setActualizadoEn(ahora);
+            doc.setActualizadoEn(momento);
 
             if (estado == EstadoNumero.DISPONIBLE) {
                 doc.setCompradorNombre(null);
@@ -251,7 +262,7 @@ public class RifaService {
                     if (doc.getCodigoReserva() == null) {
                         doc.setCodigoReserva(generarCodigoUnico());
                     }
-                    doc.setReservadoHasta(ahora.plusHours(reservaHoras));
+                    doc.setReservadoHasta(vencimiento(dto.getCompradorNombre(), dto.getCompradorTelefono()));
                 } else {
                     doc.setReservadoHasta(null);
                 }
@@ -262,11 +273,87 @@ public class RifaService {
         return obtenerPanel();
     }
 
+    /**
+     * Registra (o actualiza) los datos de la persona sobre una reserva ya
+     * creada a partir de su código. El vencimiento se recalcula: si ahora hay
+     * nombre o teléfono, se mantiene hasta la fecha de corte; si no, 36 horas.
+     */
+    public ReservaRifaResponseDTO registrarDatosReserva(String codigo, String compradorNombre,
+                                                        String compradorTelefono, String notas) {
+        if (codigo == null || codigo.isBlank()) {
+            throw new IllegalArgumentException("El código de reserva es obligatorio");
+        }
+
+        List<RifaNumero> reservas = repository.findByRifaIdAndCodigoReserva(rifaId, codigo)
+                .stream()
+                .filter(r -> r.getEstado() == EstadoNumero.RESERVADO)
+                .collect(Collectors.toList());
+        if (reservas.isEmpty()) {
+            throw new ReservaNoEncontradaException(
+                    "No existe una reserva activa con el código " + codigo);
+        }
+
+        LocalDateTime expira = vencimiento(compradorNombre, compradorTelefono);
+        LocalDateTime momento = ahora();
+
+        List<Integer> numeros = new ArrayList<>(reservas.size());
+        for (RifaNumero r : reservas) {
+            r.setCompradorNombre(compradorNombre);
+            r.setCompradorTelefono(compradorTelefono);
+            r.setNotas(notas);
+            r.setReservadoHasta(expira);
+            r.setActualizadoEn(momento);
+            repository.save(r);
+            numeros.add(r.getNumero());
+        }
+        numeros.sort(Comparator.naturalOrder());
+
+        return ReservaRifaResponseDTO.builder()
+                .codigoReserva(codigo)
+                .numeros(numeros)
+                .total(numeros.size())
+                .expiraEn(expira)
+                .build();
+    }
+
     public String getRifaId() {
         return rifaId;
     }
 
     // ─── Internos ──────────────────────────────────────────────────────
+
+    /** Zona horaria configurada de la rifa. */
+    private ZoneId zona() {
+        return ZoneId.of(zonaHoraria);
+    }
+
+    /** Instante actual en la zona de la rifa (evita la hora UTC del servidor). */
+    private LocalDateTime ahora() {
+        return LocalDateTime.now(zona());
+    }
+
+    /** Fecha y hora límite de los apartados con datos. */
+    private LocalDateTime finApartado() {
+        return LocalDateTime.parse(finApartadoIso);
+    }
+
+    /** ¿El apartado queda atado a una persona? (basta nombre o teléfono). */
+    private static boolean hayDatos(String compradorNombre, String compradorTelefono) {
+        return (compradorNombre != null && !compradorNombre.isBlank())
+                || (compradorTelefono != null && !compradorTelefono.isBlank());
+    }
+
+    /**
+     * Vencimiento de un apartado: si tiene datos y la fecha de corte aún no
+     * pasó, se mantiene hasta el corte; si no, dura {@code reserva-horas} horas.
+     */
+    private LocalDateTime vencimiento(String compradorNombre, String compradorTelefono) {
+        LocalDateTime fin = finApartado();
+        if (hayDatos(compradorNombre, compradorTelefono) && fin.isAfter(ahora())) {
+            return fin;
+        }
+        return ahora().plusHours(reservaHoras);
+    }
 
     /**
      * Intenta apartar un número de forma atómica. Solo tiene éxito si el
@@ -274,7 +361,8 @@ public class RifaService {
      * Si ya está RESERVADO o VENDIDO, el índice único provoca un
      * DuplicateKeyException que interpretamos como conflicto.
      */
-    private boolean intentarReservar(int numero, String codigo, LocalDateTime hasta) {
+    private boolean intentarReservar(int numero, String codigo, LocalDateTime hasta,
+                                     String compradorNombre, String compradorTelefono, String notas) {
         Query query = new Query(Criteria.where("rifaId").is(rifaId)
                 .and("numero").is(numero)
                 .orOperator(
@@ -285,7 +373,10 @@ public class RifaService {
                 .set("estado", EstadoNumero.RESERVADO)
                 .set("codigoReserva", codigo)
                 .set("reservadoHasta", hasta)
-                .set("actualizadoEn", LocalDateTime.now())
+                .set("compradorNombre", compradorNombre)
+                .set("compradorTelefono", compradorTelefono)
+                .set("notas", notas)
+                .set("actualizadoEn", ahora())
                 .setOnInsert("rifaId", rifaId)
                 .setOnInsert("numero", numero);
 
@@ -305,7 +396,7 @@ public class RifaService {
         r.setReservadoHasta(null);
         r.setNotas(null);
         r.setConfirmadoPor(null);
-        r.setActualizadoEn(LocalDateTime.now());
+        r.setActualizadoEn(ahora());
         repository.save(r);
     }
 
