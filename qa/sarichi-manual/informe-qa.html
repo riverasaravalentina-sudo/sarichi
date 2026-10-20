@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe QA — Bloque 1 · Autenticación · Sarichi Crocheting</title>
+<style>
+  :root{--pink:#E8527A;--teal:#2DB5C8;--cream:#FDFAF6;--ink:#24313d;--line:#e8e2dc;--ok:#1f9d63;--warn:#c98a12;--bad:#c0392b;--crit:#7d1b12}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.55 "Inter",system-ui,Arial,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 22px 64px}
+  header.top{border-bottom:3px solid var(--pink);padding-bottom:18px;margin-bottom:24px}
+  h1{font-family:"Playfair Display",Georgia,serif;margin:0 0 6px;font-size:1.9rem;color:var(--pink)}
+  .sub{color:#5c6b77;font-size:.92rem}
+  h2{font-family:"Playfair Display",Georgia,serif;font-size:1.3rem;margin:34px 0 12px;color:var(--ink);border-left:5px solid var(--teal);padding-left:10px}
+  h3{font-size:1rem;margin:22px 0 8px}
+  .cards{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0 8px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;min-width:150px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .card b{display:block;font-size:1.75rem;line-height:1.1}
+  .card span{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:#77838d}
+  .crit b{color:var(--crit)}.high b{color:var(--bad)}.med b{color:var(--warn)}
+  table{width:100%;border-collapse:collapse;background:#fff;font-size:.86rem;margin:8px 0 6px;border:1px solid var(--line)}
+  th{background:#f3efeb;text-align:left;padding:9px 10px;border-bottom:2px solid var(--line);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:#5c6b77}
+  td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#fffaf7}
+  code,.mono{font-family:Consolas,"Courier New",monospace;font-size:.85em;background:#f4f0ec;padding:1px 5px;border-radius:4px}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:600;white-space:nowrap}
+  .p-crit{background:#f7dedb;color:var(--crit)}
+  .p-alta{background:#fbe0dc;color:var(--bad)}
+  .p-media{background:#fdf1d9;color:#8a6100}
+  .p-baja{background:#e4f0f4;color:#1d6b78}
+  .p-p1{background:#e8f6ee;color:#146b46}
+  .p-p2{background:#eef2f5;color:#4a5a66}
+  .p-wait{background:#f1eeea;color:#6b7780}
+  .p-block{background:#fdf1d9;color:#8a6100}
+  .note{background:#fff;border:1px dashed var(--teal);border-radius:10px;padding:12px 14px;font-size:.9rem}
+  a{color:var(--pink)}
+  ul{margin:6px 0 6px 20px;padding:0}
+  li{margin:3px 0}
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:14px;color:#77838d;font-size:.8rem}
+  @media print{body{background:#fff}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>Informe de pruebas manuales — Bloque 1</h1>
+  <div class="sub"><strong>Autenticación, sesión, roles y seguridad</strong> · Sarichi Crocheting · QA-SARICHI-B1 v1.0 · 19/10/2026</div>
+  <div class="sub">SRS: <span class="mono">SRS_Sarichi_Crocheting_v2 DEFINITIVA.docx</span> · Código: <span class="mono">C:\TrabajosSprint\SarichiCrocheting</span> · Ambiente: local y producción</div>
+</header>
+
+<div class="cards">
+  <div class="card"><b>24</b><span>Casos en el bloque</span></div>
+  <div class="card"><b>0</b><span>Ejecutados</span></div>
+  <div class="card med"><b>24</b><span>Pendientes</span></div>
+  <div class="card crit"><b>3</b><span>Hallazgos críticos</span></div>
+  <div class="card high"><b>10</b><span>Hallazgos altos</span></div>
+  <div class="card"><b>26</b><span>Total hallazgos</span></div>
+</div>
+
+<div class="note">
+  <strong>Estado del documento:</strong> casos y hallazgos cargados a partir del análisis del SRS y del código.
+  Los resultados se completan durante la ejecución. Criterio <em>mixto</em>: una desviación frente al SRS se registra
+  como hallazgo con severidad; las rutas y pantallas se describen tal como existen en el sistema.
+</div>
+
+<h2>1. Resumen por prioridad y ambiente</h2>
+<table>
+  <thead><tr><th>Prioridad</th><th>Casos</th><th>Ambiente</th><th>Detalle</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pill p-p1">P1</span></td><td>8</td><td>Local</td><td>Escalada, IDOR, refresh, recuperación, JWT manipulado</td></tr>
+    <tr><td><span class="pill p-p1">P1</span></td><td>7</td><td>Ambos</td><td>Registro, login, logout y permisos por rol</td></tr>
+    <tr><td><span class="pill p-p2">P2</span></td><td>5</td><td>Local</td><td>Cuenta inactiva, hash, límite de intentos, cambio de contraseña</td></tr>
+    <tr><td><span class="pill p-p2">P2</span></td><td>4</td><td>Ambos</td><td>OAuth2, enumeración, cabeceras y coherencia de sesión</td></tr>
+    <tr><td><strong>Total</strong></td><td>24</td><td>13 local · 11 ambos</td><td>15 de prioridad P1 · 9 de prioridad P2</td></tr>
+  </tbody>
+</table>
+
+<h2>2. Casos de prueba</h2>
+<table>
+  <thead>
+    <tr><th style="width:74px">ID</th><th>Caso</th><th style="width:86px">RF</th><th style="width:74px">Prioridad</th><th style="width:74px">Entorno</th><th style="width:92px">Estado</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>AUTH-01</td><td>Registro de usuario válido por API</td><td>AUTH-01</td><td><span class="pill p-p1">P1</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-02</td><td>Registro con correo ya existente</td><td>AUTH-01</td><td><span class="pill p-p1">P1</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-03</td><td>Validación de campos del registro</td><td>AUTH-01</td><td><span class="pill p-p1">P1</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-04</td><td>Login web con cada cuenta semilla y redirección por rol</td><td>AUTH-02</td><td><span class="pill p-p1">P1</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-05</td><td>Login con credenciales inválidas</td><td>AUTH-02</td><td><span class="pill p-p1">P1</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-06</td><td>Inicio de sesión de cuenta suspendida</td><td>AUTH-02</td><td><span class="pill p-p1">P1</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-07</td><td>Inicio de sesión de cuenta inactiva</td><td>AUTH-02</td><td><span class="pill p-p2">P2</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-08</td><td>Renovación del access token con refresh token válido</td><td>AUTH-04</td><td><span class="pill p-p1">P1</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-09</td><td>Rechazo de refresh token inválido</td><td>AUTH-04</td><td><span class="pill p-p1">P1</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-10</td><td>Cierre de sesión por API y por web</td><td>AUTH-05</td><td><span class="pill p-p1">P1</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-11</td><td>IDOR en el cierre de sesión (X-User-Id)</td><td>AUTH-05</td><td><span class="pill p-p1">P1</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-12</td><td>Solicitud de recuperación de contraseña</td><td>AUTH-06</td><td><span class="pill p-p1">P1</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-13</td><td>Restablecimiento de contraseña</td><td>AUTH-06</td><td><span class="pill p-p1">P1</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-14</td><td>Acceso con cuenta de Google (OAuth2)</td><td>AUTH-03</td><td><span class="pill p-p2">P2</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-15</td><td>Escalada de privilegios en el registro</td><td>AUTH-01</td><td><span class="pill p-p1">P1</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-16</td><td>Matriz de permisos por rol</td><td>SEG-01</td><td><span class="pill p-p1">P1</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente*</span></td></tr>
+    <tr><td>AUTH-17</td><td>Rechazo de JWT manipulado</td><td>SEG-01</td><td><span class="pill p-p1">P1</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-18</td><td>Rechazo de access token expirado</td><td>AUTH-02</td><td><span class="pill p-p2">P2</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-19</td><td>Protección del hash de contraseña</td><td>SEG-01</td><td><span class="pill p-p2">P2</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-20</td><td>Enumeración de usuarios</td><td>SEG-01</td><td><span class="pill p-p2">P2</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-21</td><td>Intentos fallidos repetidos</td><td>SEG-01</td><td><span class="pill p-p2">P2</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-22</td><td>Exposición de información y cabeceras de seguridad</td><td>SEG-01</td><td><span class="pill p-p2">P2</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-23</td><td>Coherencia entre sesión web y token</td><td>SEG-01</td><td><span class="pill p-p2">P2</span></td><td>Ambos</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+    <tr><td>AUTH-24</td><td>Cambio de contraseña desde la sesión activa</td><td>AUTH-06</td><td><span class="pill p-p2">P2</span></td><td>Local</td><td><span class="pill p-wait">Pendiente</span></td></tr>
+  </tbody>
+</table>
+<p class="sub">* En AUTH-16 las combinaciones con los roles MERCADEO y BODEGA quedan bloqueadas por falta de cuentas de prueba (H-26).
+Detalle completo de pasos, datos y resultado esperado en <a href="02-casos-bloque-1.csv">02-casos-bloque-1.csv</a>.</p>
+
+<h2>3. Hallazgos de análisis (SRS vs sistema)</h2>
+<table>
+  <thead><tr><th style="width:58px">ID</th><th>Hallazgo</th><th style="width:84px">Severidad</th><th style="width:74px">Bloque</th><th style="width:130px">Casos</th></tr></thead>
+  <tbody>
+    <tr><td>H-05</td><td>Escalada de privilegios: el registro acepta rol arbitrario</td><td><span class="pill p-crit">Crítica</span></td><td>1</td><td>AUTH-15</td></tr>
+    <tr><td>H-06</td><td>El token de recuperación se devuelve en la respuesta de la API</td><td><span class="pill p-crit">Crítica</span></td><td>1</td><td>AUTH-12</td></tr>
+    <tr><td>H-14</td><td>Credenciales de MongoDB en el archivo de configuración</td><td><span class="pill p-crit">Crítica</span></td><td>8</td><td>—</td></tr>
+    <tr><td>H-04</td><td>Acceso con Google OAuth2 no implementado</td><td><span class="pill p-alta">Alta</span></td><td>1</td><td>AUTH-14</td></tr>
+    <tr><td>H-07</td><td>IDOR: el logout acepta el identificador de un tercero</td><td><span class="pill p-alta">Alta</span></td><td>1</td><td>AUTH-11</td></tr>
+    <tr><td>H-09</td><td>Los endpoints de monitoreo están públicos</td><td><span class="pill p-alta">Alta</span></td><td>1</td><td>AUTH-22</td></tr>
+    <tr><td>H-13</td><td>El registro no verifica el correo</td><td><span class="pill p-alta">Alta</span></td><td>1</td><td>AUTH-01</td></tr>
+    <tr><td>H-19</td><td>API de wishlist, mensajes y personalizador abiertas sin sesión</td><td><span class="pill p-alta">Alta</span></td><td>1</td><td>—</td></tr>
+    <tr><td>H-01</td><td>El SRS describe un frontend React que no existe</td><td><span class="pill p-alta">Alta</span></td><td>Todos</td><td>—</td></tr>
+    <tr><td>H-15</td><td>Los pagos dependen de llaves de Wompi no configuradas</td><td><span class="pill p-alta">Alta</span></td><td>2</td><td>—</td></tr>
+    <tr><td>H-17</td><td>El correo solo se registra en logs</td><td><span class="pill p-alta">Alta</span></td><td>8</td><td>AUTH-12</td></tr>
+    <tr><td>H-18</td><td>No existe bitácora de auditoría (RF-G-04)</td><td><span class="pill p-alta">Alta</span></td><td>8</td><td>—</td></tr>
+    <tr><td>H-23</td><td>No se implementa el anticipo y saldo 50/50</td><td><span class="pill p-alta">Alta</span></td><td>3</td><td>—</td></tr>
+    <tr><td>H-02</td><td>Firma JWT HMAC-SHA256 en lugar de RS256</td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-17</td></tr>
+    <tr><td>H-03</td><td>Vigencia de tokens 1 hora / 1 día frente a 15 min / 7 días</td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-08; AUTH-18</td></tr>
+    <tr><td>H-08</td><td><span class="mono">include-stacktrace=always</span></td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-22</td></tr>
+    <tr><td>H-10</td><td>Sesión HTTP y token JWT conviven sin integración</td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-23</td></tr>
+    <tr><td>H-11</td><td>El interceptor de seguridad protege rutas inexistentes</td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-16</td></tr>
+    <tr><td>H-12</td><td>No existe cambio de contraseña desde la sesión activa</td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-24</td></tr>
+    <tr><td>H-16</td><td>Transportadora en modo simulado</td><td><span class="pill p-media">Media</span></td><td>5</td><td>—</td></tr>
+    <tr><td>H-20</td><td>El registro revela si un correo ya está en uso</td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-20</td></tr>
+    <tr><td>H-21</td><td>No hay límite de intentos de autenticación</td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-21</td></tr>
+    <tr><td>H-22</td><td>No existe búsqueda global unificada</td><td><span class="pill p-media">Media</span></td><td>8</td><td>—</td></tr>
+    <tr><td>H-24</td><td>No existe entidad de comprobantes de pago</td><td><span class="pill p-media">Media</span></td><td>2</td><td>—</td></tr>
+    <tr><td>H-25</td><td>Estado del pedido como texto libre sin máquina de estados</td><td><span class="pill p-media">Media</span></td><td>3</td><td>—</td></tr>
+    <tr><td>H-26</td><td>Sin cuentas de prueba para MERCADEO y BODEGA</td><td><span class="pill p-media">Media</span></td><td>1</td><td>AUTH-16</td></tr>
+  </tbody>
+</table>
+<p class="sub">Detalle en <a href="03-hallazgos.csv">03-hallazgos.csv</a>.</p>
+
+<h2>4. Trazabilidad SRS → casos</h2>
+<table>
+  <thead><tr><th>RF</th><th>Requisito</th><th>Casos</th><th>Cobertura</th></tr></thead>
+  <tbody>
+    <tr><td>RF-AUTH-01</td><td>Registro</td><td>AUTH-01, 02, 03, 15</td><td>Alta</td></tr>
+    <tr><td>RF-AUTH-02</td><td>Login</td><td>AUTH-04, 05, 06, 07, 18</td><td>Alta</td></tr>
+    <tr><td>RF-AUTH-03</td><td>Acceso con Google</td><td>AUTH-14</td><td>Parcial (no implementado)</td></tr>
+    <tr><td>RF-AUTH-04</td><td>Refresh token</td><td>AUTH-08, 09</td><td>Alta</td></tr>
+    <tr><td>RF-AUTH-05</td><td>Logout</td><td>AUTH-10, 11</td><td>Alta</td></tr>
+    <tr><td>RF-AUTH-06</td><td>Recuperación de contraseña</td><td>AUTH-12, 13, 24</td><td>Alta</td></tr>
+    <tr><td>RF-SEG-01</td><td>Seguridad transversal</td><td>AUTH-16, 17, 19, 20, 21, 22, 23</td><td>Media</td></tr>
+    <tr><td>RF-G-04</td><td>Auditoría</td><td>—</td><td>No cubierto (no implementado)</td></tr>
+  </tbody>
+</table>
+
+<h2>5. Siguientes pasos</h2>
+<ul>
+  <li>Ejecutar los casos <strong>P1</strong> en local y luego los de ambiente <strong>Ambos</strong>.</li>
+  <li>Registrar resultado real, estado y evidencia en <span class="mono">02-casos-bloque-1.csv</span>.</li>
+  <li>Actualizar los hallazgos confirmados y sus severidades en <span class="mono">03-hallazgos.csv</span>.</li>
+  <li>Reponer cuentas de prueba y reiniciar el servicio si se modificaron configuraciones.</li>
+  <li>Obtener la aprobación del usuario antes de iniciar el <strong>Bloque 2</strong>.</li>
+</ul>
+
+<footer>
+  QA-SARICHI-B1 · Informe generado 19/10/2026 · Archivos: 00-plan-maestro.md · 01-matriz-trazabilidad.csv ·
+  02-casos-bloque-1.csv · 03-hallazgos.csv · datos-prueba.md
+</footer>
+
+</div>
+</body>
+</html>

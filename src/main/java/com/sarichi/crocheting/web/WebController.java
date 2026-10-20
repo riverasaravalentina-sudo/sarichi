@@ -60,7 +60,7 @@ import java.io.IOException;
  * Los @RestController de /api/** NO se modifican.
  */
 @Controller
-@RequestMapping("/api/web")
+@RequestMapping("/crocheting")
 public class WebController {
 
     @Autowired private ResenaService     resenaService;
@@ -130,7 +130,7 @@ public class WebController {
         try {
             model.addAttribute("producto", productoService.obtenerPorId(id));
         } catch (Exception e) {
-            return "redirect:/api/web/tienda";
+            return "redirect:/crocheting/tienda";
         }
         try {
             model.addAttribute("resenas", resenaService.listarPorProducto(id));
@@ -150,7 +150,7 @@ public class WebController {
                               @RequestParam(required = false) String comentario,
                               HttpSession session,
                               RedirectAttributes ra) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         String usuarioWebId = (String) session.getAttribute("usuarioWebId");
         try {
             resenaService.crearResenaWeb(id, usuarioWebId, calificacion, comentario);
@@ -158,7 +158,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al crear reseña: " + e.getMessage());
         }
-        return "redirect:/api/web/tienda/" + id;
+        return "redirect:/crocheting/tienda/" + id;
     }
 
     @GetMapping("/tienda")
@@ -202,7 +202,7 @@ public class WebController {
             var articulo = blogService.obtenerPorSlug(slug);
             model.addAttribute("articulo", articulo);
         } catch (Exception e) {
-            return "redirect:/api/web/blog";
+            return "redirect:/crocheting/blog";
         }
         return "web/blog-articulo";
     }
@@ -275,22 +275,22 @@ public class WebController {
 
     /** Mapea cada rol a su ruta de dashboard correspondiente */
     private String redirigirPorRol(String rol) {
-        if (rol == null) return "redirect:/api/web/login";
+        if (rol == null) return "redirect:/crocheting/login";
         return switch (rol) {
-            case "ADMIN"     -> "redirect:/api/web/dashboard/admin";
-            case "ARTESANA"  -> "redirect:/api/web/dashboard/artesana";
-            case "LOGISTICA" -> "redirect:/api/web/dashboard/logistica";
-            case "BODEGA"    -> "redirect:/api/web/dashboard/bodega";
-            case "MERCADEO"  -> "redirect:/api/web/dashboard/mercadeo";
-            case "CLIENTE"   -> "redirect:/api/web/dashboard/cliente";
-            default          -> "redirect:/api/web/";
+            case "ADMIN"     -> "redirect:/crocheting/dashboard/admin";
+            case "ARTESANA"  -> "redirect:/crocheting/dashboard/artesana";
+            case "LOGISTICA" -> "redirect:/crocheting/dashboard/logistica";
+            case "BODEGA"    -> "redirect:/crocheting/dashboard/bodega";
+            case "MERCADEO"  -> "redirect:/crocheting/dashboard/mercadeo";
+            case "CLIENTE"   -> "redirect:/crocheting/dashboard/cliente";
+            default          -> "redirect:/crocheting/";
         };
     }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/api/web/login";
+        return "redirect:/crocheting/login";
     }
 
     // ── Registro público ───────────────────────────────────────────────
@@ -319,10 +319,10 @@ public class WebController {
                     .build();
             autenticacionService.registrar(dto);
             ra.addFlashAttribute("success", "Cuenta creada correctamente. Ya puedes iniciar sesión.");
-            return "redirect:/api/web/login";
+            return "redirect:/crocheting/login";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/api/web/registro";
+            return "redirect:/crocheting/registro";
         }
     }
 
@@ -374,7 +374,7 @@ public class WebController {
             response.setHeader("Content-Disposition", "attachment; filename=reporte-admin.pdf");
             response.getOutputStream().write(pdf);
         } catch (Exception e) {
-            response.sendRedirect("/api/web/admin/reportes");
+            response.sendRedirect("/crocheting/admin/reportes");
         }
     }
 
@@ -388,7 +388,7 @@ public class WebController {
             response.setHeader("Content-Disposition", "attachment; filename=reporte-admin.xlsx");
             response.getOutputStream().write(excel);
         } catch (Exception e) {
-            response.sendRedirect("/api/web/admin/reportes");
+            response.sendRedirect("/crocheting/admin/reportes");
         }
     }
 
@@ -473,7 +473,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/api/web/bodega/hilos";
+        return "redirect:/crocheting/bodega/hilos";
     }
 
     @PostMapping("/bodega/hilos/salida/{id}")
@@ -490,7 +490,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/api/web/bodega/hilos";
+        return "redirect:/crocheting/bodega/hilos";
     }
 
     @GetMapping("/bodega/inventario")
@@ -520,7 +520,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/api/web/bodega/inventario";
+        return "redirect:/crocheting/bodega/inventario";
     }
 
     @PostMapping("/bodega/productos/salida/{id}")
@@ -537,7 +537,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/api/web/bodega/inventario";
+        return "redirect:/crocheting/bodega/inventario";
     }
 
     @GetMapping("/bodega/movimientos")
@@ -563,7 +563,7 @@ public class WebController {
             response.setHeader("Content-Disposition", "attachment; filename=inventario.pdf");
             response.getOutputStream().write(pdf);
         } catch (Exception e) {
-            response.sendRedirect("/api/web/dashboard/bodega");
+            response.sendRedirect("/crocheting/dashboard/bodega");
         }
     }
 
@@ -577,7 +577,7 @@ public class WebController {
             response.setHeader("Content-Disposition", "attachment; filename=inventario.xlsx");
             response.getOutputStream().write(excel);
         } catch (Exception e) {
-            response.sendRedirect("/api/web/dashboard/bodega");
+            response.sendRedirect("/crocheting/dashboard/bodega");
         }
     }
 
@@ -619,7 +619,7 @@ public class WebController {
     @GetMapping("/dashboard")
     public String dashboardGeneral(HttpSession session) {
         String rol = (String) session.getAttribute("usuarioWebRol");
-        if (rol == null) return "redirect:/api/web/login";
+        if (rol == null) return "redirect:/crocheting/login";
         return redirigirPorRol(rol);
     }
 
@@ -629,7 +629,7 @@ public class WebController {
     public String listarProductos(@RequestParam(required = false) String categoria,
                                   @RequestParam(required = false) String busqueda,
                                   Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb",     session.getAttribute("usuarioWebRol"));
         ProductoFiltroDTO filtro = new ProductoFiltroDTO();
@@ -668,7 +668,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al guardar el producto: " + e.getMessage());
         }
-        return "redirect:/api/web/productos";
+        return "redirect:/crocheting/productos";
     }
 
     @GetMapping("/productos/editar/{id}")
@@ -682,7 +682,7 @@ public class WebController {
             model.addAttribute("accion",     "Editar");
             return "web/productos/form";
         } catch (Exception e) {
-            return "redirect:/api/web/productos";
+            return "redirect:/crocheting/productos";
         }
     }
 
@@ -696,14 +696,14 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al eliminar: " + e.getMessage());
         }
-        return "redirect:/api/web/productos";
+        return "redirect:/crocheting/productos";
     }
 
     // ── Colores de Hilo ────────────────────────────────────────────────
 
     @GetMapping("/colores")
     public String listarColores(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb",     session.getAttribute("usuarioWebRol"));
         List<ColorHiloDTO> colores = colorHiloService.listarTodos();
@@ -735,7 +735,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al guardar el color: " + e.getMessage());
         }
-        return "redirect:/api/web/colores";
+        return "redirect:/crocheting/colores";
     }
 
     @GetMapping("/colores/editar/{id}")
@@ -748,7 +748,7 @@ public class WebController {
             model.addAttribute("accion", "Editar");
             return "web/colores/form";
         } catch (Exception e) {
-            return "redirect:/api/web/colores";
+            return "redirect:/crocheting/colores";
         }
     }
 
@@ -762,14 +762,14 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al eliminar: " + e.getMessage());
         }
-        return "redirect:/api/web/colores";
+        return "redirect:/crocheting/colores";
     }
 
     // ── Pedidos ────────────────────────────────────────────────────────
 
     @GetMapping("/pedidos")
     public String listarPedidos(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb",     session.getAttribute("usuarioWebRol"));
         try {
@@ -832,7 +832,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al generar guía: " + e.getMessage());
         }
-        return "redirect:/api/web/logistica/despachos";
+        return "redirect:/crocheting/logistica/despachos";
     }
 
     @PostMapping("/logistica/despachos/{id}/estado")
@@ -852,7 +852,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al actualizar estado: " + e.getMessage());
         }
-        return "redirect:/api/web/logistica/despachos";
+        return "redirect:/crocheting/logistica/despachos";
     }
 
     @GetMapping("/logistica/guias")
@@ -915,7 +915,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al publicar: " + e.getMessage());
         }
-        return "redirect:/api/web/mercadeo/blog";
+        return "redirect:/crocheting/mercadeo/blog";
     }
 
     @GetMapping("/mercadeo/galeria")
@@ -952,7 +952,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al subir imagen: " + e.getMessage());
         }
-        return "redirect:/api/web/mercadeo/galeria";
+        return "redirect:/crocheting/mercadeo/galeria";
     }
 
     @GetMapping("/mercadeo/galeria/eliminar/{id}")
@@ -966,7 +966,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al eliminar imagen: " + e.getMessage());
         }
-        return "redirect:/api/web/mercadeo/galeria";
+        return "redirect:/crocheting/mercadeo/galeria";
     }
 
     @GetMapping("/mercadeo/retos")
@@ -1007,7 +1007,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al crear reto: " + e.getMessage());
         }
-        return "redirect:/api/web/mercadeo/retos";
+        return "redirect:/crocheting/mercadeo/retos";
     }
 
     @PostMapping("/mercadeo/retos/{id}/finalizar")
@@ -1021,7 +1021,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al finalizar reto: " + e.getMessage());
         }
-        return "redirect:/api/web/mercadeo/retos";
+        return "redirect:/crocheting/mercadeo/retos";
     }
 
     @GetMapping("/mercadeo/analiticas")
@@ -1068,7 +1068,7 @@ public class WebController {
             response.setHeader("Content-Disposition", "attachment; filename=reporte-mercadeo.pdf");
             response.getOutputStream().write(pdf);
         } catch (Exception e) {
-            response.sendRedirect("/api/web/dashboard/mercadeo");
+            response.sendRedirect("/crocheting/dashboard/mercadeo");
         }
     }
 
@@ -1082,7 +1082,7 @@ public class WebController {
             response.setHeader("Content-Disposition", "attachment; filename=reporte-mercadeo.xlsx");
             response.getOutputStream().write(excel);
         } catch (Exception e) {
-            response.sendRedirect("/api/web/dashboard/mercadeo");
+            response.sendRedirect("/crocheting/dashboard/mercadeo");
         }
     }
 
@@ -1090,7 +1090,7 @@ public class WebController {
 
     @GetMapping("/wishlist")
     public String verWishlist(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         String usuarioWebId = (String) session.getAttribute("usuarioWebId");
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
@@ -1105,23 +1105,23 @@ public class WebController {
     @PostMapping("/wishlist/agregar/{productoId}")
     public String agregarWishlist(@PathVariable String productoId,
                                    RedirectAttributes ra, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         try {
             wishlistService.agregar((String) session.getAttribute("usuarioWebId"), productoId);
             ra.addFlashAttribute("success", "Producto agregado a tu lista de deseos");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/api/web/wishlist";
+        return "redirect:/crocheting/wishlist";
     }
 
     @GetMapping("/wishlist/eliminar/{productoId}")
     public String eliminarWishlist(@PathVariable String productoId,
                                     RedirectAttributes ra, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         wishlistService.eliminar((String) session.getAttribute("usuarioWebId"), productoId);
         ra.addFlashAttribute("success", "Producto eliminado de tu lista de deseos");
-        return "redirect:/api/web/wishlist";
+        return "redirect:/crocheting/wishlist";
     }
 
     // ── Gesti�n de Usuarios (solo ADMIN) ───────────────────────────────
@@ -1196,7 +1196,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error: " + e.getMessage());
         }
-        return "redirect:/api/web/usuarios";
+        return "redirect:/crocheting/usuarios";
     }
 
     @GetMapping("/usuarios/editar/{id}")
@@ -1214,7 +1214,7 @@ public class WebController {
             model.addAttribute("accion", "Editar");
             return "web/admin/usuarios-form";
         } catch (Exception e) {
-            return "redirect:/api/web/usuarios";
+            return "redirect:/crocheting/usuarios";
         }
     }
 
@@ -1233,7 +1233,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error: " + e.getMessage());
         }
-        return "redirect:/api/web/usuarios";
+        return "redirect:/crocheting/usuarios";
     }
 
     @GetMapping("/usuarios/eliminar/{id}")
@@ -1250,7 +1250,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error: " + e.getMessage());
         }
-        return "redirect:/api/web/usuarios";
+        return "redirect:/crocheting/usuarios";
     }
 
     // ── Personalizador ──────────────────────────────────────────────────
@@ -1269,7 +1269,7 @@ public class WebController {
 
     @GetMapping("/pedido-personalizado")
     public String pedidoPersonalizadoForm(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("usuarioWebId", session.getAttribute("usuarioWebId"));
         try {
@@ -1288,7 +1288,7 @@ public class WebController {
                                               @RequestParam(required = false) String mensajeBordado,
                                               RedirectAttributes ra,
                                               HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         String usuarioWebId = (String) session.getAttribute("usuarioWebId");
         try {
             java.util.Map<String, String> coloresMap = new java.util.HashMap<>();
@@ -1304,10 +1304,10 @@ public class WebController {
                     .build();
             personalizadorService.guardar(dto, usuarioWebId);
             ra.addFlashAttribute("success", "Solicitud enviada correctamente. La artesana te cotizará pronto.");
-            return "redirect:/api/web/dashboard/cliente";
+            return "redirect:/crocheting/dashboard/cliente";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al enviar solicitud: " + e.getMessage());
-            return "redirect:/api/web/pedido-personalizado";
+            return "redirect:/crocheting/pedido-personalizado";
         }
     }
 
@@ -1315,7 +1315,7 @@ public class WebController {
 
     @GetMapping("/chat/{pedidoId}")
     public String chatPedido(@PathVariable String pedidoId, Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         String usuarioWebId = (String) session.getAttribute("usuarioWebId");
         String usuarioWeb = (String) session.getAttribute("usuarioWeb");
         String rolWeb = (String) session.getAttribute("usuarioWebRol");
@@ -1346,7 +1346,7 @@ public class WebController {
                                    HttpSession session) {
         if (!estaAutenticado(session)) {
             ra.addFlashAttribute("warning", "Debes iniciar sesión o registrarte para agregar productos al carrito.");
-            return "redirect:/api/web/login";
+            return "redirect:/crocheting/login";
         }
         try {
             ProductoDTO producto = productoService.obtenerPorId(productoId);
@@ -1371,7 +1371,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No se pudo agregar el producto: " + e.getMessage());
         }
-        return "redirect:/api/web/carrito";
+        return "redirect:/crocheting/carrito";
     }
 
     @PostMapping("/carrito/eliminar/{id}")
@@ -1380,21 +1380,21 @@ public class WebController {
         carrito.removeIf(item -> item.getProductoId().equals(id));
         session.setAttribute("carrito", carrito);
         ra.addFlashAttribute("success", "Producto eliminado del carrito.");
-        return "redirect:/api/web/carrito";
+        return "redirect:/crocheting/carrito";
     }
 
     @GetMapping("/carrito/vaciar")
     public String vaciarCarrito(RedirectAttributes ra, HttpSession session) {
         session.setAttribute("carrito", new ArrayList<CarritoItem>());
         ra.addFlashAttribute("success", "Carrito vaciado correctamente.");
-        return "redirect:/api/web/carrito";
+        return "redirect:/crocheting/carrito";
     }
 
     @GetMapping("/checkout")
     public String checkout(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         List<CarritoItem> carrito = obtenerCarrito(session);
-        if (carrito.isEmpty()) return "redirect:/api/web/carrito";
+        if (carrito.isEmpty()) return "redirect:/crocheting/carrito";
         agregarModeloCarrito(model, session);
         return "web/checkout";
     }
@@ -1405,11 +1405,11 @@ public class WebController {
                                     @RequestParam(required = false) String departamento,
                                     RedirectAttributes ra,
                                     HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         List<CarritoItem> carrito = obtenerCarrito(session);
         if (carrito.isEmpty()) {
             ra.addFlashAttribute("error", "Tu carrito está vacío.");
-            return "redirect:/api/web/carrito";
+            return "redirect:/crocheting/carrito";
         }
         try {
             List<ItemPedidoRequest> items = carrito.stream()
@@ -1428,16 +1428,16 @@ public class WebController {
             pedidoService.crearPedido((String) session.getAttribute("usuarioWebId"), dto);
             session.setAttribute("carrito", new ArrayList<CarritoItem>());
             ra.addFlashAttribute("success", "Pedido creado correctamente.");
-            return "redirect:/api/web/mis-pedidos";
+            return "redirect:/crocheting/mis-pedidos";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No se pudo confirmar el pedido: " + e.getMessage());
-            return "redirect:/api/web/checkout";
+            return "redirect:/crocheting/checkout";
         }
     }
 
     @GetMapping("/mis-pedidos")
     public String misPedidos(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
         try {
@@ -1463,7 +1463,7 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al cambiar estado: " + e.getMessage());
         }
-        return "redirect:/api/web/dashboard/artesana";
+        return "redirect:/crocheting/dashboard/artesana";
     }
 
     // ── Artesana subpages ──────────────────────────────────────────────
@@ -1522,14 +1522,14 @@ public class WebController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al cotizar: " + e.getMessage());
         }
-        return "redirect:/api/web/artesana/cotizaciones";
+        return "redirect:/crocheting/artesana/cotizaciones";
     }
 
     // ── Cotizaciones (cliente) ──────────────────────────────────────────
 
     @GetMapping("/mis-cotizaciones")
     public String misCotizaciones(Model model, HttpSession session) {
-        if (!estaAutenticado(session)) return "redirect:/api/web/login";
+        if (!estaAutenticado(session)) return "redirect:/crocheting/login";
         String usuarioWebId = (String) session.getAttribute("usuarioWebId");
         model.addAttribute("usuarioWeb", session.getAttribute("usuarioWeb"));
         model.addAttribute("rolWeb", session.getAttribute("usuarioWebRol"));
@@ -1591,7 +1591,7 @@ public class WebController {
      */
     private String redirigirSegunSesion(HttpSession session) {
         String rol = (String) session.getAttribute("usuarioWebRol");
-        if (rol == null) return "redirect:/api/web/login";
+        if (rol == null) return "redirect:/crocheting/login";
         return redirigirPorRol(rol);
     }
 }

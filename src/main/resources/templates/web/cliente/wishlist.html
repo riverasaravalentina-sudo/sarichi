@@ -22,10 +22,10 @@
 <body>
   <nav class="navbar navbar-expand-lg">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="/api/web/">🐱 Mi Lista de Deseos</a>
+      <a class="navbar-brand fw-bold" href="/crocheting/">🐱 Mi Lista de Deseos</a>
       <div>
-        <a href="/api/web/dashboard" class="btn btn-sm btn-outline-secondary">Volver</a>
-        <a href="/api/web/logout" class="btn btn-sm btn-outline-danger ms-2">Salir</a>
+        <a href="/crocheting/dashboard" class="btn btn-sm btn-outline-secondary">Volver</a>
+        <a href="/crocheting/logout" class="btn btn-sm btn-outline-danger ms-2">Salir</a>
       </div>
     </div>
   </nav>
@@ -49,14 +49,14 @@
             </small>
           </div>
           <div class="d-flex gap-2 mt-2">
-            <form method="post" th:action="@{/api/web/carrito/agregar}">
+            <form method="post" th:action="@{/crocheting/carrito/agregar}">
               <input type="hidden" name="productoId" th:value="${item.productoId}">
               <input type="hidden" name="cantidad" value="1">
               <button type="submit" class="btn btn-sm" style="background:var(--rosa);color:#fff;">
                 <i class="bi bi-cart-plus"></i>
               </button>
             </form>
-            <a th:href="@{/api/web/wishlist/eliminar/{id}(id=${item.productoId})}" class="btn btn-sm btn-outline-danger">
+            <a th:href="@{/crocheting/wishlist/eliminar/{id}(id=${item.productoId})}" class="btn btn-sm btn-outline-danger">
               <i class="bi bi-trash"></i>
             </a>
           </div>
@@ -68,7 +68,7 @@
       <div style="font-size:4rem;">🐱</div>
       <p style="font-weight:600;color:#999">Tu lista de deseos está vacía</p>
       <p class="text-muted small">Explora la tienda y agrega tus productos favoritos</p>
-      <a href="/api/web/tienda" class="btn" style="background:var(--rosa);color:#fff;">Explorar tienda</a>
+      <a href="/crocheting/tienda" class="btn" style="background:var(--rosa);color:#fff;">Explorar tienda</a>
     </div>
   </div>
 

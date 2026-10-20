@@ -11,17 +11,17 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/api/web/}"><i class="bi bi-megaphone"></i> MERCADEO</a>
+      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/crocheting/}"><i class="bi bi-megaphone"></i> MERCADEO</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMer">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarMer">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/mercadeo/blog}"><i class="bi bi-pencil"></i> Blog</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/mercadeo/galeria}"><i class="bi bi-images"></i> Galería</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/mercadeo/retos}"><i class="bi bi-trophy"></i> Retos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/mercadeo/analiticas}"><i class="bi bi-graph-up"></i> Analíticas</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/mercadeo/blog}"><i class="bi bi-pencil"></i> Blog</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/mercadeo/galeria}"><i class="bi bi-images"></i> Galería</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/mercadeo/retos}"><i class="bi bi-trophy"></i> Retos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/mercadeo/analiticas}"><i class="bi bi-graph-up"></i> Analíticas</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
         </ul>
       </div>
     </div>
@@ -84,21 +84,21 @@
 
     <div class="row g-4">
       <div class="col-md-4">
-        <a th:href="@{/api/web/mercadeo/blog}" class="card shadow-sm nav-card p-4 text-decoration-none">
+        <a th:href="@{/crocheting/mercadeo/blog}" class="card shadow-sm nav-card p-4 text-decoration-none">
           <div style="width:64px;height:64px;border-radius:16px;background:#fce4ec;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#E8527A" class="mb-3"><i class="bi bi-pencil-square"></i></div>
           <h5 class="fw-bold mb-1">Blog</h5>
           <small class="text-muted">Gestiona artículos y publicaciones</small>
         </a>
       </div>
       <div class="col-md-4">
-        <a th:href="@{/api/web/mercadeo/galeria}" class="card shadow-sm nav-card p-4 text-decoration-none">
+        <a th:href="@{/crocheting/mercadeo/galeria}" class="card shadow-sm nav-card p-4 text-decoration-none">
           <div style="width:64px;height:64px;border-radius:16px;background:#e0f2f1;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#2DB5C8" class="mb-3"><i class="bi bi-images"></i></div>
           <h5 class="fw-bold mb-1">Galería</h5>
           <small class="text-muted">Administra colecciones y fotos</small>
         </a>
       </div>
       <div class="col-md-4">
-        <a th:href="@{/api/web/mercadeo/retos}" class="card shadow-sm nav-card p-4 text-decoration-none">
+        <a th:href="@{/crocheting/mercadeo/retos}" class="card shadow-sm nav-card p-4 text-decoration-none">
           <div style="width:64px;height:64px;border-radius:16px;background:#fff3e0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#ff9800" class="mb-3"><i class="bi bi-trophy"></i></div>
           <h5 class="fw-bold mb-1">Retos Mensuales</h5>
           <small class="text-muted">Crea y gestiona retos</small>
@@ -111,7 +111,7 @@
         <div class="card shadow-sm">
           <div class="card-header d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0"><i class="bi bi-graph-up me-2 brand"></i>Analíticas</h5>
-            <a th:href="@{/api/web/mercadeo/analiticas}" class="btn btn-sm btn-outline-secondary">Ver detalle</a>
+            <a th:href="@{/crocheting/mercadeo/analiticas}" class="btn btn-sm btn-outline-secondary">Ver detalle</a>
           </div>
           <div class="card-body" th:if="${metricas != null}">
             <div class="row g-3">
@@ -135,7 +135,7 @@
           <div class="card-body text-center py-4" th:unless="${metricas != null}">
             <i class="bi bi-bar-chart brand" style="font-size:2rem"></i>
             <p class="text-muted mt-2 mb-0">No hay métricas disponibles</p>
-            <a th:href="@{/api/web/mercadeo/analiticas}" class="btn btn-outline-secondary btn-sm mt-2">Ir a analíticas</a>
+            <a th:href="@{/crocheting/mercadeo/analiticas}" class="btn btn-outline-secondary btn-sm mt-2">Ir a analíticas</a>
           </div>
         </div>
       </div>

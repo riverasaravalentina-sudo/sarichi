@@ -12,10 +12,10 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/mercadeo}">🐱 MERCADEO</a>
+      <a class="navbar-brand brand fw-bold" th:href="@{/crocheting/dashboard/mercadeo}">🐱 MERCADEO</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}">Salir</a></li>
         </ul>
       </div>
     </div>
@@ -33,7 +33,7 @@
             <p class="card-text small text-muted" th:text="${img.descripcion}">Descripción</p>
             <div class="d-flex justify-content-between align-items-center">
               <small class="text-muted"><i class="bi bi-heart"></i> <span th:text="${img.likes}">0</span></small>
-              <a class="btn btn-sm btn-outline-danger" th:href="@{/api/web/mercadeo/galeria/eliminar/{id}(id=${img.id})}"
+              <a class="btn btn-sm btn-outline-danger" th:href="@{/crocheting/mercadeo/galeria/eliminar/{id}(id=${img.id})}"
                  onclick="return confirm('¿Eliminar esta imagen?')"><i class="bi bi-trash"></i></a>
             </div>
           </div>
@@ -45,7 +45,7 @@
     <div class="modal fade" id="subirModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
-          <form th:action="@{/api/web/mercadeo/galeria/subir}" method="post" enctype="multipart/form-data">
+          <form th:action="@{/crocheting/mercadeo/galeria/subir}" method="post" enctype="multipart/form-data">
             <div class="modal-header"><h5 class="modal-title">Subir imagen</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
@@ -82,7 +82,7 @@
       <h5>Galería visual</h5>
       <p class="text-muted">Sube imágenes de productos terminados para inspirar a los clientes</p>
     </div>
-    <a th:href="@{/api/web/dashboard/mercadeo}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
+    <a th:href="@{/crocheting/dashboard/mercadeo}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

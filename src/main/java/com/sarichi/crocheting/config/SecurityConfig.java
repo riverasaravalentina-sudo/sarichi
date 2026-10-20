@@ -70,6 +70,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
 
                 // ── Capa web Thymeleaf — SIEMPRE pública ──────────────────────────
+                .requestMatchers(new AntPathRequestMatcher("/crocheting/**")).permitAll()
+
+                // ── Compatibilidad: redirección de rutas antiguas /api/web → /crocheting
                 .requestMatchers(new AntPathRequestMatcher("/api/web/**")).permitAll()
 
                 // ── Recursos estáticos y HTML públicos ────────────────────────────

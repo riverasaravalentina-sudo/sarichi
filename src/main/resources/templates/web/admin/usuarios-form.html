@@ -12,15 +12,15 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/admin}">🐱 ADMIN</a>
-      <a th:href="@{/api/web/usuarios}" class="btn btn-sm btn-outline-secondary ms-auto">&larr; Volver</a>
+      <a class="navbar-brand brand fw-bold" th:href="@{/crocheting/dashboard/admin}">🐱 ADMIN</a>
+      <a th:href="@{/crocheting/usuarios}" class="btn btn-sm btn-outline-secondary ms-auto">&larr; Volver</a>
     </div>
   </nav>
   <main class="container py-5" style="max-width:600px;">
     <h2 class="mb-4" th:text="${accion} + ' usuario'">Crear usuario</h2>
     <div class="card shadow-sm">
       <div class="card-body">
-        <form method="post" th:action="@{/api/web/usuarios/guardar}">
+        <form method="post" th:action="@{/crocheting/usuarios/guardar}">
           <input type="hidden" name="id" th:value="${usuario.id}">
 
           <div class="mb-3">

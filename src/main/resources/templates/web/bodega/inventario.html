@@ -12,15 +12,15 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/bodega}">📦 BODEGA</a>
+      <a class="navbar-brand brand fw-bold" th:href="@{/crocheting/dashboard/bodega}">📦 BODEGA</a>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/inventario}">Inventario</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/hilos}">Hilos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/movimientos}">Bitácora</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/bodega/inventario}">Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/bodega/hilos}">Hilos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/bodega/movimientos}">Bitácora</a></li>
         </ul>
         <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}">Salir</a></li>
         </ul>
       </div>
     </div>
@@ -57,13 +57,13 @@
         </div>
       </div>
     </div>
-    <a th:href="@{/api/web/dashboard/bodega}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
+    <a th:href="@{/crocheting/dashboard/bodega}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
   </main>
 
   <div class="modal fade" id="entradaModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form method="post" th:action="@{/api/web/bodega/productos/entrada/__${id}__}" id="entradaForm">
+        <form method="post" th:action="@{/crocheting/bodega/productos/entrada/__${id}__}" id="entradaForm">
           <div class="modal-header"><h5 class="modal-title">Registrar entrada de producto</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
           <div class="modal-body">
             <p class="text-muted" id="entradaNombre"></p>
@@ -87,7 +87,7 @@
   <div class="modal fade" id="salidaModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form method="post" th:action="@{/api/web/bodega/productos/salida/__${id}__}" id="salidaForm">
+        <form method="post" th:action="@{/crocheting/bodega/productos/salida/__${id}__}" id="salidaForm">
           <div class="modal-header"><h5 class="modal-title">Registrar salida de producto</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
           <div class="modal-body">
             <p class="text-muted" id="salidaNombre"></p>
@@ -116,7 +116,7 @@
         var itemId = btn.getAttribute('data-id');
         var nombre = btn.getAttribute('data-nombre');
         document.getElementById(id.replace('Modal', 'Nombre')).textContent = nombre;
-        document.getElementById(id.replace('Modal', 'Form')).action = '/api/web/bodega/productos/' + id.replace('Modal', '').toLowerCase() + '/' + itemId;
+        document.getElementById(id.replace('Modal', 'Form')).action = '/crocheting/bodega/productos/' + id.replace('Modal', '').toLowerCase() + '/' + itemId;
       });
     });
   </script>

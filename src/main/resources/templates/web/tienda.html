@@ -171,21 +171,21 @@
     <!-- Navbar -->
     <nav class="navbar navbar-sarichi sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand-sarichi" href="/api/web/">
+            <a class="navbar-brand-sarichi" href="/crocheting/">
                 🐱 Sarichi
             </a>
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="/api/web/">Inicio</a>
+                    <a class="nav-link" href="/crocheting/">Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/api/web/tienda">Tienda</a>
+                    <a class="nav-link" href="/crocheting/tienda">Tienda</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/api/web/blog">Blog</a>
+                    <a class="nav-link" href="/crocheting/blog">Blog</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/api/web/galeria">Galería</a>
+                    <a class="nav-link" href="/crocheting/galeria">Galería</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/rifa/index.html">🎁 Rifa</a>
@@ -197,14 +197,14 @@
                                 <i class="bi bi-person"></i> <span th:text="${usuarioWeb}"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/api/web/dashboard">Mi Dashboard</a></li>
+                                <li><a class="dropdown-item" href="/crocheting/dashboard">Mi Dashboard</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="/api/web/logout">Cerrar Sesión</a></li>
+                                <li><a class="dropdown-item" href="/crocheting/logout">Cerrar Sesión</a></li>
                             </ul>
                         </div>
                     </th:block>
                     <th:block th:unless="${usuarioWeb}">
-                        <a href="/api/web/login" class="btn btn-sm btn-primary">
+                        <a href="/crocheting/login" class="btn btn-sm btn-primary">
                             <i class="bi bi-box-arrow-in-right"></i> Ingresar
                         </a>
                     </th:block>
@@ -226,7 +226,7 @@
         <!-- Filtros -->
         <div class="filters">
             <h5>Filtros</h5>
-            <form method="get" action="/api/web/tienda" class="row g-3">
+            <form method="get" action="/crocheting/tienda" class="row g-3">
                 <div class="col-md-6">
                     <input type="text" name="buscar" class="form-control" placeholder="Buscar por nombre...">
                 </div>
@@ -274,7 +274,7 @@
                             </div>
                             <th:block th:if="${usuarioWeb != null}">
                                 <div class="d-flex gap-2">
-                                    <form method="post" th:action="@{/api/web/carrito/agregar}" class="flex-grow-1">
+                                    <form method="post" th:action="@{/crocheting/carrito/agregar}" class="flex-grow-1">
                                         <input type="hidden" name="productoId" th:value="${producto.id}">
                                         <input type="hidden" name="cantidad" value="1">
                                         <button type="submit" class="btn-sarichi w-100 justify-content-center"
@@ -283,14 +283,14 @@
                                         </button>
                                     </form>
                                     <th:block th:if="${wishlistIds != null and wishlistIds.contains(producto.id)}">
-                                        <a th:href="@{/api/web/wishlist/eliminar/{id}(id=${producto.id})}"
+                                        <a th:href="@{/crocheting/wishlist/eliminar/{id}(id=${producto.id})}"
                                            class="btn btn-outline-danger" style="border-radius:10px;"
                                            title="Quitar de wishlist">
                                             <i class="bi bi-heart-fill"></i>
                                         </a>
                                     </th:block>
                                     <th:block th:unless="${wishlistIds != null and wishlistIds.contains(producto.id)}">
-                                        <form method="post" th:action="@{/api/web/wishlist/agregar/{id}(id=${producto.id})}">
+                                        <form method="post" th:action="@{/crocheting/wishlist/agregar/{id}(id=${producto.id})}">
                                             <button type="submit" class="btn btn-outline-danger" style="border-radius:10px;"
                                                     title="Agregar a wishlist">
                                                 <i class="bi bi-heart"></i>
@@ -300,7 +300,7 @@
                                 </div>
                             </th:block>
                             <th:block th:unless="${usuarioWeb != null}">
-                                <a href="/api/web/login" class="btn btn-outline-secondary w-100 justify-content-center">
+                                <a href="/crocheting/login" class="btn btn-outline-secondary w-100 justify-content-center">
                                     <i class="bi bi-box-arrow-in-right"></i> Inicia sesión para comprar
                                 </a>
                             </th:block>
@@ -315,7 +315,7 @@
             <div class="empty-state-icon">🐱</div>
             <h4>No hay productos disponibles</h4>
             <p class="text-muted">Por favor, intenta con otros filtros o vuelve más tarde.</p>
-            <a href="/api/web/tienda" class="btn btn-primary mt-3">
+            <a href="/crocheting/tienda" class="btn btn-primary mt-3">
                 <i class="bi bi-arrow-clockwise"></i> Recargar
             </a>
         </div>

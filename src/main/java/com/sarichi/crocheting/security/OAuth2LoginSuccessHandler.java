@@ -72,12 +72,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         session.setAttribute("usuarioWebId", usuario.getId());
 
         String redirectUrl = switch (usuario.getRol().name()) {
-            case "ADMIN"     -> "/api/web/dashboard/admin";
-            case "ARTESANA"  -> "/api/web/dashboard/artesana";
-            case "LOGISTICA" -> "/api/web/dashboard/logistica";
-            case "BODEGA"    -> "/api/web/dashboard/bodega";
-            case "MERCADEO"  -> "/api/web/dashboard/mercadeo";
-            default          -> "/api/web/dashboard/cliente";
+            case "ADMIN"     -> "/crocheting/dashboard/admin";
+            case "ARTESANA"  -> "/crocheting/dashboard/artesana";
+            case "LOGISTICA" -> "/crocheting/dashboard/logistica";
+            case "BODEGA"    -> "/crocheting/dashboard/bodega";
+            case "MERCADEO"  -> "/crocheting/dashboard/mercadeo";
+            default          -> "/crocheting/dashboard/cliente";
         };
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);

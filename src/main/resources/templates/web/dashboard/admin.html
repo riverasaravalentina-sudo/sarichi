@@ -11,16 +11,16 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/api/web/}"><i class="bi bi-shield-lock"></i> ADMIN</a>
+      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/crocheting/}"><i class="bi bi-shield-lock"></i> ADMIN</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdm">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarAdm">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/productos}"><i class="bi bi-box"></i> Productos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/colores}"><i class="bi bi-palette"></i> Colores</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/pedidos}"><i class="bi bi-truck"></i> Pedidos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/productos}"><i class="bi bi-box"></i> Productos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/colores}"><i class="bi bi-palette"></i> Colores</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/pedidos}"><i class="bi bi-truck"></i> Pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
         </ul>
       </div>
     </div>
@@ -88,11 +88,11 @@
             <h5 class="mb-0"><i class="bi bi-lightning me-2 brand"></i>Acceso rápido</h5>
           </div>
           <div class="card-body d-flex flex-column gap-2">
-            <a th:href="@{/api/web/productos}" class="btn btn-outline-primary w-100 text-start"><i class="bi bi-box me-2"></i>Gestionar Productos</a>
-            <a th:href="@{/api/web/pedidos}" class="btn btn-outline-warning w-100 text-start"><i class="bi bi-truck me-2"></i>Pedidos</a>
-            <a th:href="@{/api/web/colores}" class="btn btn-outline-info w-100 text-start"><i class="bi bi-palette me-2"></i>Gestionar Colores</a>
-            <a th:href="@{/api/web/usuarios}" class="btn btn-outline-secondary w-100 text-start"><i class="bi bi-people me-2"></i>Usuarios</a>
-            <a th:href="@{/api/web/admin/reportes}" class="btn btn-outline-success w-100 text-start"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reportes</a>
+            <a th:href="@{/crocheting/productos}" class="btn btn-outline-primary w-100 text-start"><i class="bi bi-box me-2"></i>Gestionar Productos</a>
+            <a th:href="@{/crocheting/pedidos}" class="btn btn-outline-warning w-100 text-start"><i class="bi bi-truck me-2"></i>Pedidos</a>
+            <a th:href="@{/crocheting/colores}" class="btn btn-outline-info w-100 text-start"><i class="bi bi-palette me-2"></i>Gestionar Colores</a>
+            <a th:href="@{/crocheting/usuarios}" class="btn btn-outline-secondary w-100 text-start"><i class="bi bi-people me-2"></i>Usuarios</a>
+            <a th:href="@{/crocheting/admin/reportes}" class="btn btn-outline-success w-100 text-start"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reportes</a>
           </div>
         </div>
       </div>

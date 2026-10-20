@@ -12,13 +12,13 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/admin}">🐱 ADMIN</a>
+      <a class="navbar-brand brand fw-bold" th:href="@{/crocheting/dashboard/admin}">🐱 ADMIN</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/productos}">Productos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/colores}">Colores</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/pedidos}">Pedidos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/productos}">Productos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/colores}">Colores</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/pedidos}">Pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}">Salir</a></li>
         </ul>
       </div>
     </div>
@@ -34,7 +34,7 @@
     </div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>Gestión de Usuarios (excluye CLIENTES)</h2>
-      <a th:href="@{/api/web/usuarios/nuevo}" class="btn" style="background:#E8527A;color:#fff;">
+      <a th:href="@{/crocheting/usuarios/nuevo}" class="btn" style="background:#E8527A;color:#fff;">
         <i class="bi bi-person-plus"></i> Nuevo usuario
       </a>
     </div>
@@ -50,15 +50,15 @@
                 <td><span class="badge bg-info" th:text="${u.rol}">ROL</span></td>
                 <td><span class="badge" th:classappend="${u.estado == 'ACTIVO' ? 'bg-success' : 'bg-danger'}" th:text="${u.estado}">Estado</span></td>
                 <td>
-                  <a th:href="@{/api/web/usuarios/editar/{id}(id=${u.id})}" class="btn btn-sm btn-outline-primary">
+                  <a th:href="@{/crocheting/usuarios/editar/{id}(id=${u.id})}" class="btn btn-sm btn-outline-primary">
                     <i class="bi bi-pencil"></i> Editar
                   </a>
-                  <a th:href="@{/api/web/usuarios/estado/{id}(id=${u.id})}" class="btn btn-sm"
+                  <a th:href="@{/crocheting/usuarios/estado/{id}(id=${u.id})}" class="btn btn-sm"
                      th:classappend="${u.estado == 'ACTIVO' ? 'btn-outline-warning' : 'btn-outline-success'}">
                     <i class="bi" th:classappend="${u.estado == 'ACTIVO' ? 'bi-pause-circle' : 'bi-check-circle'}"></i>
                     <span th:text="${u.estado == 'ACTIVO' ? 'Desactivar' : 'Activar'}">Estado</span>
                   </a>
-                  <a th:href="@{/api/web/usuarios/eliminar/{id}(id=${u.id})}" class="btn btn-sm btn-outline-danger"
+                  <a th:href="@{/crocheting/usuarios/eliminar/{id}(id=${u.id})}" class="btn btn-sm btn-outline-danger"
                      onclick="return confirm('¿Eliminar este usuario?')">
                     <i class="bi bi-trash"></i> Eliminar
                   </a>
@@ -73,7 +73,7 @@
         </div>
       </div>
     </div>
-    <a th:href="@{/api/web/dashboard/admin}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
+    <a th:href="@{/crocheting/dashboard/admin}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

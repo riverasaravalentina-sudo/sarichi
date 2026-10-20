@@ -11,19 +11,19 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/api/web/}"><i class="bi bi-boxes"></i> BODEGA</a>
+      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/crocheting/}"><i class="bi bi-boxes"></i> BODEGA</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarBod">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarBod">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/inventario}"><i class="bi bi-clipboard-data"></i> Inventario</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/hilos}"><i class="bi bi-thread"></i> Hilos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/bodega/movimientos}"><i class="bi bi-journal-text"></i> Bitácora</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/colores/nuevo}"><i class="bi bi-plus-circle"></i> Nuevo color</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/bodega/inventario}"><i class="bi bi-clipboard-data"></i> Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/bodega/hilos}"><i class="bi bi-thread"></i> Hilos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/bodega/movimientos}"><i class="bi bi-journal-text"></i> Bitácora</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/colores/nuevo}"><i class="bi bi-plus-circle"></i> Nuevo color</a></li>
         </ul>
         <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
         </ul>
       </div>
     </div>
@@ -33,8 +33,8 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="fw-bold m-0"><i class="bi bi-archive brand me-2"></i>Control de Inventario</h2>
       <div>
-        <a th:href="@{/api/web/bodega/exportar/pdf}" class="btn btn-sm btn-outline-danger me-1"><i class="bi bi-filetype-pdf"></i> PDF</a>
-        <a th:href="@{/api/web/bodega/exportar/excel}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+        <a th:href="@{/crocheting/bodega/exportar/pdf}" class="btn btn-sm btn-outline-danger me-1"><i class="bi bi-filetype-pdf"></i> PDF</a>
+        <a th:href="@{/crocheting/bodega/exportar/excel}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Excel</a>
       </div>
     </div>
 
@@ -43,7 +43,7 @@
         <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
         <div>
           <strong>Alerta de stock crítico:</strong> Hay <span th:text="${criticos.size()}">0</span> hilo(s) con stock por debajo del mínimo.
-          <a th:href="@{/api/web/bodega/hilos}" class="alert-link ms-2">Ver hilos críticos</a>
+          <a th:href="@{/crocheting/bodega/hilos}" class="alert-link ms-2">Ver hilos críticos</a>
         </div>
       </div>
     </div>
@@ -105,7 +105,7 @@
         <div class="card shadow-sm">
           <div class="card-header d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0"><i class="bi bi-droplet me-2 brand"></i>Colores de hilo</h5>
-            <a th:href="@{/api/web/bodega/hilos}" class="btn btn-sm btn-outline-primary">Gestionar</a>
+            <a th:href="@{/crocheting/bodega/hilos}" class="btn btn-sm btn-outline-primary">Gestionar</a>
           </div>
           <div class="table-responsive">
             <table class="table table-sm align-middle mb-0">
@@ -131,7 +131,7 @@
         <div class="card shadow-sm">
           <div class="card-header d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0"><i class="bi bi-box me-2 brand"></i>Productos en stock</h5>
-            <a th:href="@{/api/web/bodega/inventario}" class="btn btn-sm btn-outline-primary">Gestionar</a>
+            <a th:href="@{/crocheting/bodega/inventario}" class="btn btn-sm btn-outline-primary">Gestionar</a>
           </div>
           <div class="table-responsive">
             <table class="table table-sm align-middle mb-0">

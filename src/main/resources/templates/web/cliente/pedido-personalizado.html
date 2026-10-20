@@ -22,8 +22,8 @@
 <body>
   <nav class="navbar navbar-expand-lg">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="/api/web/">🐱 Pedido Personalizado</a>
-      <a href="/api/web/dashboard" class="btn btn-sm btn-outline-secondary">Volver</a>
+      <a class="navbar-brand fw-bold" href="/crocheting/">🐱 Pedido Personalizado</a>
+      <a href="/crocheting/dashboard" class="btn btn-sm btn-outline-secondary">Volver</a>
     </div>
   </nav>
 
@@ -34,7 +34,7 @@
     <div class="row g-4">
       <div class="col-md-8">
         <div class="card card-form shadow-sm p-4">
-          <form method="post" th:action="@{/api/web/pedido-personalizado}" enctype="multipart/form-data">
+          <form method="post" th:action="@{/crocheting/pedido-personalizado}" enctype="multipart/form-data">
             <div class="mb-3">
               <label class="fw-medium">Producto de referencia</label>
               <select name="productoId" class="form-select">

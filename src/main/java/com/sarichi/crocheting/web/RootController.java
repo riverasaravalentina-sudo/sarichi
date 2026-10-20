@@ -8,7 +8,7 @@ public class RootController {
 
     @GetMapping("/")
     public String redirectRoot() {
-        return "redirect:/api/web/";
+        return "redirect:/crocheting/";
     }
 
     @GetMapping({ "/rifa", "/rifa/" })

@@ -36,12 +36,12 @@
     <!-- Navbar -->
     <nav class="navbar navbar-sarichi sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand-sarichi" href="/api/web/">🐱 Sarichi</a>
+            <a class="navbar-brand-sarichi" href="/crocheting/">🐱 Sarichi</a>
             <ul class="nav">
-                <li class="nav-item"><a class="nav-link" href="/api/web/">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" href="/api/web/tienda">Tienda</a></li>
-                <li class="nav-item"><a class="nav-link" href="/api/web/blog">Blog</a></li>
-                <li class="nav-item"><a class="nav-link" href="/api/web/galeria">Galería</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crocheting/">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crocheting/tienda">Tienda</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crocheting/blog">Blog</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crocheting/galeria">Galería</a></li>
                 <li class="nav-item"><a class="nav-link" href="/rifa/index.html">🎁 Rifa</a></li>
                 <li class="nav-item ms-3">
                     <th:block th:if="${usuarioWeb}">
@@ -50,14 +50,14 @@
                                 <i class="bi bi-person"></i> <span th:text="${usuarioWeb}"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/api/web/dashboard">Mi Dashboard</a></li>
+                                <li><a class="dropdown-item" href="/crocheting/dashboard">Mi Dashboard</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="/api/web/logout">Cerrar Sesión</a></li>
+                                <li><a class="dropdown-item" href="/crocheting/logout">Cerrar Sesión</a></li>
                             </ul>
                         </div>
                     </th:block>
                     <th:block th:unless="${usuarioWeb}">
-                        <a href="/api/web/login" class="btn btn-sm btn-primary"><i class="bi bi-box-arrow-in-right"></i> Ingresar</a>
+                        <a href="/crocheting/login" class="btn btn-sm btn-primary"><i class="bi bi-box-arrow-in-right"></i> Ingresar</a>
                     </th:block>
                 </li>
             </ul>

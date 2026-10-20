@@ -11,17 +11,17 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/api/web/}"><i class="bi bi-handbag"></i> CLIENTE</a>
+      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/crocheting/}"><i class="bi bi-handbag"></i> CLIENTE</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCli">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCli">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/carrito}"><i class="bi bi-cart"></i> Carrito</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/mis-pedidos}"><i class="bi bi-box"></i> Mis pedidos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/mis-cotizaciones}"><i class="bi bi-currency-dollar"></i> Cotizaciones</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/wishlist}"><i class="bi bi-heart"></i> Wishlist</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/carrito}"><i class="bi bi-cart"></i> Carrito</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/mis-pedidos}"><i class="bi bi-box"></i> Mis pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/mis-cotizaciones}"><i class="bi bi-currency-dollar"></i> Cotizaciones</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/wishlist}"><i class="bi bi-heart"></i> Wishlist</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
         </ul>
       </div>
     </div>
@@ -84,7 +84,7 @@
                     <h6 class="fw-semibold mb-1" th:text="${p.nombre}">Producto</h6>
                     <p class="text-muted small mb-2"><i class="bi bi-tag"></i> <span th:text="${p.categoria}">Categoría</span></p>
                     <p class="fw-bold brand fs-5 mb-3">$<span th:text="${p.precioBase}">0</span></p>
-                    <form method="post" th:action="@{/api/web/carrito/agregar}">
+                    <form method="post" th:action="@{/crocheting/carrito/agregar}">
                       <input type="hidden" name="productoId" th:value="${p.id}">
                       <input type="hidden" name="cantidad" value="1">
                       <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-cart-plus me-1"></i>Agregar</button>
@@ -102,12 +102,12 @@
             <h5 class="mb-0"><i class="bi bi-lightning me-2 brand"></i>Acceso rápido</h5>
           </div>
           <div class="card-body d-flex flex-column gap-2">
-            <a th:href="@{/api/web/carrito}" class="btn btn-outline-primary w-100 text-start"><i class="bi bi-cart me-2"></i>Ver carrito</a>
-            <a th:href="@{/api/web/mis-pedidos}" class="btn btn-outline-info w-100 text-start"><i class="bi bi-box me-2"></i>Mis pedidos</a>
-            <a th:href="@{/api/web/pedido-personalizado}" class="btn btn-outline-success w-100 text-start"><i class="bi bi-pencil me-2"></i>Pedido personalizado</a>
-            <a th:href="@{/api/web/mis-cotizaciones}" class="btn btn-outline-warning w-100 text-start"><i class="bi bi-currency-dollar me-2"></i>Mis cotizaciones</a>
-            <a th:href="@{/api/web/wishlist}" class="btn btn-outline-danger w-100 text-start"><i class="bi bi-heart me-2"></i>Wishlist</a>
-            <a th:href="@{/api/web/personalizador}" class="btn btn-outline-secondary w-100 text-start"><i class="bi bi-palette me-2"></i>Personalizador</a>
+            <a th:href="@{/crocheting/carrito}" class="btn btn-outline-primary w-100 text-start"><i class="bi bi-cart me-2"></i>Ver carrito</a>
+            <a th:href="@{/crocheting/mis-pedidos}" class="btn btn-outline-info w-100 text-start"><i class="bi bi-box me-2"></i>Mis pedidos</a>
+            <a th:href="@{/crocheting/pedido-personalizado}" class="btn btn-outline-success w-100 text-start"><i class="bi bi-pencil me-2"></i>Pedido personalizado</a>
+            <a th:href="@{/crocheting/mis-cotizaciones}" class="btn btn-outline-warning w-100 text-start"><i class="bi bi-currency-dollar me-2"></i>Mis cotizaciones</a>
+            <a th:href="@{/crocheting/wishlist}" class="btn btn-outline-danger w-100 text-start"><i class="bi bi-heart me-2"></i>Wishlist</a>
+            <a th:href="@{/crocheting/personalizador}" class="btn btn-outline-secondary w-100 text-start"><i class="bi bi-palette me-2"></i>Personalizador</a>
           </div>
         </div>
         <div class="card shadow-sm mt-3">

@@ -106,29 +106,29 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container-fluid px-4">
-            <a class="navbar-brand" href="/api/web/">🐱 Sarichi</a>
+            <a class="navbar-brand" href="/crocheting/">🐱 Sarichi</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/api/web/">Inicio</a>
+                        <a class="nav-link" href="/crocheting/">Inicio</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/api/web/tienda">Tienda</a>
+                        <a class="nav-link" href="/crocheting/tienda">Tienda</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/api/web/blog">Blog</a>
+                        <a class="nav-link" href="/crocheting/blog">Blog</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/api/web/galeria">Galería</a>
+                        <a class="nav-link" href="/crocheting/galeria">Galería</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/rifa/index.html">🎁 Rifa</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/api/web/acerca-de">Acerca de</a>
+                        <a class="nav-link" href="/crocheting/acerca-de">Acerca de</a>
                     </li>
                     <li class="nav-item ms-2">
                         <th:block th:if="${usuarioWeb}">
@@ -137,14 +137,14 @@
                                     <i class="bi bi-person"></i> <span th:text="${usuarioWeb}"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/api/web/dashboard">Mi Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="/crocheting/dashboard">Mi Dashboard</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="/api/web/logout">Cerrar Sesión</a></li>
+                                    <li><a class="dropdown-item" href="/crocheting/logout">Cerrar Sesión</a></li>
                                 </ul>
                             </div>
                         </th:block>
                         <th:block th:unless="${usuarioWeb}">
-                            <a class="btn btn-sm btn-primary" href="/api/web/login">Iniciar Sesión</a>
+                            <a class="btn btn-sm btn-primary" href="/crocheting/login">Iniciar Sesión</a>
                         </th:block>
                     </li>
                 </ul>
@@ -168,9 +168,9 @@
                 <div class="col-md-4">
                     <h5>Enlaces Rápidos</h5>
                     <ul class="list-unstyled">
-                        <li><a href="/api/web/" class="text-white-50 text-decoration-none">Inicio</a></li>
-                        <li><a href="/api/web/tienda" class="text-white-50 text-decoration-none">Tienda</a></li>
-                        <li><a href="/api/web/acerca-de" class="text-white-50 text-decoration-none">Acerca de</a></li>
+                        <li><a href="/crocheting/" class="text-white-50 text-decoration-none">Inicio</a></li>
+                        <li><a href="/crocheting/tienda" class="text-white-50 text-decoration-none">Tienda</a></li>
+                        <li><a href="/crocheting/acerca-de" class="text-white-50 text-decoration-none">Acerca de</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">

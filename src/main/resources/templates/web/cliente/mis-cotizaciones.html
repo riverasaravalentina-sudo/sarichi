@@ -12,11 +12,11 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/cliente}">🐱 SARICHI</a>
+      <a class="navbar-brand brand fw-bold" th:href="@{/crocheting/dashboard/cliente}">🐱 SARICHI</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><span class="nav-link text-muted" th:text="${usuarioWeb}">Usuario</span></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}">Salir</a></li>
         </ul>
       </div>
     </div>
@@ -40,7 +40,7 @@
                 <td th:if="${c.precioCotizacion == null}">-</td>
                 <td th:text="${c.tiempoEstimado ?: '-'}">Tiempo</td>
                 <td>
-                  <a class="btn btn-sm btn-outline-info" th:href="@{/api/web/chat/{id}(id=${c.id})}" th:if="${c.estado == 'COTIZADO'}"><i class="bi bi-chat-dots"></i></a>
+                  <a class="btn btn-sm btn-outline-info" th:href="@{/crocheting/chat/{id}(id=${c.id})}" th:if="${c.estado == 'COTIZADO'}"><i class="bi bi-chat-dots"></i></a>
                 </td>
               </tr>
             </tbody>
@@ -49,11 +49,11 @@
         <div th:if="${cotizaciones == null or cotizaciones.isEmpty()}" class="text-center py-5">
           <div style="font-size:3rem">📋</div>
           <p class="text-muted">No has solicitado cotizaciones aún</p>
-          <a th:href="@{/api/web/pedido-personalizado}" class="btn btn-sarichi" style="background:#E8527A;color:#fff;">Solicitar cotización</a>
+          <a th:href="@{/crocheting/pedido-personalizado}" class="btn btn-sarichi" style="background:#E8527A;color:#fff;">Solicitar cotización</a>
         </div>
       </div>
     </div>
-    <a th:href="@{/api/web/dashboard/cliente}" class="btn btn-outline-secondary mt-3">&larr; Volver</a>
+    <a th:href="@{/crocheting/dashboard/cliente}" class="btn btn-outline-secondary mt-3">&larr; Volver</a>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -40,12 +40,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.startsWith("/web/")
-            || path.startsWith("/api/web/")
+            || path.startsWith("/crocheting/")
             || path.startsWith("/rifa/")
             || path.startsWith("/api/rifa/")
             || path.startsWith("/qa/")
             || path.equals("/web")
-            || path.equals("/api/web")
+            || path.equals("/crocheting")
             || path.equals("/rifa")
             || path.equals("/api/rifa")
             || path.startsWith("/css/")

@@ -33,12 +33,12 @@
     <!-- Navbar -->
     <nav class="navbar navbar-sarichi sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand-sarichi" href="/api/web/">🐱 Sarichi</a>
+            <a class="navbar-brand-sarichi" href="/crocheting/">🐱 Sarichi</a>
             <ul class="nav">
-                <li class="nav-item"><a class="nav-link" href="/api/web/">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" href="/api/web/tienda">Tienda</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crocheting/">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crocheting/tienda">Tienda</a></li>
                 <li class="nav-item"><a class="nav-link" href="/rifa/index.html">🎁 Rifa</a></li>
-                <li class="nav-item"><a class="nav-link" href="/api/web/carrito"><i class="bi bi-cart"></i> Carrito</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crocheting/carrito"><i class="bi bi-cart"></i> Carrito</a></li>
             </ul>
         </div>
     </nav>
@@ -84,7 +84,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2 text-end">
-                                    <form method="post" th:action="@{/api/web/carrito/eliminar/{id}(id=${item.productoId})}" style="display: inline;">
+                                    <form method="post" th:action="@{/crocheting/carrito/eliminar/{id}(id=${item.productoId})}" style="display: inline;">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-trash"></i> Eliminar
                                         </button>
@@ -96,10 +96,10 @@
 
                     <!-- Acciones -->
                     <div class="mt-3 d-flex gap-2">
-                        <a href="/api/web/tienda" class="btn btn-outline-secondary">
+                        <a href="/crocheting/tienda" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> Seguir comprando
                         </a>
-                        <form method="get" action="/api/web/carrito/vaciar" style="display: inline;">
+                        <form method="get" action="/crocheting/carrito/vaciar" style="display: inline;">
                             <button type="submit" class="btn btn-outline-danger">
                                 <i class="bi bi-trash"></i> Vaciar carrito
                             </button>
@@ -112,7 +112,7 @@
                     <div class="empty-icon">🛒</div>
                     <h4>Tu carrito está vacío</h4>
                     <p class="text-muted">Comienza a agregar productos desde nuestra tienda</p>
-                    <a href="/api/web/tienda" class="btn btn-primary mt-3">
+                    <a href="/crocheting/tienda" class="btn btn-primary mt-3">
                         <i class="bi bi-shop"></i> Ir a la Tienda
                     </a>
                 </div>
@@ -140,7 +140,7 @@
                         <span>Total estimado:</span>
                         <span>$<span th:text="${#numbers.formatDecimal(total, 0, 0)}"></span></span>
                     </div>
-                    <a href="/api/web/checkout" class="btn btn-checkout w-100">
+                    <a href="/crocheting/checkout" class="btn btn-checkout w-100">
                         <i class="bi bi-credit-card"></i> Proceder al Checkout
                     </a>
                 </div>

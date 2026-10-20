@@ -11,18 +11,18 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/api/web/}"><i class="bi bi-truck"></i> LOGÍSTICA</a>
+      <a class="navbar-brand brand fw-bold fs-4" th:href="@{/crocheting/}"><i class="bi bi-truck"></i> LOGÍSTICA</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLog">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarLog">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logistica/despachos}"><i class="bi bi-clipboard-check"></i> Despachos</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logistica/guias}"><i class="bi bi-receipt"></i> Guías</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/pedidos}"><i class="bi bi-box-seam"></i> Pedidos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logistica/despachos}"><i class="bi bi-clipboard-check"></i> Despachos</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logistica/guias}"><i class="bi bi-receipt"></i> Guías</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/pedidos}"><i class="bi bi-box-seam"></i> Pedidos</a></li>
         </ul>
         <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
         </ul>
       </div>
     </div>
@@ -91,7 +91,7 @@
 
     <div class="row g-3 mb-4">
       <div class="col-md-4">
-        <a th:href="@{/api/web/logistica/despachos}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
+        <a th:href="@{/crocheting/logistica/despachos}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
           <div class="d-flex align-items-center gap-3 mb-2">
             <div style="width:48px;height:48px;border-radius:12px;background:#e0f2f1;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#2DB5C8"><i class="bi bi-clipboard-check"></i></div>
             <div>
@@ -102,7 +102,7 @@
         </a>
       </div>
       <div class="col-md-4">
-        <a th:href="@{/api/web/logistica/guias}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
+        <a th:href="@{/crocheting/logistica/guias}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
           <div class="d-flex align-items-center gap-3 mb-2">
             <div style="width:48px;height:48px;border-radius:12px;background:#fff3e0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#ff9800"><i class="bi bi-receipt"></i></div>
             <div>
@@ -113,7 +113,7 @@
         </a>
       </div>
       <div class="col-md-4">
-        <a th:href="@{/api/web/pedidos}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
+        <a th:href="@{/crocheting/pedidos}" class="card shadow-sm p-4 h-100 text-decoration-none" style="color:inherit">
           <div class="d-flex align-items-center gap-3 mb-2">
             <div style="width:48px;height:48px;border-radius:12px;background:#fce4ec;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#E8527A"><i class="bi bi-box-seam"></i></div>
             <div>
@@ -130,7 +130,7 @@
         <div class="card shadow-sm">
           <div class="card-header d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0"><i class="bi bi-clock me-2 brand"></i>Despachos pendientes</h5>
-            <a th:href="@{/api/web/logistica/despachos}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+            <a th:href="@{/crocheting/logistica/despachos}" class="btn btn-sm btn-outline-primary">Ver todos</a>
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -144,7 +144,7 @@
                   <td th:text="${d.ciudadDestino}">Ciudad</td>
                   <td><span class="badge bg-warning text-dark" th:text="${d.estado}">estado</span></td>
                   <td class="pe-3">
-                    <a th:href="@{/api/web/logistica/despachos}" class="btn btn-sm btn-outline-primary"><i class="bi bi-truck"></i> Generar guía</a>
+                    <a th:href="@{/crocheting/logistica/despachos}" class="btn btn-sm btn-outline-primary"><i class="bi bi-truck"></i> Generar guía</a>
                   </td>
                 </tr>
               </tbody>

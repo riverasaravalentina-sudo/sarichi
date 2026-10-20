@@ -12,13 +12,13 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand brand fw-bold" th:href="@{/api/web/dashboard/logistica}">🐱 LOGÍSTICA</a>
+      <a class="navbar-brand brand fw-bold" th:href="@{/crocheting/dashboard/logistica}">🐱 LOGÍSTICA</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLog">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarLog">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" th:href="@{/api/web/logout}">Salir</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/crocheting/logout}">Salir</a></li>
         </ul>
       </div>
     </div>
@@ -37,7 +37,7 @@
     <div th:if="${despachos == null or despachos.isEmpty()}" class="text-center py-5">
       <div style="font-size:3rem">📦</div>
       <p class="text-muted">No hay pedidos pendientes por despachar</p>
-      <a th:href="@{/api/web/dashboard/logistica}" class="btn btn-outline-secondary">&larr; Volver al dashboard</a>
+      <a th:href="@{/crocheting/dashboard/logistica}" class="btn btn-outline-secondary">&larr; Volver al dashboard</a>
     </div>
 
     <div th:if="${despachos != null and !despachos.isEmpty()}">
@@ -68,7 +68,7 @@
       <div class="modal fade" th:id="'guiaModal-' + ${d.pedidoId}" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">
-            <form th:action="@{/api/web/logistica/despachos/generar-guia/{id}(id=${d.pedidoId})}" method="post">
+            <form th:action="@{/crocheting/logistica/despachos/generar-guia/{id}(id=${d.pedidoId})}" method="post">
               <div class="modal-header"><h5 class="modal-title">Generar guía - Pedido <span th:text="${d.pedidoId}">id</span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
               <div class="modal-body">
@@ -96,7 +96,7 @@
       </div>
     </div>
 
-    <a th:href="@{/api/web/dashboard/logistica}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
+    <a th:href="@{/crocheting/dashboard/logistica}" class="btn btn-outline-secondary mt-3">&larr; Volver al dashboard</a>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
